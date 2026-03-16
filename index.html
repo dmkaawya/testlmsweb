@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova X Edu - Premier Learning Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        display: ['Space Grotesk', 'sans-serif'],
+                        body: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-body bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
+    <!-- Navigation -->
+    <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo -->
+                <a href="#" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/25 group-hover:shadow-amber-500/40 transition-shadow">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                        </svg>
+                    </div>
+                    <span class="font-display font-bold text-xl">Nova X Edu</span>
+                </a>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center gap-1">
+                    <a href="#home" class="nav-link px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Home</a>
+                    <a href="#courses" class="nav-link px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Free Courses</a>
+                    <a href="#about" class="nav-link px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">About</a>
+                    <a href="#contact" class="nav-link px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Contact</a>
+                    <a href="#rules" class="nav-link px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Rules</a>
+                </div>
+
+                <!-- Right Actions -->
+                <div class="flex items-center gap-3">
+                    <!-- Theme Toggle -->
+                    <button id="theme-toggle" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="Toggle theme">
+                        <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                        </svg>
+                        <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                        </svg>
+                    </button>
+
+                    <!-- Login Button -->
+                    <a href="auth.html" class="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
+                        Login
+                    </a>
+                    <a href="auth.html?mode=register" class="hidden sm:flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-amber-500 to-orange-600 rounded-lg shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:scale-105 transition-all">
+                        Get Started
+                    </a>
+
+                    <!-- Mobile Menu Button -->
+                    <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="md:hidden hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800">
+            <div class="px-4 py-4 space-y-2">
+                <a href="#home" class="block px-4 py-3 rounded-lg font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Home</a>
+                <a href="#courses" class="block px-4 py-3 rounded-lg font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Free Courses</a>
+                <a href="#about" class="block px-4 py-3 rounded-lg font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">About</a>
+                <a href="#contact" class="block px-4 py-3 rounded-lg font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Contact</a>
+                <a href="#rules" class="block px-4 py-3 rounded-lg font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Rules</a>
+                <hr class="my-3 border-slate-200 dark:border-slate-700">
+                <a href="auth.html" class="block px-4 py-3 rounded-lg font-medium text-center border border-slate-300 dark:border-slate-600">Login</a>
+                <a href="auth.html?mode=register" class="block px-4 py-3 rounded-lg font-medium text-center text-white bg-gradient-to-r from-amber-500 to-orange-600">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="relative min-h-screen flex items-center pt-20 overflow-hidden">
+        <!-- Animated Background -->
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-400/20 rounded-full blur-3xl animate-pulse"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-orange-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+            <div class="absolute top-1/2 left-1/2 w-64 h-64 bg-rose-400/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+        </div>
+
+        <!-- Grid Pattern -->
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)]"></div>
+
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <!-- Hero Content -->
+                <div class="space-y-8">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full text-sm font-medium">
+                        <span class="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
+                        Now Enrolling for 2025
+                    </div>
+
+                    <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
+                        Transform Your
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600"> Learning Journey</span>
+                    </h1>
+
+                    <p class="text-lg sm:text-xl text-slate-600 dark:text-slate-400 max-w-xl">
+                        Sri Lanka's premier online education platform. Access world-class courses, expert instructors, and a thriving community of learners.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <a href="auth.html?mode=register" class="group inline-flex items-center justify-center gap-2 px-8 py-4 text-lg font-medium text-white bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl shadow-xl shadow-amber-500/25 hover:shadow-amber-500/40 hover:scale-105 transition-all">
+                            Start Learning Free
+                            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                            </svg>
+                        </a>
+                        <a href="#courses" class="inline-flex items-center justify-center gap-2 px-8 py-4 text-lg font-medium border-2 border-slate-300 dark:border-slate-700 rounded-xl hover:border-amber-500 hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
+                            Browse Courses
+                        </a>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="grid grid-cols-3 gap-8 pt-8 border-t border-slate-200 dark:border-slate-800">
+                        <div>
+                            <div class="font-display text-3xl font-bold text-amber-600">5K+</div>
+                            <div class="text-sm text-slate-500 dark:text-slate-400">Active Students</div>
+                        </div>
+                        <div>
+                            <div class="font-display text-3xl font-bold text-amber-600">200+</div>
+                            <div class="text-sm text-slate-500 dark:text-slate-400">Video Lessons</div>
+                        </div>
+                        <div>
+                            <div class="font-display text-3xl font-bold text-amber-600">98%</div>
+                            <div class="text-sm text-slate-500 dark:text-slate-400">Success Rate</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hero Visual -->
+                <div class="relative hidden lg:block">
+                    <div class="relative w-full aspect-square">
+                        <!-- Floating Cards -->
+                        <div class="absolute top-10 right-10 w-48 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-4 animate-float">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-sm">Course Completed</div>
+                                    <div class="text-xs text-slate-500">Advanced Mathematics</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="absolute bottom-20 left-0 w-56 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-4 animate-float-delayed">
+                            <div class="flex items-center gap-3 mb-3">
+                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=teacher1" alt="Instructor" class="w-10 h-10 rounded-full">
+                                <div>
+                                    <div class="font-medium text-sm">Dr. Sarah Perera</div>
+                                    <div class="text-xs text-slate-500">Physics Expert</div>
+                                </div>
+                            </div>
+                            <div class="flex gap-1">
+                                <span class="px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded text-xs">4.9 Rating</span>
+                                <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded text-xs">10+ Years</span>
+                            </div>
+                        </div>
+
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full opacity-20 blur-2xl"></div>
+
+                        <!-- Main Image -->
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="relative">
+                                <svg class="w-64 h-64 text-amber-500/20" viewBox="0 0 200 200">
+                                    <circle cx="100" cy="100" r="80" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="5,5"/>
+                                    <circle cx="100" cy="100" r="60" fill="none" stroke="currentColor" stroke-width="1"/>
+                                </svg>
+                                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-gradient-to-br from-amber-500 to-orange-600 rounded-3xl shadow-2xl shadow-amber-500/30 flex items-center justify-center">
+                                    <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+            <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Free Courses Section -->
+    <section id="courses" class="py-24 bg-white dark:bg-slate-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="inline-block px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full text-sm font-medium mb-4">Free Courses</span>
+                <h2 class="font-display text-3xl sm:text-4xl font-bold mb-4">Start Learning Today</h2>
+                <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">Access our curated collection of free courses and begin your educational journey without any cost.</p>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="max-w-xl mx-auto mb-12">
+                <div class="relative">
+                    <input type="text" id="course-search" placeholder="Search courses..." class="w-full px-5 py-4 pl-12 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all">
+                    <svg class="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Course Grid -->
+            <div id="courses-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Courses will be dynamically loaded -->
+            </div>
+
+            <!-- Pagination -->
+            <div id="courses-pagination" class="flex justify-center gap-2 mt-12"></div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-24 bg-slate-50 dark:bg-slate-950">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="inline-block px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full text-sm font-medium mb-4">Why Choose Us</span>
+                <h2 class="font-display text-3xl sm:text-4xl font-bold mb-4">A Complete Learning Ecosystem</h2>
+            </div>
+
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="group p-6 bg-white dark:bg-slate-900 rounded-2xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+                    <div class="w-14 h-14 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <svg class="w-7 h-7 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-display font-semibold text-lg mb-2">Live Classes</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">Interactive live sessions with expert instructors via Zoom integration.</p>
+                </div>
+
+                <div class="group p-6 bg-white dark:bg-slate-900 rounded-2xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+                    <div class="w-14 h-14 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-display font-semibold text-lg mb-2">Study Materials</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">Comprehensive notes, PDFs, and resources for every subject.</p>
+                </div>
+
+                <div class="group p-6 bg-white dark:bg-slate-900 rounded-2xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+                    <div class="w-14 h-14 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-display font-semibold text-lg mb-2">MCQ Quizzes</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">Practice with interactive quizzes and track your progress instantly.</p>
+                </div>
+
+                <div class="group p-6 bg-white dark:bg-slate-900 rounded-2xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+                    <div class="w-14 h-14 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <svg class="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-display font-semibold text-lg mb-2">Secure Platform</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">Advanced device security and content protection for peace of mind.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-24 bg-white dark:bg-slate-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <span class="inline-block px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full text-sm font-medium mb-4">About Us</span>
+                    <h2 class="font-display text-3xl sm:text-4xl font-bold mb-6">Empowering Students Across Sri Lanka</h2>
+                    <div class="space-y-4 text-slate-600 dark:text-slate-400">
+                        <p>Nova X Edu is a cutting-edge Learning Management System designed specifically for Sri Lankan students. We combine world-class educational content with advanced technology to deliver an unparalleled learning experience.</p>
+                        <p>Our platform features live interactive classes, recorded sessions, comprehensive study materials, and intelligent assessment tools - all accessible from anywhere, at any time.</p>
+                        <p>With our advanced security measures including device fingerprinting and access controls, both students and educators can focus on what matters most: quality education.</p>
+                    </div>
+
+                    <div class="mt-8 flex flex-wrap gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </div>
+                            <span class="font-medium">Ministry Approved</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                                </svg>
+                            </div>
+                            <span class="font-medium">Certified Platform</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <div class="absolute inset-0 bg-gradient-to-br from-amber-400 to-orange-500 rounded-3xl rotate-3 opacity-20"></div>
+                    <div class="relative bg-slate-100 dark:bg-slate-800 rounded-3xl p-8">
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="text-center p-4">
+                                <div class="font-display text-4xl font-bold text-amber-600">50+</div>
+                                <div class="text-sm text-slate-500 mt-1">Expert Teachers</div>
+                            </div>
+                            <div class="text-center p-4">
+                                <div class="font-display text-4xl font-bold text-amber-600">100+</div>
+                                <div class="text-sm text-slate-500 mt-1">Active Courses</div>
+                            </div>
+                            <div class="text-center p-4">
+                                <div class="font-display text-4xl font-bold text-amber-600">24/7</div>
+                                <div class="text-sm text-slate-500 mt-1">Support</div>
+                            </div>
+                            <div class="text-center p-4">
+                                <div class="font-display text-4xl font-bold text-amber-600">99%</div>
+                                <div class="text-sm text-slate-500 mt-1">Uptime</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-24 bg-slate-50 dark:bg-slate-950">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="inline-block px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full text-sm font-medium mb-4">Contact Us</span>
+                <h2 class="font-display text-3xl sm:text-4xl font-bold mb-4">Get in Touch</h2>
+                <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Contact Info -->
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="font-medium">Email</div>
+                                <div class="text-slate-500 text-sm">info@novaxedu.com</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="font-medium">Phone</div>
+                                <div class="text-slate-500 text-sm">+94 77 123 4567</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="font-medium">Address</div>
+                                <div class="text-slate-500 text-sm">Colombo, Sri Lanka</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Form -->
+                <div class="lg:col-span-2">
+                    <form id="contact-form" class="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-lg">
+                        <div class="grid sm:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">First Name</label>
+                                <input type="text" name="firstName" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Last Name</label>
+                                <input type="text" name="lastName" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all">
+                            </div>
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium mb-2">Email</label>
+                            <input type="email" name="email" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all">
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium mb-2">Subject</label>
+                            <select name="subject" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all">
+                                <option>General Inquiry</option>
+                                <option>Course Information</option>
+                                <option>Technical Support</option>
+                                <option>Partnership</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium mb-2">Message</label>
+                            <textarea name="message" rows="5" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all resize-none"></textarea>
+                        </div>
+                        <button type="submit" class="w-full py-4 text-white bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl font-medium shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:scale-[1.02] transition-all">
+                            Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Rules Section -->
+    <section id="rules" class="py-24 bg-white dark:bg-slate-900">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="inline-block px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full text-sm font-medium mb-4">Platform Rules</span>
+                <h2 class="font-display text-3xl sm:text-4xl font-bold mb-4">Terms and Conditions</h2>
+            </div>
+
+            <div class="prose prose-slate dark:prose-invert max-w-none">
+                <div class="bg-slate-50 dark:bg-slate-800 rounded-2xl p-8 space-y-6">
+                    <div class="border-b border-slate-200 dark:border-slate-700 pb-6">
+                        <h3 class="font-display font-semibold text-lg mb-3 flex items-center gap-2">
+                            <span class="w-8 h-8 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center text-amber-600 text-sm font-bold">1</span>
+                            Account Security
+                        </h3>
+                        <ul class="list-disc list-inside text-slate-600 dark:text-slate-400 space-y-2 text-sm">
+                            <li>Each student account is limited to one registered device for security purposes.</li>
+                            <li>Sharing login credentials with others is strictly prohibited.</li>
+                            <li>Any unauthorized access attempts will result in immediate account suspension.</li>
+                            <li>Device changes must be requested through the administration.</li>
+                        </ul>
+                    </div>
+
+                    <div class="border-b border-slate-200 dark:border-slate-700 pb-6">
+                        <h3 class="font-display font-semibold text-lg mb-3 flex items-center gap-2">
+                            <span class="w-8 h-8 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center text-amber-600 text-sm font-bold">2</span>
+                            Content Usage
+                        </h3>
+                        <ul class="list-disc list-inside text-slate-600 dark:text-slate-400 space-y-2 text-sm">
+                            <li>All course materials are for personal educational use only.</li>
+                            <li>Downloading, recording, or redistributing content is forbidden.</li>
+                            <li>Copyright violations will result in legal action and account termination.</li>
+                            <li>Access to paid content requires active enrollment and payment.</li>
+                        </ul>
+                    </div>
+
+                    <div class="border-b border-slate-200 dark:border-slate-700 pb-6">
+                        <h3 class="font-display font-semibold text-lg mb-3 flex items-center gap-2">
+                            <span class="w-8 h-8 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center text-amber-600 text-sm font-bold">3</span>
+                            Payment Policy
+                        </h3>
+                        <ul class="list-disc list-inside text-slate-600 dark:text-slate-400 space-y-2 text-sm">
+                            <li>All fees must be paid before course access is granted.</li>
+                            <li>Refunds are available within 7 days of payment if no content has been accessed.</li>
+                            <li>Bank transfer details are provided in the student portal.</li>
+                            <li>Payment receipts must be preserved for verification.</li>
+                        </ul>
+                    </div>
+
+                    <div class="border-b border-slate-200 dark:border-slate-700 pb-6">
+                        <h3 class="font-display font-semibold text-lg mb-3 flex items-center gap-2">
+                            <span class="w-8 h-8 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center text-amber-600 text-sm font-bold">4</span>
+                            Code of Conduct
+                        </h3>
+                        <ul class="list-disc list-inside text-slate-600 dark:text-slate-400 space-y-2 text-sm">
+                            <li>Maintain respectful communication with teachers and fellow students.</li>
+                            <li>Complete quizzes and assessments independently unless specified.</li>
+                            <li>Report any technical issues or concerns promptly.</li>
+                            <li>Follow the scheduled timetable for live sessions.</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="font-display font-semibold text-lg mb-3 flex items-center gap-2">
+                            <span class="w-8 h-8 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center text-amber-600 text-sm font-bold">5</span>
+                            E-Commerce Terms
+                        </h3>
+                        <ul class="list-disc list-inside text-slate-600 dark:text-slate-400 space-y-2 text-sm">
+                            <li>Products purchased cannot be returned unless damaged or defective.</li>
+                            <li>Shipping times vary by location (3-7 business days within Sri Lanka).</li>
+                            <li>Order confirmation requires acceptance of these terms.</li>
+                            <li>Disputes must be raised within 48 hours of delivery.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 dark:bg-slate-950 text-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                            </svg>
+                        </div>
+                        <span class="font-display font-bold text-xl">Nova X Edu</span>
+                    </div>
+                    <p class="text-slate-400 text-sm">Empowering students with quality education through innovative technology.</p>
+                </div>
+
+                <div>
+                    <h4 class="font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-slate-400 text-sm">
+                        <li><a href="#home" class="hover:text-amber-400 transition-colors">Home</a></li>
+                        <li><a href="#courses" class="hover:text-amber-400 transition-colors">Free Courses</a></li>
+                        <li><a href="#about" class="hover:text-amber-400 transition-colors">About</a></li>
+                        <li><a href="#contact" class="hover:text-amber-400 transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-semibold mb-4">Support</h4>
+                    <ul class="space-y-2 text-slate-400 text-sm">
+                        <li><a href="#rules" class="hover:text-amber-400 transition-colors">Terms & Rules</a></li>
+                        <li><a href="#" class="hover:text-amber-400 transition-colors">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-amber-400 transition-colors">FAQ</a></li>
+                        <li><a href="#" class="hover:text-amber-400 transition-colors">Help Center</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-semibold mb-4">Connect</h4>
+                    <div class="flex gap-4">
+                        <a href="#" class="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center hover:bg-amber-500 transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center hover:bg-amber-500 transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z"/></svg>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center hover:bg-amber-500 transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <p class="text-slate-400 text-sm">2025 Nova X Edu. All rights reserved.</p>
+                <p class="text-slate-500 text-xs">Designed with care for Sri Lankan students.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
+    <script>
+        // Initialize app for landing page
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            initNavbar();
+            initMobileMenu();
+            loadFreeCourses();
+            initContactForm();
+        });
+
+        // Navbar scroll effect
+        function initNavbar() {
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('bg-white/95', 'dark:bg-slate-900/95', 'backdrop-blur-lg', 'shadow-lg');
+                } else {
+                    navbar.classList.remove('bg-white/95', 'dark:bg-slate-900/95', 'backdrop-blur-lg', 'shadow-lg');
+                }
+            });
+        }
+
+        // Mobile menu toggle
+        function initMobileMenu() {
+            const btn = document.getElementById('mobile-menu-btn');
+            const menu = document.getElementById('mobile-menu');
+            btn.addEventListener('click', () => {
+                menu.classList.toggle('hidden');
+            });
+            
+            // Close menu on link click
+            menu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    menu.classList.add('hidden');
+                });
+            });
+        }
+
+        // Load free courses
+        async function loadFreeCourses() {
+            const grid = document.getElementById('courses-grid');
+            const searchInput = document.getElementById('course-search');
+            const paginationContainer = document.getElementById('courses-pagination');
+            
+            let currentPage = 1;
+            const perPage = 6;
+
+            async function fetchCourses(page = 1, search = '') {
+                grid.innerHTML = '<div class="col-span-full text-center py-12"><div class="animate-spin w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full mx-auto"></div></div>';
+                
+                try {
+                    let query = supabase
+                        .from('batches')
+                        .select('*, subjects(name)', { count: 'exact' })
+                        .eq('is_active', true)
+                        .order('created_at', { ascending: false });
+
+                    if (search) {
+                        query = query.ilike('name', `%${search}%`);
+                    }
+
+                    const from = (page - 1) * perPage;
+                    const to = from + perPage - 1;
+                    const { data, count, error } = await query.range(from, to);
+
+                    if (error) throw error;
+
+                    renderCourses(data || []);
+                    renderPagination(count, page);
+                } catch (error) {
+                    console.error('Error loading courses:', error);
+                    grid.innerHTML = '<div class="col-span-full text-center py-12 text-slate-500">Failed to load courses. Please try again.</div>';
+                }
+            }
+
+            function renderCourses(courses) {
+                if (courses.length === 0) {
+                    grid.innerHTML = '<div class="col-span-full text-center py-12 text-slate-500">No courses found.</div>';
+                    return;
+                }
+
+                grid.innerHTML = courses.map(course => `
+                    <div class="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+                        <div class="aspect-video relative overflow-hidden bg-gradient-to-br from-amber-400 to-orange-500">
+                            ${course.image_url 
+                                ? `<img src="${course.image_url}" alt="${course.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">`
+                                : `<div class="absolute inset-0 flex items-center justify-center">
+                                    <svg class="w-16 h-16 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                    </svg>
+                                </div>`
+                            }
+                            <div class="absolute top-3 right-3">
+                                <span class="px-3 py-1 bg-green-500 text-white text-xs font-medium rounded-full">Free Preview</span>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            ${course.subjects ? `<span class="text-xs text-amber-600 font-medium">${course.subjects.name}</span>` : ''}
+                            <h3 class="font-display font-semibold text-lg mt-1 mb-2 line-clamp-2">${course.name}</h3>
+                            <p class="text-slate-500 text-sm mb-4 line-clamp-2">${course.description || 'No description available.'}</p>
+                            <div class="flex items-center justify-between">
+                                <div class="text-sm">
+                                    <span class="text-slate-500">Start:</span>
+                                    <span class="font-medium">${course.start_date ? new Date(course.start_date).toLocaleDateString() : 'TBA'}</span>
+                                </div>
+                                <a href="auth.html?mode=register" class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-amber-500 to-orange-600 rounded-lg hover:shadow-lg transition-all">
+                                    Enroll Now
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            function renderPagination(totalItems, currentPage) {
+                const totalPages = Math.ceil(totalItems / perPage);
+                if (totalPages <= 1) {
+                    paginationContainer.innerHTML = '';
+                    return;
+                }
+
+                let html = '';
+                
+                if (currentPage > 1) {
+                    html += `<button class="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" onclick="window.landingFetchCourses(${currentPage - 1})">Previous</button>`;
+                }
+
+                for (let i = 1; i <= totalPages; i++) {
+                    if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                        html += `<button class="px-4 py-2 rounded-lg ${i === currentPage ? 'bg-amber-500 text-white' : 'border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800'} transition-colors" onclick="window.landingFetchCourses(${i})">${i}</button>`;
+                    } else if (i === currentPage - 2 || i === currentPage + 2) {
+                        html += `<span class="px-2">...</span>`;
+                    }
+                }
+
+                if (currentPage < totalPages) {
+                    html += `<button class="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" onclick="window.landingFetchCourses(${currentPage + 1})">Next</button>`;
+                }
+
+                paginationContainer.innerHTML = html;
+            }
+
+            // Search debounce
+            let searchTimeout;
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    fetchCourses(1, e.target.value);
+                }, 300);
+            });
+
+            // Expose function globally for pagination
+            window.landingFetchCourses = (page) => {
+                currentPage = page;
+                fetchCourses(page, searchInput.value);
+            };
+
+            // Initial fetch
+            fetchCourses(1);
+        }
+
+        // Contact form
+        function initContactForm() {
+            const form = document.getElementById('contact-form');
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(form);
+                
+                // In a real app, this would send to backend
+                alert('Thank you for your message! We will get back to you soon.');
+                form.reset();
+            });
+        }
+    </script>
+</body>
+</html>
