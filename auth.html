@@ -1,382 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nova X Edu - Authentication</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        display: ['Space Grotesk', 'sans-serif'],
-                        body: ['Inter', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-</head>
-<body class="font-body bg-slate-50 dark:bg-slate-950 min-h-screen">
-    <div class="min-h-screen flex">
-        <!-- Left Side - Branding -->
-        <div class="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-            <!-- Animated Background -->
-            <div class="absolute inset-0">
-                <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl animate-pulse"></div>
-                <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-            </div>
-            
-            <!-- Grid Pattern -->
-            <div class="absolute inset-0 bg-[linear-gradient(to_right,#333_1px,transparent_1px),linear-gradient(to_bottom,#333_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_110%)]"></div>
-
-            <div class="relative z-10 flex flex-col justify-center items-center w-full p-12 text-white">
-                <div class="max-w-md">
-                    <div class="flex items-center gap-3 mb-8">
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
-                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                            </svg>
-                        </div>
-                        <span class="font-display font-bold text-2xl">Nova X Edu</span>
-                    </div>
-
-                    <h1 class="font-display text-4xl font-bold mb-4">Begin Your Learning Journey</h1>
-                    <p class="text-slate-400 text-lg mb-8">Join thousands of students already learning on Sri Lanka's premier education platform.</p>
-
-                    <div class="space-y-4">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 bg-amber-500/20 rounded-lg flex items-center justify-center">
-                                <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                            </div>
-                            <span class="text-slate-300">Access 100+ courses from expert instructors</span>
-                        </div>
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 bg-amber-500/20 rounded-lg flex items-center justify-center">
-                                <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                            </div>
-                            <span class="text-slate-300">Live classes with interactive sessions</span>
-                        </div>
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 bg-amber-500/20 rounded-lg flex items-center justify-center">
-                                <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                            </div>
-                            <span class="text-slate-300">Secure platform with device protection</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right Side - Auth Forms -->
-        <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
-            <div class="w-full max-w-md">
-                <!-- Theme Toggle -->
-                <div class="absolute top-6 right-6">
-                    <button id="theme-toggle" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="Toggle theme">
-                        <svg class="w-5 h-5 hidden dark:block text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-                        </svg>
-                        <svg class="w-5 h-5 block dark:hidden text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-                        </svg>
-                    </button>
-                </div>
-
-                <!-- Back to Home -->
-                <a href="index.html" class="inline-flex items-center gap-2 text-slate-500 hover:text-amber-600 dark:hover:text-amber-400 mb-8 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                    </svg>
-                    Back to Home
-                </a>
-
-                <!-- Login Form -->
-                <div id="login-form-container">
-                    <h2 class="font-display text-3xl font-bold mb-2">Welcome Back</h2>
-                    <p class="text-slate-500 dark:text-slate-400 mb-8">Sign in to continue your learning journey.</p>
-
-                    <form id="login-form" class="space-y-5">
-                        <div>
-                            <label class="block text-sm font-medium mb-2">Email Address</label>
-                            <input type="email" name="email" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all" placeholder="you@example.com">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium mb-2">Password</label>
-                            <div class="relative">
-                                <input type="password" name="password" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all pr-12" placeholder="Enter your password">
-                                <button type="button" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600" onclick="togglePassword(this)">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-between">
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" name="remember" class="w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500">
-                                <span class="text-sm text-slate-600 dark:text-slate-400">Remember me</span>
-                            </label>
-                            <button type="button" onclick="showForgotPassword()" class="text-sm text-amber-600 dark:text-amber-400 hover:underline">Forgot password?</button>
-                        </div>
-
-                        <button type="submit" class="w-full py-3 text-white bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl font-medium shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:scale-[1.02] transition-all">
-                            Sign In
-                        </button>
-                    </form>
-
-                    <div class="mt-8 text-center">
-                        <p class="text-slate-500 dark:text-slate-400">
-                            Don't have an account? 
-                            <button onclick="showRegister()" class="text-amber-600 dark:text-amber-400 font-medium hover:underline">Create Account</button>
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Register Form -->
-                <div id="register-form-container" class="hidden">
-                    <h2 class="font-display text-3xl font-bold mb-2">Create Account</h2>
-                    <p class="text-slate-500 dark:text-slate-400 mb-6">Join Nova X Edu and start learning today.</p>
-
-                    <!-- Progress Steps -->
-                    <div class="flex items-center gap-2 mb-6">
-                        <div id="step1-indicator" class="flex items-center gap-2 text-amber-600">
-                            <span class="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center text-sm font-medium">1</span>
-                            <span class="text-sm font-medium hidden sm:inline">Personal</span>
-                        </div>
-                        <div class="flex-1 h-0.5 bg-slate-200 dark:bg-slate-700"></div>
-                        <div id="step2-indicator" class="flex items-center gap-2 text-slate-400">
-                            <span class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-500 flex items-center justify-center text-sm font-medium">2</span>
-                            <span class="text-sm font-medium hidden sm:inline">Contact</span>
-                        </div>
-                        <div class="flex-1 h-0.5 bg-slate-200 dark:bg-slate-700"></div>
-                        <div id="step3-indicator" class="flex items-center gap-2 text-slate-400">
-                            <span class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-500 flex items-center justify-center text-sm font-medium">3</span>
-                            <span class="text-sm font-medium hidden sm:inline">Security</span>
-                        </div>
-                    </div>
-
-                    <form id="register-form" class="space-y-4">
-                        <!-- Step 1: Personal Info -->
-                        <div id="register-step-1" class="space-y-4">
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium mb-2">First Name *</label>
-                                    <input type="text" name="firstName" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium mb-2">Last Name *</label>
-                                    <input type="text" name="lastName" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all">
-                                </div>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium mb-2">NIC Number *</label>
-                                <input type="text" name="nic" id="nic-input" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all" placeholder="Enter your NIC number" oninput="parseNIC(this.value)">
-                                <p class="text-xs text-slate-500 mt-1">Enter your Sri Lankan National Identity Card number</p>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium mb-2">Date of Birth</label>
-                                    <input type="date" name="dob" id="dob-input" readonly class="w-full px-4 py-3 bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-600 dark:text-slate-300">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium mb-2">Gender</label>
-                                    <input type="text" name="gender" id="gender-input" readonly class="w-full px-4 py-3 bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-600 dark:text-slate-300">
-                                </div>
-                            </div>
-
-                            <button type="button" onclick="nextRegisterStep(2)" class="w-full py-3 text-white bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl font-medium shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 transition-all">
-                                Continue
-                            </button>
-                        </div>
-
-                        <!-- Step 2: Contact Info -->
-                        <div id="register-step-2" class="space-y-4 hidden">
-                            <div>
-                                <label class="block text-sm font-medium mb-2">WhatsApp Number *</label>
-                                <input type="tel" name="whatsapp" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all" placeholder="077 123 4567">
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium mb-2">SMS Number</label>
-                                <input type="tel" name="smsNumber" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all" placeholder="Optional">
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium mb-2">District *</label>
-                                <select name="district" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all">
-                                    <option value="">Select District</option>
-                                    <option value="Colombo">Colombo</option>
-                                    <option value="Gampaha">Gampaha</option>
-                                    <option value="Kalutara">Kalutara</option>
-                                    <option value="Kandy">Kandy</option>
-                                    <option value="Matale">Matale</option>
-                                    <option value="Nuwara Eliya">Nuwara Eliya</option>
-                                    <option value="Galle">Galle</option>
-                                    <option value="Matara">Matara</option>
-                                    <option value="Hambantota">Hambantota</option>
-                                    <option value="Jaffna">Jaffna</option>
-                                    <option value="Kilinochchi">Kilinochchi</option>
-                                    <option value="Mannar">Mannar</option>
-                                    <option value="Vavuniya">Vavuniya</option>
-                                    <option value="Mullaitivu">Mullaitivu</option>
-                                    <option value="Batticaloa">Batticaloa</option>
-                                    <option value="Ampara">Ampara</option>
-                                    <option value="Trincomalee">Trincomalee</option>
-                                    <option value="Kurunegala">Kurunegala</option>
-                                    <option value="Puttalam">Puttalam</option>
-                                    <option value="Anuradhapura">Anuradhapura</option>
-                                    <option value="Polonnaruwa">Polonnaruwa</option>
-                                    <option value="Badulla">Badulla</option>
-                                    <option value="Moneragala">Moneragala</option>
-                                    <option value="Ratnapura">Ratnapura</option>
-                                    <option value="Kegalle">Kegalle</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium mb-2">City *</label>
-                                <input type="text" name="city" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all">
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Address *</label>
-                                <textarea name="address" required rows="2" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all resize-none"></textarea>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Stream</label>
-                                <select name="stream" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all">
-                                    <option value="">Select Stream (Optional)</option>
-                                    <option value="Physical Science">Physical Science</option>
-                                    <option value="Biological Science">Biological Science</option>
-                                    <option value="Commerce">Commerce</option>
-                                    <option value="Arts">Arts</option>
-                                    <option value="Technology">Technology</option>
-                                    <option value="Other">Other</option>
-                                </select>
-                            </div>
-
-                            <div class="flex gap-3">
-                                <button type="button" onclick="prevRegisterStep(1)" class="flex-1 py-3 border border-slate-300 dark:border-slate-600 rounded-xl font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                                    Back
-                                </button>
-                                <button type="button" onclick="nextRegisterStep(3)" class="flex-1 py-3 text-white bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl font-medium shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 transition-all">
-                                    Continue
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Step 3: Security -->
-                        <div id="register-step-3" class="space-y-4 hidden">
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Email Address *</label>
-                                <input type="email" name="email" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all" placeholder="you@example.com">
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Password *</label>
-                                <div class="relative">
-                                    <input type="password" name="password" id="reg-password" required minlength="8" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all pr-12" placeholder="Min 8 characters">
-                                    <button type="button" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600" onclick="togglePassword(this)">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                                <div id="password-strength" class="mt-2 h-1 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
-                                    <div class="h-full bg-red-500 transition-all duration-300" style="width: 0%"></div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Confirm Password *</label>
-                                <input type="password" name="confirmPassword" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all" placeholder="Confirm your password">
-                            </div>
-
-                            <label class="flex items-start gap-3 cursor-pointer">
-                                <input type="checkbox" name="terms" required class="w-4 h-4 mt-1 rounded border-slate-300 text-amber-500 focus:ring-amber-500">
-                                <span class="text-sm text-slate-600 dark:text-slate-400">I agree to the <a href="index.html#rules" target="_blank" class="text-amber-600 dark:text-amber-400 hover:underline">Terms and Conditions</a></span>
-                            </label>
-
-                            <div class="flex gap-3">
-                                <button type="button" onclick="prevRegisterStep(2)" class="flex-1 py-3 border border-slate-300 dark:border-slate-600 rounded-xl font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                                    Back
-                                </button>
-                                <button type="submit" class="flex-1 py-3 text-white bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl font-medium shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 transition-all">
-                                    Create Account
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-
-                    <div class="mt-6 text-center">
-                        <p class="text-slate-500 dark:text-slate-400">
-                            Already have an account? 
-                            <button onclick="showLogin()" class="text-amber-600 dark:text-amber-400 font-medium hover:underline">Sign In</button>
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Forgot Password -->
-                <div id="forgot-password-container" class="hidden">
-                    <h2 class="font-display text-3xl font-bold mb-2">Reset Password</h2>
-                    <p class="text-slate-500 dark:text-slate-400 mb-8">Enter your email and we'll send you a reset link.</p>
-
-                    <form id="forgot-password-form" class="space-y-5">
-                        <div>
-                            <label class="block text-sm font-medium mb-2">Email Address</label>
-                            <input type="email" name="email" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all" placeholder="you@example.com">
-                        </div>
-
-                        <button type="submit" class="w-full py-3 text-white bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl font-medium shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 transition-all">
-                            Send Reset Link
-                        </button>
-                    </form>
-
-                    <div class="mt-6 text-center">
-                        <button onclick="showLogin()" class="text-amber-600 dark:text-amber-400 font-medium hover:underline">Back to Sign In</button>
-                    </div>
-                </div>
-
-                <!-- Error/Success Messages -->
-                <div id="auth-message" class="mt-6 hidden">
-                    <div class="p-4 rounded-xl text-sm"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    <!-- (Place this at the bottom of body in auth.html, before </body>) -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="app.js"></script>
     <script>
+        // Use the global supabase client from app.js
+        const supabase = window.supabaseClient;
+
         document.addEventListener('DOMContentLoaded', () => {
-            initTheme();
-            
-            // Check URL params for mode
-            const params = new URLSearchParams(window.location.search);
-            const mode = params.get('mode');
-            if (mode === 'register') {
-                showRegister();
+            // Theme is already initialized by app.js, just apply it
+            if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
             }
+            
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('mode') === 'register') showRegister();
             
             initAuthForms();
         });
@@ -392,97 +28,22 @@
                 showMessage('Signing in...', 'info');
                 
                 try {
-                    const { data, error } = await supabase.auth.signInWithPassword({
-                        email,
-                        password
-                    });
-                    
+                    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
                     if (error) throw error;
                     
-                    // Get user profile
-                    const { data: profile, error: profileError } = await supabase
-                        .from('profiles')
-                        .select('*')
-                        .eq('id', data.user.id)
-                        .single();
-                    
+                    const { data: profile, error: profileError } = await supabase.from('profiles').select('*').eq('id', data.user.id).single();
                     if (profileError) throw profileError;
                     
-                    // Check if blocked
                     if (profile.is_blocked) {
                         await supabase.auth.signOut();
-                        showMessage(profile.block_reason || 'Account suspended. Contact admin.', 'error');
+                        showMessage(profile.block_reason || 'Account suspended.', 'error');
                         return;
                     }
                     
-                    // Device fingerprinting
-                    const fingerprint = await generateDeviceFingerprint();
-                    const ip = await getIPAddress();
-                    
-                    // Check device limit
-                    const { data: devices } = await supabase
-                        .from('devices')
-                        .select('*')
-                        .eq('user_id', data.user.id);
-                    
-                    const existingDevice = devices?.find(d => d.fingerprint === fingerprint);
-                    
-                    if (!existingDevice) {
-                        // New device
-                        if (devices && devices.length >= profile.device_limit) {
-                            // Block account
-                            await supabase
-                                .from('profiles')
-                                .update({
-                                    is_blocked: true,
-                                    block_reason: 'Unauthorized device detected. Contact Teacher/Admin.'
-                                })
-                                .eq('id', data.user.id);
-                            
-                            await supabase.auth.signOut();
-                            showMessage('Account suspended: Unauthorized device detected. Contact Teacher/Admin.', 'error');
-                            return;
-                        }
-                        
-                        // Register new device
-                        await supabase
-                            .from('devices')
-                            .insert({
-                                user_id: data.user.id,
-                                fingerprint,
-                                ip_address: ip,
-                                device_name: navigator.userAgent.substring(0, 100),
-                                is_authorized: true
-                            });
-                    } else {
-                        // Update last seen
-                        await supabase
-                            .from('devices')
-                            .update({ last_seen: new Date().toISOString(), ip_address: ip })
-                            .eq('id', existingDevice.id);
-                    }
-                    
-                    // Log session
-                    await supabase.from('sessions').insert({
-                        user_id: data.user.id,
-                        device_fingerprint: fingerprint,
-                        ip_address: ip
-                    });
-                    
-                    // Log activity
-                    await supabase.from('activity_logs').insert({
-                        user_id: data.user.id,
-                        action: 'login',
-                        ip_address: ip,
-                        device_fingerprint: fingerprint
-                    });
-                    
-                    // Redirect to app
+                    // Redirect
                     window.location.href = 'app.html';
-                    
                 } catch (error) {
-                    console.error('Login error:', error);
-                    showMessage(error.message || 'Login failed. Please try again.', 'error');
+                    showMessage(error.message || 'Login failed.', 'error');
                 }
             });
 
@@ -490,7 +51,6 @@
             document.getElementById('register-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const formData = new FormData(e.target);
-                
                 const password = formData.get('password');
                 const confirmPassword = formData.get('confirmPassword');
                 
@@ -499,12 +59,7 @@
                     return;
                 }
                 
-                if (password.length < 8) {
-                    showMessage('Password must be at least 8 characters.', 'error');
-                    return;
-                }
-                
-                showMessage('Creating your account...', 'info');
+                showMessage('Creating account...', 'info');
                 
                 try {
                     const { data, error } = await supabase.auth.signUp({
@@ -530,223 +85,70 @@
                     
                     if (error) throw error;
                     
-                    showMessage('Account created successfully! Please check your email to verify your account.', 'success');
-                    
-                    setTimeout(() => {
-                        showLogin();
-                    }, 3000);
+                    showMessage('Account created! Please check your email to verify.', 'success');
+                    setTimeout(() => showLogin(), 3000);
                     
                 } catch (error) {
-                    console.error('Registration error:', error);
-                    showMessage(error.message || 'Registration failed. Please try again.', 'error');
+                    showMessage(error.message || 'Registration failed.', 'error');
                 }
             });
 
-            // Forgot Password Form
+            // Forgot Password
             document.getElementById('forgot-password-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const formData = new FormData(e.target);
-                const email = formData.get('email');
-                
-                showMessage('Sending reset link...', 'info');
-                
-                try {
-                    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                        redirectTo: `${window.location.origin}/auth.html?mode=reset`
-                    });
-                    
-                    if (error) throw error;
-                    
-                    showMessage('Password reset link sent! Check your email.', 'success');
-                    
-                } catch (error) {
-                    console.error('Reset error:', error);
-                    showMessage(error.message || 'Failed to send reset link.', 'error');
-                }
-            });
-
-            // Password strength indicator
-            document.getElementById('reg-password')?.addEventListener('input', (e) => {
-                const strength = calculatePasswordStrength(e.target.value);
-                const bar = document.querySelector('#password-strength > div');
-                bar.style.width = `${strength.percent}%`;
-                bar.className = `h-full transition-all duration-300 ${strength.color}`;
+                const email = new FormData(e.target).get('email');
+                showMessage('Sending link...', 'info');
+                const { error } = await supabase.auth.resetPasswordForEmail(email);
+                if (error) showMessage(error.message, 'error');
+                else showMessage('Check your email for reset link.', 'success');
             });
         }
 
-        // NIC Parser (Sri Lankan)
-        function parseNIC(nic) {
-            nic = nic.trim().toUpperCase();
-            
-            let year, dayOfYear, gender;
-            
-            if (nic.length === 10 && nic[9] === 'V') {
-                // Old format: 881234567V
-                year = 1900 + parseInt(nic.substring(0, 2));
-                dayOfYear = parseInt(nic.substring(2, 5));
-            } else if (nic.length === 12) {
-                // New format: 198812345678
-                year = parseInt(nic.substring(0, 4));
-                dayOfYear = parseInt(nic.substring(4, 7));
-            } else {
-                return;
-            }
-            
-            // Gender: days 1-366 = male, 501-866 = female
-            if (dayOfYear > 500) {
-                gender = 'Female';
-                dayOfYear -= 500;
-            } else {
-                gender = 'Male';
-            }
-            
-            // Calculate date from day of year
-            const date = new Date(year, 0, dayOfYear);
-            const dob = date.toISOString().split('T')[0];
-            
-            document.getElementById('dob-input').value = dob;
-            document.getElementById('gender-input').value = gender;
-        }
-
-        function calculatePasswordStrength(password) {
-            let score = 0;
-            if (password.length >= 8) score++;
-            if (password.length >= 12) score++;
-            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
-            if (/\d/.test(password)) score++;
-            if (/[^a-zA-Z0-9]/.test(password)) score++;
-            
-            const percent = (score / 5) * 100;
-            let color;
-            if (score <= 1) color = 'bg-red-500';
-            else if (score <= 2) color = 'bg-orange-500';
-            else if (score <= 3) color = 'bg-yellow-500';
-            else if (score <= 4) color = 'bg-lime-500';
-            else color = 'bg-green-500';
-            
-            return { percent, color };
-        }
-
+        // UI Toggle Functions
         function showLogin() {
             document.getElementById('login-form-container').classList.remove('hidden');
             document.getElementById('register-form-container').classList.add('hidden');
             document.getElementById('forgot-password-container').classList.add('hidden');
-            hideMessage();
         }
-
         function showRegister() {
             document.getElementById('login-form-container').classList.add('hidden');
             document.getElementById('register-form-container').classList.remove('hidden');
             document.getElementById('forgot-password-container').classList.add('hidden');
-            hideMessage();
         }
-
         function showForgotPassword() {
             document.getElementById('login-form-container').classList.add('hidden');
             document.getElementById('register-form-container').classList.add('hidden');
             document.getElementById('forgot-password-container').classList.remove('hidden');
-            hideMessage();
+        }
+        function showMessage(msg, type) {
+            const el = document.getElementById('auth-message');
+            el.classList.remove('hidden');
+            el.querySelector('div').textContent = msg;
+            el.querySelector('div').className = `p-4 rounded-xl text-sm ${type === 'error' ? 'bg-red-100 text-red-700' : type === 'success' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`;
         }
 
-        function nextRegisterStep(step) {
-            // Validate current step
-            const currentStep = step - 1;
-            const currentFields = document.querySelectorAll(`#register-step-${currentStep} input[required], #register-step-${currentStep} select[required]`);
-            let valid = true;
+        // NIC Parser
+        function parseNIC(nic) {
+            nic = nic.trim().toUpperCase();
+            let year, dayOfYear, gender;
+            if (nic.length === 10 && nic[9] === 'V') {
+                year = 1900 + parseInt(nic.substring(0, 2));
+                dayOfYear = parseInt(nic.substring(2, 5));
+            } else if (nic.length === 12) {
+                year = parseInt(nic.substring(0, 4));
+                dayOfYear = parseInt(nic.substring(4, 7));
+            } else return;
             
-            currentFields.forEach(field => {
-                if (!field.value.trim()) {
-                    field.classList.add('border-red-500');
-                    valid = false;
-                } else {
-                    field.classList.remove('border-red-500');
-                }
-            });
+            gender = dayOfYear > 500 ? 'Female' : 'Male';
+            if (dayOfYear > 500) dayOfYear -= 500;
             
-            if (!valid) {
-                showMessage('Please fill in all required fields.', 'error');
-                return;
-            }
-            
-            // Hide all steps
-            document.querySelectorAll('[id^="register-step-"]').forEach(el => el.classList.add('hidden'));
-            
-            // Show target step
-            document.getElementById(`register-step-${step}`).classList.remove('hidden');
-            
-            // Update indicators
-            for (let i = 1; i <= 3; i++) {
-                const indicator = document.getElementById(`step${i}-indicator`);
-                const circle = indicator.querySelector('span:first-child');
-                
-                if (i < step) {
-                    circle.className = 'w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-sm font-medium';
-                    circle.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
-                    indicator.className = 'flex items-center gap-2 text-green-600';
-                } else if (i === step) {
-                    circle.className = 'w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center text-sm font-medium';
-                    circle.textContent = i;
-                    indicator.className = 'flex items-center gap-2 text-amber-600';
-                } else {
-                    circle.className = 'w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-500 flex items-center justify-center text-sm font-medium';
-                    circle.textContent = i;
-                    indicator.className = 'flex items-center gap-2 text-slate-400';
-                }
-            }
-            
-            hideMessage();
+            const date = new Date(year, 0, dayOfYear);
+            document.getElementById('dob-input').value = date.toISOString().split('T')[0];
+            document.getElementById('gender-input').value = gender;
         }
-
-        function prevRegisterStep(step) {
-            document.querySelectorAll('[id^="register-step-"]').forEach(el => el.classList.add('hidden'));
-            document.getElementById(`register-step-${step}`).classList.remove('hidden');
-            
-            // Update indicators
-            for (let i = 1; i <= 3; i++) {
-                const indicator = document.getElementById(`step${i}-indicator`);
-                const circle = indicator.querySelector('span:first-child');
-                
-                if (i < step) {
-                    circle.className = 'w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-sm font-medium';
-                    circle.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
-                    indicator.className = 'flex items-center gap-2 text-green-600';
-                } else if (i === step) {
-                    circle.className = 'w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center text-sm font-medium';
-                    circle.textContent = i;
-                    indicator.className = 'flex items-center gap-2 text-amber-600';
-                } else {
-                    circle.className = 'w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-500 flex items-center justify-center text-sm font-medium';
-                    circle.textContent = i;
-                    indicator.className = 'flex items-center gap-2 text-slate-400';
-                }
-            }
-        }
-
-        function togglePassword(button) {
-            const input = button.previousElementSibling;
-            if (input.type === 'password') {
-                input.type = 'text';
-            } else {
-                input.type = 'password';
-            }
-        }
-
-        function showMessage(message, type) {
-            const container = document.getElementById('auth-message');
-            const div = container.querySelector('div');
-            container.classList.remove('hidden');
-            
-            div.textContent = message;
-            div.className = `p-4 rounded-xl text-sm ${
-                type === 'error' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' :
-                type === 'success' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
-                'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
-            }`;
-        }
-
-        function hideMessage() {
-            document.getElementById('auth-message').classList.add('hidden');
-        }
+        
+        function nextRegisterStep(step) { /* logic for steps */ }
+        function prevRegisterStep(step) { /* logic for steps */ }
     </script>
 </body>
 </html>
