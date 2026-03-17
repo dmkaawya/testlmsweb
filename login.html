@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="si" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Nova X Edu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .auth-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .auth-bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 50%, rgba(168, 85, 247, 0.05) 100%);
+    }
+    
+    .auth-bg::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -30%;
+      width: 80%;
+      height: 150%;
+      background: radial-gradient(ellipse, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+      animation: float 20s ease-in-out infinite;
+    }
+    
+    .auth-container {
+      width: 100%;
+      max-width: 520px;
+      position: relative;
+    }
+    
+    .auth-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      border: 1px solid var(--glass-border);
+      padding: 2.5rem;
+      box-shadow: var(--card-shadow-hover);
+    }
+    
+    .auth-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .auth-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+    
+    .auth-logo svg {
+      width: 48px;
+      height: 48px;
+    }
+    
+    .auth-logo span {
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .auth-tabs {
+      display: flex;
+      background: var(--bg-tertiary);
+      border-radius: 12px;
+      padding: 0.25rem;
+      margin-bottom: 2rem;
+    }
+    
+    .auth-tab {
+      flex: 1;
+      padding: 0.875rem;
+      border: none;
+      background: transparent;
+      border-radius: 10px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .auth-tab.active {
+      background: var(--bg-secondary);
+      color: var(--accent-primary);
+      box-shadow: var(--card-shadow);
+    }
+    
+    .auth-form { display: none; }
+    .auth-form.active { display: block; }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    
+    @media (max-width: 480px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
+    
+    .password-field {
+      position: relative;
+    }
+    
+    .password-toggle {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.5rem 0;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    
+    .auth-divider::before,
+    .auth-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-color);
+    }
+    
+    .social-btns {
+      display: flex;
+      gap: 1rem;
+    }
+    
+    .social-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.875rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .social-btn:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--accent-primary);
+    }
+    
+    .back-link {
+      position: absolute;
+      top: 2rem;
+      left: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    
+    .back-link:hover {
+      color: var(--accent-primary);
+    }
+    
+    .nic-helper {
+      background: rgba(99, 102, 241, 0.1);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-top: 0.5rem;
+      font-size: 0.875rem;
+    }
+    
+    .nic-helper .extracted-info {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+    
+    .nic-helper .info-item {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      color: var(--success);
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-bg"></div>
+    
+    <a href="index.html" class="back-link">
+      <i data-lucide="arrow-left" style="width: 20px; height: 20px;"></i>
+      Back to Home
+    </a>
+    
+    <button class="theme-toggle" id="themeToggle" style="position: absolute; top: 2rem; right: 2rem;" aria-label="Toggle theme">
+      <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+      <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="5"/>
+        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+      </svg>
+    </button>
+    
+    <div class="auth-container">
+      <div class="auth-card">
+        <div class="auth-header">
+          <div class="auth-logo">
+            <svg viewBox="0 0 48 48" fill="none">
+              <defs>
+                <linearGradient id="logoGradAuth" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#6366f1"/>
+                  <stop offset="100%" stop-color="#a855f7"/>
+                </linearGradient>
+              </defs>
+              <rect width="48" height="48" rx="12" fill="url(#logoGradAuth)"/>
+              <path d="M14 34V14l20 10-20 10z" fill="white"/>
+            </svg>
+            <span>Nova X Edu</span>
+          </div>
+          <p style="color: var(--text-muted);">Welcome! Please sign in to continue.</p>
+        </div>
+        
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-tab="login">Sign In</button>
+          <button class="auth-tab" data-tab="register">Register</button>
+        </div>
+        
+        <!-- Login Form -->
+        <form class="auth-form active" id="loginForm">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" class="form-input" name="email" placeholder="Enter your email" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="password-field">
+              <input type="password" class="form-input" name="password" placeholder="Enter your password" required>
+              <button type="button" class="password-toggle" onclick="togglePassword(this)">
+                <i data-lucide="eye" style="width: 20px; height: 20px;"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+              <input type="checkbox" name="remember">
+              <span style="color: var(--text-secondary); font-size: 0.875rem;">Remember me</span>
+            </label>
+            <a href="#" style="font-size: 0.875rem;" onclick="showForgotPassword()">Forgot password?</a>
+          </div>
+          
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1.5rem;">
+            <i data-lucide="log-in" style="width: 20px; height: 20px;"></i>
+            Sign In
+          </button>
+          
+          <div class="auth-divider">or continue with</div>
+          
+          <div class="social-btns">
+            <button type="button" class="social-btn" onclick="signInWithGoogle()">
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              </svg>
+              Google
+            </button>
+          </div>
+        </form>
+        
+        <!-- Register Form -->
+        <form class="auth-form" id="registerForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">First Name</label>
+              <input type="text" class="form-input" name="firstName" placeholder="First name" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Last Name</label>
+              <input type="text" class="form-input" name="lastName" placeholder="Last name" required>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">NIC Number</label>
+            <input type="text" class="form-input" name="nic" id="nicInput" placeholder="Enter your NIC (e.g., 200012345678 or 200012345V)" required maxlength="12" style="text-transform: uppercase;">
+            <div class="nic-helper" id="nicHelper" style="display: none;">
+              <span style="color: var(--text-muted);">Extracted from NIC:</span>
+              <div class="extracted-info">
+                <span class="info-item" id="nicDob"><i data-lucide="calendar" style="width: 14px; height: 14px;"></i> <span></span></span>
+                <span class="info-item" id="nicGender"><i data-lucide="user" style="width: 14px; height: 14px;"></i> <span></span></span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">WhatsApp Number</label>
+              <input type="tel" class="form-input" name="whatsapp" placeholder="0771234567">
+            </div>
+            <div class="form-group">
+              <label class="form-label">SMS Number</label>
+              <input type="tel" class="form-input" name="sms" placeholder="0771234567">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" class="form-input" name="email" placeholder="Enter your email" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="password-field">
+              <input type="password" class="form-input" name="password" id="regPassword" placeholder="Create a password" required minlength="6">
+              <button type="button" class="password-toggle" onclick="togglePassword(this)">
+                <i data-lucide="eye" style="width: 20px; height: 20px;"></i>
+              </button>
+            </div>
+            <div class="form-helper">Password must be at least 6 characters</div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">District</label>
+              <select class="form-select" name="district" required>
+                <option value="">Select District</option>
+                <option value="Colombo">Colombo</option>
+                <option value="Gampaha">Gampaha</option>
+                <option value="Kalutara">Kalutara</option>
+                <option value="Kandy">Kandy</option>
+                <option value="Matale">Matale</option>
+                <option value="Nuwara Eliya">Nuwara Eliya</option>
+                <option value="Galle">Galle</option>
+                <option value="Matara">Matara</option>
+                <option value="Hambantota">Hambantota</option>
+                <option value="Jaffna">Jaffna</option>
+                <option value="Kilinochchi">Kilinochchi</option>
+                <option value="Mannar">Mannar</option>
+                <option value="Vavuniya">Vavuniya</option>
+                <option value="Mullaitivu">Mullaitivu</option>
+                <option value="Batticaloa">Batticaloa</option>
+                <option value="Ampara">Ampara</option>
+                <option value="Trincomalee">Trincomalee</option>
+                <option value="Kurunegala">Kurunegala</option>
+                <option value="Puttalam">Puttalam</option>
+                <option value="Anuradhapura">Anuradhapura</option>
+                <option value="Polonnaruwa">Polonnaruwa</option>
+                <option value="Badulla">Badulla</option>
+                <option value="Monaragala">Monaragala</option>
+                <option value="Ratnapura">Ratnapura</option>
+                <option value="Kegalle">Kegalle</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">City</label>
+              <input type="text" class="form-input" name="city" placeholder="Your city">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Address</label>
+            <textarea class="form-textarea" name="address" placeholder="Your full address" rows="2"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Stream (Optional)</label>
+            <select class="form-select" name="stream">
+              <option value="">Select Stream</option>
+              <option value="Science">Science (Bio)</option>
+              <option value="Mathematics">Mathematics</option>
+              <option value="Commerce">Commerce</option>
+              <option value="Arts">Arts</option>
+              <option value="Technology">Technology</option>
+            </select>
+          </div>
+          
+          <div style="margin-bottom: 1.5rem;">
+            <label style="display: flex; align-items: flex-start; gap: 0.5rem; cursor: pointer;">
+              <input type="checkbox" name="terms" required style="margin-top: 0.25rem;">
+              <span style="color: var(--text-secondary); font-size: 0.875rem;">I agree to the <a href="rules.html" target="_blank">Terms of Service</a> and <a href="rules.html" target="_blank">Privacy Policy</a></span>
+            </label>
+          </div>
+          
+          <button type="submit" class="btn btn-primary" style="width: 100%;">
+            <i data-lucide="user-plus" style="width: 20px; height: 20px;"></i>
+            Create Account
+          </button>
+        </form>
+        
+        <!-- Forgot Password Form -->
+        <form class="auth-form" id="forgotForm">
+          <div style="text-align: center; margin-bottom: 1.5rem;">
+            <i data-lucide="key" style="width: 48px; height: 48px; color: var(--accent-primary); margin-bottom: 1rem;"></i>
+            <p style="color: var(--text-secondary);">Enter your email address and we'll send you a link to reset your password.</p>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" class="form-input" name="email" placeholder="Enter your email" required>
+          </div>
+          
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">
+            Send Reset Link
+          </button>
+          
+          <button type="button" class="btn btn-secondary" style="width: 100%;" onclick="backToLogin()">
+            Back to Login
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <div class="toast-container" id="toastContainer"></div>
+  
+  <script src="app.js"></script>
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+    
+    // Theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    });
+    
+    // Tab switching
+    const tabs = document.querySelectorAll('.auth-tab');
+    const forms = document.querySelectorAll('.auth-form');
+    
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        const formId = tab.dataset.tab === 'login' ? 'loginForm' : 
+                       tab.dataset.tab === 'register' ? 'registerForm' : 'forgotForm';
+        forms.forEach(f => f.classList.remove('active'));
+        document.getElementById(formId).classList.add('active');
+      });
+    });
+    
+    // Check URL params for register
+    if (new URLSearchParams(window.location.search).has('register')) {
+      tabs[1].click();
+    }
+    
+    // Password toggle
+    function togglePassword(btn) {
+      const input = btn.parentElement.querySelector('input');
+      const icon = btn.querySelector('i');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.setAttribute('data-lucide', 'eye-off');
+      } else {
+        input.type = 'password';
+        icon.setAttribute('data-lucide', 'eye');
+      }
+      lucide.createIcons();
+    }
+    
+    // NIC validation and extraction
+    const nicInput = document.getElementById('nicInput');
+    const nicHelper = document.getElementById('nicHelper');
+    
+    nicInput.addEventListener('input', function() {
+      const nic = this.value.toUpperCase();
+      this.value = nic;
+      
+      if (nic.length >= 10) {
+        const result = extractFromNIC(nic);
+        if (result) {
+          nicHelper.style.display = 'block';
+          document.querySelector('#nicDob span').textContent = result.dob;
+          document.querySelector('#nicGender span').textContent = result.gender;
+          lucide.createIcons();
+        } else {
+          nicHelper.style.display = 'none';
+        }
+      } else {
+        nicHelper.style.display = 'none';
+      }
+    });
+    
+    // Extract DOB and Gender from Sri Lankan NIC
+    function extractFromNIC(nic) {
+      let year, days;
+      
+      // New NIC format (12 digits)
+      if (nic.length === 12 && /^\d{12}$/.test(nic)) {
+        year = parseInt(nic.substring(0, 4));
+        days = parseInt(nic.substring(4, 7));
+      }
+      // Old NIC format (9 digits + V/X)
+      else if (nic.length === 10 && /^\d{9}[VX]$/.test(nic)) {
+        year = 1900 + parseInt(nic.substring(0, 2));
+        days = parseInt(nic.substring(2, 5));
+      }
+      else {
+        return null;
+      }
+      
+      // Determine gender
+      const isFemale = days > 500;
+      if (isFemale) days -= 500;
+      
+      // Determine date
+      const months = [31, (year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      let month = 0, day = days;
+      
+      for (let i = 0; i < 12; i++) {
+        if (day <= months[i]) {
+          month = i + 1;
+          break;
+        }
+        day -= months[i];
+      }
+      
+      const dob = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      
+      return {
+        dob: dob,
+        gender: isFemale ? 'Female' : 'Male'
+      };
+    }
+    
+    // Forgot password
+    function showForgotPassword() {
+      tabs.forEach(t => t.classList.remove('active'));
+      forms.forEach(f => f.classList.remove('active'));
+      document.getElementById('forgotForm').classList.add('active');
+    }
+    
+    function backToLogin() {
+      tabs[0].classList.add('active');
+      forms.forEach(f => f.classList.remove('active'));
+      document.getElementById('loginForm').classList.add('active');
+    }
+    
+    // Login form submission
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      
+      try {
+        showLoading(true);
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: formData.get('email'),
+          password: formData.get('password')
+        });
+        
+        if (error) throw error;
+        
+        // Check device limit
+        await checkDeviceLimit(data.user.id);
+        
+        showToast('Login successful! Redirecting...', 'success');
+        setTimeout(() => {
+          window.location.href = 'app.html';
+        }, 1000);
+      } catch (error) {
+        showToast(error.message, 'error');
+      } finally {
+        showLoading(false);
+      }
+    });
+    
+    // Register form submission
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      
+      const nic = formData.get('nic').toUpperCase();
+      const nicData = extractFromNIC(nic);
+      
+      try {
+        showLoading(true);
+        
+        // Sign up with Supabase
+        const { data, error } = await supabase.auth.signUp({
+          email: formData.get('email'),
+          password: formData.get('password'),
+          options: {
+            data: {
+              first_name: formData.get('firstName'),
+              last_name: formData.get('lastName'),
+              role: 'student'
+            }
+          }
+        });
+        
+        if (error) throw error;
+        
+        // Insert profile data
+        if (data.user) {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert({
+              id: data.user.id,
+              email: formData.get('email'),
+              first_name: formData.get('firstName'),
+              last_name: formData.get('lastName'),
+              nic: nic,
+              dob: nicData ? nicData.dob : null,
+              gender: nicData ? nicData.gender : null,
+              whatsapp_number: formData.get('whatsapp'),
+              sms_number: formData.get('sms'),
+              district: formData.get('district'),
+              city: formData.get('city'),
+              address: formData.get('address'),
+              stream: formData.get('stream'),
+              role: 'student',
+              is_approved: false
+            });
+          
+          if (profileError) throw profileError;
+        }
+        
+        showToast('Account created! Please check your email to verify.', 'success');
+        tabs[0].click();
+      } catch (error) {
+        showToast(error.message, 'error');
+      } finally {
+        showLoading(false);
+      }
+    });
+    
+    // Forgot password form
+    document.getElementById('forgotForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      
+      try {
+        showLoading(true);
+        const { error } = await supabase.auth.resetPasswordForEmail(formData.get('email'), {
+          redirectTo: window.location.origin + '/login.html'
+        });
+        
+        if (error) throw error;
+        
+        showToast('Password reset link sent to your email!', 'success');
+        backToLogin();
+      } catch (error) {
+        showToast(error.message, 'error');
+      } finally {
+        showLoading(false);
+      }
+    });
+    
+    // Google sign in
+    async function signInWithGoogle() {
+      try {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: window.location.origin + '/app.html'
+          }
+        });
+        if (error) throw error;
+      } catch (error) {
+        showToast(error.message, 'error');
+      }
+    }
+    
+    // Check device limit
+    async function checkDeviceLimit(userId) {
+      const fingerprint = generateFingerprint();
+      
+      // Get user's current active sessions
+      const { data: sessions } = await supabase
+        .from('device_sessions')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_active', true);
+      
+      // Check if this device is already registered
+      const existingSession = sessions?.find(s => s.device_fingerprint === fingerprint);
+      
+      if (existingSession) {
+        // Update last activity
+        await supabase
+          .from('device_sessions')
+          .update({ last_activity: new Date().toISOString() })
+          .eq('id', existingSession.id);
+        return;
+      }
+      
+      // Get user profile for device limit
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('device_limit, is_blocked')
+        .eq('id', userId)
+        .single();
+      
+      if (profile?.is_blocked) {
+        await supabase.auth.signOut();
+        throw new Error('Account blocked. Please contact admin.');
+      }
+      
+      if (sessions && sessions.length >= (profile?.device_limit || 1)) {
+        // Block the account
+        await supabase
+          .from('profiles')
+          .update({ is_blocked: true })
+          .eq('id', userId);
+        
+        await supabase.auth.signOut();
+        throw new Error('Device limit exceeded. Account blocked. Contact admin.');
+      }
+      
+      // Register new session
+      await supabase.from('device_sessions').insert({
+        user_id: userId,
+        device_fingerprint: fingerprint,
+        ip_address: await getIP(),
+        user_agent: navigator.userAgent,
+        is_active: true
+      });
+    }
+    
+    // Generate device fingerprint
+    function generateFingerprint() {
+      const components = [
+        navigator.userAgent,
+        navigator.language,
+        screen.width,
+        screen.height,
+        screen.colorDepth,
+        new Date().getTimezoneOffset(),
+        navigator.hardwareConcurrency || '',
+        navigator.deviceMemory || ''
+      ];
+      
+      return btoa(components.join('|')).substring(0, 64);
+    }
+    
+    // Get IP address
+    async function getIP() {
+      try {
+        const res = await fetch('https://api.ipify.org?format=json');
+        const data = await res.json();
+        return data.ip;
+      } catch {
+        return 'unknown';
+      }
+    }
+  </script>
+</body>
+</html>
