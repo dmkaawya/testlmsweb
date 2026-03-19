@@ -1,0 +1,1925 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Portal — Nova X Edu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --brand: #7C3AED; --brand-light: #A78BFA; --brand-glow: rgba(124,58,237,0.3);
+      --accent: #F59E0B; --accent2: #06B6D4;
+      --success: #10B981; --danger: #EF4444; --warn: #F97316;
+    }
+    [data-theme="dark"] {
+      --bg: #09090F; --bg2: #0F0F1A; --bg3: #16162A; --bg4: #1E1E35;
+      --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.13);
+      --text: #F1F0FF; --text2: #A9A7C9; --text3: #6B6B8A;
+      --glass: rgba(255,255,255,0.04); --glass2: rgba(255,255,255,0.07);
+      --shadow: 0 8px 40px rgba(0,0,0,0.5);
+      --sidebar-bg: #0C0C17;
+    }
+    [data-theme="light"] {
+      --bg: #F4F3FF; --bg2: #FFFFFF; --bg3: #EDE9FE; --bg4: #DDD6FE;
+      --border: rgba(0,0,0,0.08); --border2: rgba(0,0,0,0.14);
+      --text: #1A1133; --text2: #4C3D8A; --text3: #7C6FAF;
+      --glass: rgba(255,255,255,0.6); --glass2: rgba(255,255,255,0.85);
+      --shadow: 0 8px 40px rgba(124,58,237,0.1);
+      --sidebar-bg: #F0EEFF;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; overflow: hidden; }
+    h1,h2,h3,h4,h5 { font-family: 'Syne', sans-serif; }
+    button { cursor: pointer; border: none; outline: none; font-family: inherit; }
+    a { text-decoration: none; color: inherit; }
+
+    /* ── SIDEBAR ── */
+    #sidebar {
+      width: 260px; flex-shrink: 0; background: var(--sidebar-bg);
+      border-right: 1px solid var(--border); display: flex; flex-direction: column;
+      height: 100vh; overflow-y: auto; overflow-x: hidden;
+      transition: width 0.3s, transform 0.3s;
+      z-index: 50;
+    }
+    #sidebar.collapsed { width: 64px; }
+    .sidebar-header {
+      padding: 20px 16px; display: flex; align-items: center; gap: 10px;
+      border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .logo-icon {
+      width: 36px; height: 36px; min-width: 36px; background: var(--brand);
+      border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      font-size: 16px; color: white; font-weight: 800;
+      box-shadow: 0 0 16px var(--brand-glow);
+    }
+    .logo-text {
+      font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px;
+      white-space: nowrap; overflow: hidden;
+    }
+    .logo-text span { color: var(--brand-light); }
+    .sidebar-logo-label { font-size: 11px; color: var(--text3); }
+
+    .nav-section { padding: 8px 8px; }
+    .nav-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); padding: 8px 10px 4px; white-space: nowrap; overflow: hidden; }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 12px; border-radius: 10px;
+      font-size: 14px; color: var(--text2); font-weight: 500;
+      transition: all 0.2s; cursor: pointer; white-space: nowrap; overflow: hidden;
+      position: relative;
+    }
+    .nav-item:hover { background: var(--glass2); color: var(--text); }
+    .nav-item.active { background: var(--brand); color: white; box-shadow: 0 4px 16px var(--brand-glow); }
+    .nav-item .nav-icon { font-size: 18px; flex-shrink: 0; min-width: 24px; text-align: center; }
+    .nav-item .nav-badge {
+      margin-left: auto; min-width: 20px; height: 20px; border-radius: 10px;
+      background: var(--danger); color: white; font-size: 11px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; padding: 0 6px;
+      flex-shrink: 0;
+    }
+    #sidebar.collapsed .nav-label { opacity: 0; }
+    #sidebar.collapsed .nav-item span:not(.nav-icon) { opacity: 0; width: 0; }
+    #sidebar.collapsed .nav-badge { opacity: 0; }
+
+    .sidebar-footer {
+      margin-top: auto; padding: 16px 8px;
+      border-top: 1px solid var(--border);
+    }
+    .user-card {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 10px;
+      background: var(--glass); cursor: pointer;
+      transition: background 0.2s; overflow: hidden;
+    }
+    .user-card:hover { background: var(--glass2); }
+    .user-avatar {
+      width: 36px; height: 36px; min-width: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--brand), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; color: white;
+    }
+    .user-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 11px; color: var(--text3); }
+
+    /* ── MAIN ── */
+    #main {
+      flex: 1; display: flex; flex-direction: column;
+      height: 100vh; overflow: hidden;
+    }
+    
+    /* ── TOPBAR ── */
+    #topbar {
+      height: 60px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 12px;
+      padding: 0 20px; background: var(--bg2); flex-shrink: 0;
+    }
+    .menu-btn {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: var(--glass); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; color: var(--text2); transition: all 0.2s;
+    }
+    .menu-btn:hover { background: var(--glass2); }
+    .topbar-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; flex: 1; }
+    .topbar-actions { display: flex; align-items: center; gap: 8px; }
+    .icon-btn {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: var(--glass); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; color: var(--text2); transition: all 0.2s;
+      position: relative;
+    }
+    .icon-btn:hover { background: var(--glass2); border-color: var(--border2); }
+    .notif-badge {
+      position: absolute; top: -4px; right: -4px;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--danger); font-size: 9px; font-weight: 700;
+      color: white; display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── CONTENT ── */
+    #content {
+      flex: 1; overflow-y: auto; padding: 24px;
+    }
+    #content::-webkit-scrollbar { width: 5px; }
+    #content::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 5px; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 16px; padding: 20px;
+    }
+    .card-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+    /* ── STAT GRID ── */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; margin-bottom: 24px; }
+    .stat-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 14px; padding: 18px; position: relative; overflow: hidden;
+      transition: all 0.2s;
+    }
+    .stat-card:hover { border-color: var(--brand); transform: translateY(-2px); }
+    .stat-card::before {
+      content: ''; position: absolute; top: 0; right: 0;
+      width: 80px; height: 80px; border-radius: 50%;
+      opacity: 0.08; transform: translate(20px,-20px);
+    }
+    .sc-blue::before { background: var(--accent2); }
+    .sc-purple::before { background: var(--brand); }
+    .sc-amber::before { background: var(--accent); }
+    .sc-green::before { background: var(--success); }
+    .sc-red::before { background: var(--danger); }
+    .stat-icon { font-size: 24px; margin-bottom: 10px; }
+    .stat-val { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; margin-bottom: 4px; }
+    .stat-lbl { font-size: 12px; color: var(--text3); }
+
+    /* ── TEACHER CARDS ── */
+    .teacher-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .teacher-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden; transition: all 0.25s;
+      cursor: pointer;
+    }
+    .teacher-card:hover { border-color: var(--brand); transform: translateY(-3px); box-shadow: 0 8px 24px var(--brand-glow); }
+    .tc-header { padding: 24px 20px 16px; text-align: center; }
+    .tc-avatar {
+      width: 64px; height: 64px; border-radius: 16px; margin: 0 auto 12px;
+      background: linear-gradient(135deg, var(--brand), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; font-weight: 700; color: white;
+    }
+    .tc-name { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .tc-subject { font-size: 13px; color: var(--text3); }
+    .tc-tabs { display: flex; border-top: 1px solid var(--border); }
+    .tc-tab {
+      flex: 1; padding: 10px; text-align: center; font-size: 12px; font-weight: 500;
+      color: var(--text3); transition: all 0.2s; cursor: pointer; border-right: 1px solid var(--border);
+    }
+    .tc-tab:last-child { border-right: none; }
+    .tc-tab.active, .tc-tab:hover { background: var(--glass); color: var(--brand-light); }
+
+    /* ── SECTIONS ── */
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .section-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; }
+    .btn-sm {
+      padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 500;
+      border: 1px solid var(--border2); background: var(--glass); color: var(--text2);
+      transition: all 0.2s;
+    }
+    .btn-sm:hover { border-color: var(--brand); color: var(--brand-light); }
+    .btn-primary-sm {
+      padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 500;
+      background: var(--brand); color: white; box-shadow: 0 2px 10px var(--brand-glow);
+      transition: all 0.2s;
+    }
+    .btn-primary-sm:hover { background: #6D28D9; }
+
+    /* ── TABLE ── */
+    .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { padding: 12px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); background: var(--bg3); text-align: left; border-bottom: 1px solid var(--border); }
+    td { padding: 12px 16px; border-bottom: 1px solid var(--border); color: var(--text2); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--glass); }
+    .badge {
+      display: inline-flex; align-items: center; padding: 3px 10px;
+      border-radius: 100px; font-size: 11px; font-weight: 600; white-space: nowrap;
+    }
+    .badge-green { background: rgba(16,185,129,0.15); color: var(--success); }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--accent); }
+    .badge-red { background: rgba(239,68,68,0.15); color: var(--danger); }
+    .badge-blue { background: rgba(6,182,212,0.15); color: var(--accent2); }
+    .badge-purple { background: rgba(124,58,237,0.15); color: var(--brand-light); }
+
+    /* ── RECORDING CARDS ── */
+    .recording-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+    .recording-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden; transition: all 0.25s;
+    }
+    .recording-card:hover { border-color: var(--brand); transform: translateY(-2px); }
+    .rec-thumb {
+      width: 100%; height: 150px; background: var(--bg3);
+      position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;
+    }
+    .rec-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .rec-thumb-placeholder { font-size: 40px; opacity: 0.3; }
+    .rec-type-badge {
+      position: absolute; top: 8px; left: 8px;
+      padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .rec-free-badge {
+      position: absolute; top: 8px; right: 8px;
+      background: rgba(16,185,129,0.9); color: white;
+      padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;
+    }
+    .rec-body { padding: 16px; }
+    .rec-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; line-height: 1.4; }
+    .rec-desc { font-size: 12px; color: var(--text3); margin-bottom: 12px; line-height: 1.4; }
+    .rec-meta { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+    .rec-meta-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text3); }
+
+    /* ── PROFILE ── */
+    .profile-header {
+      background: linear-gradient(135deg, var(--brand), var(--accent2));
+      border-radius: 16px; padding: 32px; margin-bottom: 20px;
+      display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+    }
+    .profile-avatar {
+      width: 80px; height: 80px; border-radius: 20px;
+      background: rgba(255,255,255,0.2); display: flex; align-items: center;
+      justify-content: center; font-size: 32px; font-weight: 700; color: white;
+      flex-shrink: 0;
+    }
+    .profile-info h2 { font-size: 24px; color: white; margin-bottom: 4px; }
+    .profile-info p { font-size: 14px; color: rgba(255,255,255,0.7); }
+
+    .profile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .profile-field { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+    .pf-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .pf-value { font-size: 15px; font-weight: 500; }
+    .pf-edit { display: flex; gap: 10px; margin-top: 8px; }
+    .pf-edit input, .pf-edit select {
+      flex: 1; background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 12px; color: var(--text); font-size: 14px;
+    }
+
+    /* ── NOTIFICATIONS PANEL ── */
+    #notif-panel {
+      position: fixed; top: 60px; right: 0; width: 360px;
+      background: var(--bg2); border-left: 1px solid var(--border);
+      height: calc(100vh - 60px); z-index: 200;
+      transform: translateX(100%); transition: transform 0.3s;
+      display: flex; flex-direction: column;
+    }
+    #notif-panel.open { transform: translateX(0); }
+    .notif-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .notif-header h3 { font-size: 16px; font-weight: 700; }
+    .notif-list { flex: 1; overflow-y: auto; }
+    .notif-item { padding: 16px 20px; border-bottom: 1px solid var(--border); transition: background 0.2s; cursor: pointer; }
+    .notif-item:hover { background: var(--glass); }
+    .notif-item.unread { background: var(--glass); border-left: 3px solid var(--brand); }
+    .notif-item-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+    .notif-item-msg { font-size: 12px; color: var(--text2); line-height: 1.4; }
+    .notif-item-time { font-size: 11px; color: var(--text3); margin-top: 6px; }
+
+    /* ── MOBILE OVERLAY ── */
+    #sidebar-overlay {
+      display: none; position: fixed; inset: 0; z-index: 49;
+      background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+    }
+
+    /* ── LOADING ── */
+    .loading-spinner {
+      display: flex; align-items: center; justify-content: center;
+      padding: 48px; color: var(--text3); font-size: 14px; gap: 10px;
+    }
+    .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--brand); border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── FORM ── */
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 12px; color: var(--text2); font-weight: 500; }
+    .form-group input, .form-group select, .form-group textarea {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 14px; color: var(--text); font-size: 14px;
+      font-family: inherit; transition: all 0.2s;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-glow);
+    }
+    .form-group input::placeholder { color: var(--text3); }
+
+    /* ── PAYMENT ── */
+    .payment-method-card {
+      border: 2px solid var(--border); border-radius: 12px; padding: 16px;
+      cursor: pointer; transition: all 0.2s; margin-bottom: 12px;
+    }
+    .payment-method-card:hover { border-color: var(--brand-light); }
+    .payment-method-card.selected { border-color: var(--brand); background: var(--glass); }
+    .pm-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .pm-icon { font-size: 24px; }
+    .pm-name { font-size: 15px; font-weight: 600; }
+    .pm-desc { font-size: 12px; color: var(--text3); }
+
+    /* ── STORE ── */
+    .store-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+    .store-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden; transition: all 0.25s;
+    }
+    .store-card:hover { border-color: var(--brand); transform: translateY(-2px); }
+    .store-thumb { width: 100%; height: 160px; background: var(--bg3); display: flex; align-items: center; justify-content: center; font-size: 48px; }
+    .store-body { padding: 14px; }
+    .store-price { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: var(--brand-light); margin: 8px 0; }
+    .cart-badge-wrap { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 100; }
+    .cart-float-btn {
+      background: var(--brand); color: white; padding: 12px 24px; border-radius: 100px;
+      font-size: 14px; font-weight: 600; box-shadow: 0 8px 24px var(--brand-glow);
+      display: flex; align-items: center; gap: 10px; transition: all 0.2s;
+    }
+    .cart-float-btn:hover { background: #6D28D9; transform: scale(1.05); }
+
+    /* ── FILTER PILLS ── */
+    .filter-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+    .pill {
+      padding: 6px 14px; border-radius: 100px; font-size: 12px; font-weight: 500;
+      border: 1px solid var(--border); color: var(--text2); background: var(--glass);
+      transition: all 0.2s; cursor: pointer;
+    }
+    .pill.active { background: var(--brand); border-color: var(--brand); color: white; }
+    .pill:hover:not(.active) { border-color: var(--border2); }
+
+    /* ── SUPPORT ── */
+    .ticket-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+    .ticket-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+    .ticket-subject { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+    .ticket-msg { font-size: 13px; color: var(--text2); line-height: 1.5; }
+
+    /* ── MOBILE ── */
+    @media (max-width: 768px) {
+      #sidebar { position: fixed; left: 0; top: 0; transform: translateX(-100%); z-index: 50; }
+      #sidebar.mobile-open { transform: translateX(0); width: 260px; }
+      #sidebar-overlay { display: block; }
+      #main { width: 100%; }
+      #content { padding: 16px; }
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .empty-state { text-align: center; padding: 48px 24px; }
+    .empty-icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .empty-desc { font-size: 14px; color: var(--text3); }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar Overlay (mobile) -->
+<div id="sidebar-overlay" onclick="toggleSidebar()" style="display:none"></div>
+
+<!-- ── SIDEBAR ── -->
+<aside id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-icon">N</div>
+    <div>
+      <div class="logo-text">Nova<span>X</span></div>
+      <div class="sidebar-logo-label">Student Portal</div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Main</div>
+    <div class="nav-item active" onclick="showTab('dashboard',this)">
+      <span class="nav-icon">📊</span><span>Dashboard</span>
+    </div>
+    <div class="nav-item" onclick="showTab('teachers',this)">
+      <span class="nav-icon">👨‍🏫</span><span>My Teachers</span>
+    </div>
+    <div class="nav-item" onclick="showTab('enroll',this)">
+      <span class="nav-icon">➕</span><span>Find Classes</span>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Learning</div>
+    <div class="nav-item" onclick="showTab('recordings',this)">
+      <span class="nav-icon">🎬</span><span>Recordings</span>
+    </div>
+    <div class="nav-item" onclick="showTab('live',this)">
+      <span class="nav-icon">🔴</span><span>Live Classes</span>
+    </div>
+    <div class="nav-item" onclick="showTab('notes',this)">
+      <span class="nav-icon">📝</span><span>Notes</span>
+    </div>
+    <div class="nav-item" onclick="showTab('quizzes',this)">
+      <span class="nav-icon">❓</span><span>Quizzes</span>
+    </div>
+    <div class="nav-item" onclick="showTab('timetable',this)">
+      <span class="nav-icon">📅</span><span>Timetable</span>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Account</div>
+    <div class="nav-item" onclick="showTab('payments',this)">
+      <span class="nav-icon">💳</span><span>Payments</span>
+    </div>
+    <div class="nav-item" onclick="showTab('store',this)">
+      <span class="nav-icon">🛒</span><span>Store</span>
+    </div>
+    <div class="nav-item" onclick="showTab('profile',this)">
+      <span class="nav-icon">👤</span><span>Profile</span>
+    </div>
+    <div class="nav-item" onclick="showTab('support',this)">
+      <span class="nav-icon">🎫</span><span>Support</span>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="nav-item" onclick="showTab('activity',this)" style="margin-bottom:4px">
+      <span class="nav-icon">📋</span><span>Activity Log</span>
+    </div>
+    <div class="user-card" onclick="showTab('profile',document.querySelector('.nav-item'))">
+      <div class="user-avatar" id="sidebar-avatar">S</div>
+      <div style="overflow:hidden;flex:1">
+        <div class="user-name" id="sidebar-name">Loading...</div>
+        <div class="user-role">Student</div>
+      </div>
+      <button onclick="event.stopPropagation();handleLogout()" title="Logout" style="background:none;color:var(--text3);font-size:16px;flex-shrink:0">🚪</button>
+    </div>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<div id="main">
+  <!-- Topbar -->
+  <div id="topbar">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="topbar-title" id="topbar-title">Dashboard</div>
+    <div class="topbar-actions">
+      <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle theme">🌙</button>
+      <button class="icon-btn" onclick="toggleNotifPanel()" id="notif-btn" title="Notifications">
+        🔔<span class="notif-badge" id="notif-count" style="display:none">0</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div id="content">
+
+    <!-- ═══ DASHBOARD ═══ -->
+    <div class="tab-content active" id="tab-dashboard">
+      <div style="margin-bottom:24px">
+        <h2 style="font-size:24px;margin-bottom:4px">Good <span id="greeting-time">morning</span>, <span id="greeting-name">Student</span>! 👋</h2>
+        <p style="color:var(--text2);font-size:14px">Here's what's happening with your learning journey.</p>
+      </div>
+
+      <div class="stat-grid" id="stats-grid">
+        <div class="stat-card sc-purple">
+          <div class="stat-icon">💳</div>
+          <div class="stat-val" id="stat-payments">—</div>
+          <div class="stat-lbl">Total Payments</div>
+        </div>
+        <div class="stat-card sc-blue">
+          <div class="stat-icon">🎬</div>
+          <div class="stat-val" id="stat-recordings">—</div>
+          <div class="stat-lbl">Recordings Viewed</div>
+        </div>
+        <div class="stat-card sc-amber">
+          <div class="stat-icon">📝</div>
+          <div class="stat-val" id="stat-notes">—</div>
+          <div class="stat-lbl">Notes Downloaded</div>
+        </div>
+        <div class="stat-card sc-green">
+          <div class="stat-icon">❓</div>
+          <div class="stat-val" id="stat-quizzes">—</div>
+          <div class="stat-lbl">Quizzes Completed</div>
+        </div>
+        <div class="stat-card sc-blue">
+          <div class="stat-icon">🔴</div>
+          <div class="stat-val" id="stat-live">—</div>
+          <div class="stat-lbl">Live Sessions Joined</div>
+        </div>
+        <div class="stat-card sc-amber">
+          <div class="stat-icon">🛒</div>
+          <div class="stat-val" id="stat-orders">—</div>
+          <div class="stat-lbl">Store Purchases</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px" id="dash-bottom">
+        <!-- Recent Activity -->
+        <div class="card" style="grid-column:span 2">
+          <div class="card-title">📚 My Enrolled Classes</div>
+          <div id="enrolled-list" class="loading-spinner"><div class="spinner"></div> Loading...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ MY TEACHERS ═══ -->
+    <div class="tab-content" id="tab-teachers">
+      <div class="section-header">
+        <div class="section-title">My Teachers</div>
+        <button class="btn-primary-sm" onclick="showTab('enroll',document.querySelector('.nav-item'))">+ Find New Class</button>
+      </div>
+      <div class="teacher-grid" id="my-teachers-grid">
+        <div class="loading-spinner"><div class="spinner"></div> Loading...</div>
+      </div>
+    </div>
+
+    <!-- ═══ FIND CLASSES ═══ -->
+    <div class="tab-content" id="tab-enroll">
+      <div class="section-header">
+        <div class="section-title">Find Classes</div>
+      </div>
+      <div style="margin-bottom:20px;display:flex;gap:10px;flex-wrap:wrap">
+        <input type="text" id="teacher-search" placeholder="🔍  Search teachers..." onkeyup="filterTeachers()" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;color:var(--text);font-size:14px;font-family:inherit;flex:1;min-width:200px">
+        <select id="teacher-grade-filter" onchange="filterTeachers()" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;color:var(--text);font-size:14px;font-family:inherit">
+          <option value="">All Grades</option>
+        </select>
+      </div>
+      <div class="teacher-grid" id="all-teachers-grid">
+        <div class="loading-spinner"><div class="spinner"></div> Loading teachers...</div>
+      </div>
+    </div>
+
+    <!-- ═══ RECORDINGS ═══ -->
+    <div class="tab-content" id="tab-recordings">
+      <div class="section-header">
+        <div class="section-title">Recordings</div>
+      </div>
+      
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+        <select id="rec-teacher" onchange="loadRecordings()" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:9px 14px;color:var(--text);font-size:13px;font-family:inherit">
+          <option value="">All Teachers</option>
+        </select>
+        <select id="rec-year" onchange="loadRecordings()" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:9px 14px;color:var(--text);font-size:13px;font-family:inherit">
+          <option value="">All Years</option>
+        </select>
+        <select id="rec-month" onchange="loadRecordings()" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:9px 14px;color:var(--text);font-size:13px;font-family:inherit">
+          <option value="">All Months</option>
+          <option value="1">January</option><option value="2">February</option>
+          <option value="3">March</option><option value="4">April</option>
+          <option value="5">May</option><option value="6">June</option>
+          <option value="7">July</option><option value="8">August</option>
+          <option value="9">September</option><option value="10">October</option>
+          <option value="11">November</option><option value="12">December</option>
+        </select>
+      </div>
+      <div class="filter-pills" id="rec-type-pills">
+        <div class="pill active" onclick="setRecType('',this)">All</div>
+        <div class="pill" onclick="setRecType('theory',this)">Theory</div>
+        <div class="pill" onclick="setRecType('revision',this)">Revision</div>
+        <div class="pill" onclick="setRecType('paper',this)">Paper</div>
+        <div class="pill" onclick="setRecType('extra',this)">Extra</div>
+      </div>
+      <div class="recording-grid" id="recordings-grid">
+        <div class="loading-spinner" style="grid-column:1/-1"><div class="spinner"></div> Loading...</div>
+      </div>
+    </div>
+
+    <!-- ═══ LIVE CLASSES ═══ -->
+    <div class="tab-content" id="tab-live">
+      <div class="section-header">
+        <div class="section-title">Live Classes</div>
+      </div>
+      <div id="live-classes-list" class="loading-spinner"><div class="spinner"></div> Loading...</div>
+    </div>
+
+    <!-- ═══ NOTES ═══ -->
+    <div class="tab-content" id="tab-notes">
+      <div class="section-header">
+        <div class="section-title">Notes</div>
+      </div>
+      <div id="notes-grid" class="recording-grid">
+        <div class="loading-spinner" style="grid-column:1/-1"><div class="spinner"></div> Loading...</div>
+      </div>
+    </div>
+
+    <!-- ═══ QUIZZES ═══ -->
+    <div class="tab-content" id="tab-quizzes">
+      <div class="section-header">
+        <div class="section-title">Quizzes</div>
+      </div>
+      <div id="quizzes-list" class="loading-spinner"><div class="spinner"></div> Loading...</div>
+    </div>
+
+    <!-- ═══ TIMETABLE ═══ -->
+    <div class="tab-content" id="tab-timetable">
+      <div class="section-header">
+        <div class="section-title">Timetable</div>
+      </div>
+      <div id="timetable-content" class="loading-spinner"><div class="spinner"></div> Loading...</div>
+    </div>
+
+    <!-- ═══ PAYMENTS ═══ -->
+    <div class="tab-content" id="tab-payments">
+      <div class="section-header">
+        <div class="section-title">Payment History</div>
+        <button class="btn-primary-sm" onclick="openPaymentModal()">+ Make Payment</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Transaction ID</th>
+              <th>Amount</th>
+              <th>Teacher / Class</th>
+              <th>Month</th>
+              <th>Method</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="payments-table">
+            <tr><td colspan="7" class="loading-spinner"><div class="spinner"></div> Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══ STORE ═══ -->
+    <div class="tab-content" id="tab-store">
+      <div class="section-header">
+        <div class="section-title">Store</div>
+        <button class="btn-sm" onclick="openCart()">🛒 Cart (<span id="cart-count">0</span>)</button>
+      </div>
+      <div class="store-grid" id="store-grid">
+        <div class="loading-spinner" style="grid-column:1/-1"><div class="spinner"></div> Loading...</div>
+      </div>
+    </div>
+
+    <!-- ═══ PROFILE ═══ -->
+    <div class="tab-content" id="tab-profile">
+      <div class="profile-header">
+        <div class="profile-avatar" id="profile-big-avatar">S</div>
+        <div class="profile-info">
+          <h2 id="profile-full-name">Student Name</h2>
+          <p id="profile-email-display">student@example.com</p>
+          <p style="color:rgba(255,255,255,0.5);font-size:12px;margin-top:4px">Student Account</p>
+        </div>
+        <button class="btn-sm" style="margin-left:auto" onclick="toggleProfileEdit()" id="edit-profile-btn">✏️ Edit Profile</button>
+      </div>
+      <div class="profile-grid" id="profile-fields"></div>
+    </div>
+
+    <!-- ═══ SUPPORT ═══ -->
+    <div class="tab-content" id="tab-support">
+      <div class="section-header">
+        <div class="section-title">Support</div>
+        <button class="btn-primary-sm" onclick="openTicketModal()">+ New Ticket</button>
+      </div>
+      <div id="support-content">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px" id="support-grid">
+          <div class="card">
+            <div class="card-title">📞 Contact Info</div>
+            <div id="hotlines-list" class="loading-spinner"><div class="spinner"></div></div>
+          </div>
+          <div class="card">
+            <div class="card-title">🎫 My Tickets</div>
+            <div id="tickets-list">Loading...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ACTIVITY ═══ -->
+    <div class="tab-content" id="tab-activity">
+      <div class="section-header">
+        <div class="section-title">Activity Log</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Action</th><th>Details</th><th>Date & Time</th></tr>
+          </thead>
+          <tbody id="activity-table">
+            <tr><td colspan="3" class="loading-spinner"><div class="spinner"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- Notification Panel -->
+<div id="notif-panel">
+  <div class="notif-header">
+    <h3>🔔 Notifications</h3>
+    <button class="btn-sm" onclick="markAllRead()">Mark all read</button>
+  </div>
+  <div class="notif-list" id="notif-list">
+    <div class="loading-spinner"><div class="spinner"></div></div>
+  </div>
+</div>
+
+<!-- Modal Backdrop -->
+<div id="modal-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:300;align-items:center;justify-content:center">
+  <div id="modal-box" style="background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:32px;max-width:500px;width:90%;max-height:85vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <h3 id="modal-title" style="font-size:18px">Modal</h3>
+      <button onclick="closeModal()" style="background:var(--bg3);border:1px solid var(--border);width:32px;height:32px;border-radius:8px;font-size:16px;color:var(--text2)">✕</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ──────────────────────────────────────────
+// SUPABASE
+// ──────────────────────────────────────────
+const SUPABASE_URL = 'https://vxrxncjixwqqaasmkpvw.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4cnhuY2ppeHdxcWFhc21rcHZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTI3MzMsImV4cCI6MjA4OTE2ODczM30.QESIHemwVvSierW1k_H_np9w60kPs4rMku5n2vzQeG0';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ──────────────────────────────────────────
+// STATE
+// ──────────────────────────────────────────
+let currentUser = null;
+let currentProfile = null;
+let enrollments = [];
+let allTeachers = [];
+let cart = [];
+let recTypeFilter = '';
+let profileEditMode = false;
+
+// ──────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { window.location.href = 'index.html'; return; }
+  
+  currentUser = session.user;
+  await loadProfile();
+  await Promise.all([loadDashboard(), loadNotifications(), loadGradesFilter()]);
+  
+  // Log activity
+  logActivity('Logged in to Student Portal');
+  
+  // Theme
+  applyTheme(localStorage.getItem('nxe-theme') || 'dark');
+  
+  // Greeting
+  const h = new Date().getHours();
+  const greet = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
+  document.getElementById('greeting-time').textContent = greet;
+})();
+
+// ──────────────────────────────────────────
+// AUTH
+// ──────────────────────────────────────────
+async function handleLogout() {
+  await logActivity('Logged out');
+  await sb.from('session_logs').update({ logged_out_at: new Date().toISOString(), is_active: false })
+    .eq('user_id', currentUser.id).eq('is_active', true);
+  await sb.auth.signOut();
+  window.location.href = 'index.html';
+}
+
+// ──────────────────────────────────────────
+// PROFILE
+// ──────────────────────────────────────────
+async function loadProfile() {
+  const { data } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  currentProfile = data;
+  if (!data) return;
+
+  const name = `${data.first_name || ''} ${data.last_name || ''}`.trim() || 'Student';
+  const initials = (data.first_name?.[0] || '') + (data.last_name?.[0] || '') || 'S';
+
+  document.getElementById('sidebar-name').textContent = name;
+  document.getElementById('sidebar-avatar').textContent = initials.toUpperCase();
+  document.getElementById('greeting-name').textContent = data.first_name || 'Student';
+  document.getElementById('profile-full-name').textContent = name;
+  document.getElementById('profile-email-display').textContent = data.email;
+  document.getElementById('profile-big-avatar').textContent = initials.toUpperCase();
+
+  renderProfileFields(data);
+}
+
+function renderProfileFields(p) {
+  const fields = [
+    { label: 'First Name', key: 'first_name', val: p.first_name },
+    { label: 'Last Name', key: 'last_name', val: p.last_name },
+    { label: 'Email', key: 'email', val: p.email, readonly: true },
+    { label: 'NIC Number', key: 'nic_number', val: p.nic_number },
+    { label: 'Birthday', key: 'birthday', val: p.birthday, type: 'date' },
+    { label: 'Gender', key: 'gender', val: p.gender },
+    { label: 'District', key: 'district', val: p.district },
+    { label: 'City', key: 'city', val: p.city },
+    { label: 'Address', key: 'address', val: p.address },
+    { label: 'Work Phone', key: 'work_phone', val: p.work_phone },
+    { label: 'WhatsApp / Telegram', key: 'contact_number', val: p.contact_number },
+  ];
+
+  document.getElementById('profile-fields').innerHTML = fields.map(f => `
+    <div class="profile-field">
+      <div class="pf-label">${f.label}</div>
+      <div class="pf-value" id="pf-val-${f.key}">${f.val || '—'}</div>
+      <input type="${f.type||'text'}" class="profile-edit-input" id="pf-inp-${f.key}" 
+        value="${f.val || ''}" style="display:none;width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:14px;margin-top:6px" 
+        ${f.readonly ? 'readonly' : ''} />
+    </div>`).join('');
+
+  if (profileEditMode) {
+    document.querySelectorAll('.pf-value').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.profile-edit-input').forEach(el => el.style.display = 'block');
+  }
+}
+
+function toggleProfileEdit() {
+  profileEditMode = !profileEditMode;
+  const btn = document.getElementById('edit-profile-btn');
+  if (profileEditMode) {
+    btn.textContent = '💾 Save Changes';
+    btn.onclick = saveProfile;
+    document.querySelectorAll('.pf-value').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.profile-edit-input').forEach(el => el.style.display = 'block');
+  } else {
+    saveProfile();
+  }
+}
+
+async function saveProfile() {
+  const updates = {};
+  ['first_name','last_name','nic_number','birthday','gender','district','city','address','work_phone','contact_number'].forEach(k => {
+    const inp = document.getElementById('pf-inp-' + k);
+    if (inp) updates[k] = inp.value || null;
+  });
+
+  const { error } = await sb.from('profiles').update(updates).eq('id', currentUser.id);
+  if (!error) {
+    profileEditMode = false;
+    document.getElementById('edit-profile-btn').textContent = '✏️ Edit Profile';
+    document.getElementById('edit-profile-btn').onclick = toggleProfileEdit;
+    await loadProfile();
+    showToast('Profile updated successfully!');
+  } else {
+    showToast('Failed to save: ' + error.message, 'error');
+  }
+}
+
+// ──────────────────────────────────────────
+// DASHBOARD
+// ──────────────────────────────────────────
+async function loadDashboard() {
+  const uid = currentUser.id;
+  
+  // Load stats in parallel
+  const [payments, recordings, notes, quizzes, live, orders, enr] = await Promise.all([
+    sb.from('payments').select('id', { count: 'exact' }).eq('student_id', uid),
+    sb.from('recording_views').select('id', { count: 'exact' }).eq('student_id', uid),
+    sb.from('note_downloads').select('id', { count: 'exact' }).eq('student_id', uid),
+    sb.from('quiz_attempts').select('id', { count: 'exact' }).eq('student_id', uid),
+    sb.from('live_class_joins').select('id', { count: 'exact' }).eq('student_id', uid),
+    sb.from('store_orders').select('id', { count: 'exact' }).eq('student_id', uid),
+    sb.from('enrollments').select('*, profiles!teacher_id(id,name,first_name,last_name), subjects(name), batches(name)').eq('student_id', uid).eq('is_active', true)
+  ]);
+
+  document.getElementById('stat-payments').textContent = payments.count || 0;
+  document.getElementById('stat-recordings').textContent = recordings.count || 0;
+  document.getElementById('stat-notes').textContent = notes.count || 0;
+  document.getElementById('stat-quizzes').textContent = quizzes.count || 0;
+  document.getElementById('stat-live').textContent = live.count || 0;
+  document.getElementById('stat-orders').textContent = orders.count || 0;
+
+  enrollments = enr.data || [];
+  renderEnrolledList();
+  await loadMyTeachers();
+}
+
+function renderEnrolledList() {
+  const cont = document.getElementById('enrolled-list');
+  if (!enrollments.length) {
+    cont.innerHTML = '<div class="empty-state"><div class="empty-icon">🎓</div><div class="empty-title">No enrollments yet</div><div class="empty-desc">Find a class and enroll to get started!</div></div>';
+    return;
+  }
+  cont.innerHTML = `<div class="table-wrap">
+    <table>
+      <thead><tr><th>Teacher</th><th>Subject</th><th>Batch</th><th>Actions</th></tr></thead>
+      <tbody>${enrollments.map(e => {
+        const t = e.profiles;
+        const tName = t ? (t.name || `${t.first_name||''} ${t.last_name||''}`.trim()) : '—';
+        return `<tr>
+          <td><strong>${tName}</strong></td>
+          <td>${e.subjects?.name || '—'}</td>
+          <td>${e.batches?.name || '—'}</td>
+          <td>
+            <button class="btn-sm" onclick="viewTeacher('${t?.id}')">View</button>
+            <button class="btn-sm" style="color:var(--danger);border-color:var(--danger)" onclick="reportTeacher('${t?.id}','${tName}')">Report</button>
+          </td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>
+  </div>`;
+}
+
+// ──────────────────────────────────────────
+// TEACHERS
+// ──────────────────────────────────────────
+async function loadMyTeachers() {
+  const grid = document.getElementById('my-teachers-grid');
+  if (!enrollments.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">👨‍🏫</div><div class="empty-title">No teachers yet</div><div class="empty-desc">Enroll in a class to see your teachers here.</div></div>';
+    return;
+  }
+  grid.innerHTML = enrollments.map(e => {
+    const t = e.profiles;
+    if (!t) return '';
+    const tName = t.name || `${t.first_name||''} ${t.last_name||''}`.trim();
+    const initial = tName[0]?.toUpperCase() || 'T';
+    return `
+    <div class="teacher-card" onclick="viewTeacher('${t.id}')">
+      <div class="tc-header">
+        <div class="tc-avatar">${initial}</div>
+        <div class="tc-name">${tName}</div>
+        <div class="tc-subject">${e.subjects?.name || ''} • ${e.batches?.name || ''}</div>
+      </div>
+      <div class="tc-tabs">
+        <div class="tc-tab" onclick="event.stopPropagation();loadTeacherRecordings('${t.id}')">📹 Rec</div>
+        <div class="tc-tab" onclick="event.stopPropagation();loadTeacherNotes('${t.id}')">📝 Notes</div>
+        <div class="tc-tab" onclick="event.stopPropagation();loadTeacherLive('${t.id}')">🔴 Live</div>
+        <div class="tc-tab" onclick="event.stopPropagation();reportTeacher('${t.id}','${tName}')">⚠️</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function loadAllTeachers() {
+  if (allTeachers.length) return renderAllTeachers();
+  const { data } = await sb.from('profiles').select('id,name,first_name,last_name,notes').eq('role','teacher').eq('is_active',true);
+  allTeachers = data || [];
+  renderAllTeachers();
+}
+
+function renderAllTeachers() {
+  const grid = document.getElementById('all-teachers-grid');
+  const search = document.getElementById('teacher-search')?.value?.toLowerCase() || '';
+  const gradeFilter = document.getElementById('teacher-grade-filter')?.value || '';
+  const filtered = allTeachers.filter(t => {
+    const name = (t.name || `${t.first_name||''} ${t.last_name||''}`.trim()).toLowerCase();
+    return name.includes(search);
+  });
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🔍</div><div class="empty-title">No teachers found</div></div>';
+    return;
+  }
+  grid.innerHTML = filtered.map(t => {
+    const tName = t.name || `${t.first_name||''} ${t.last_name||''}`.trim();
+    const isEnrolled = enrollments.some(e => e.profiles?.id === t.id);
+    return `
+    <div class="teacher-card">
+      <div class="tc-header">
+        <div class="tc-avatar">${tName[0]?.toUpperCase()||'T'}</div>
+        <div class="tc-name">${tName}</div>
+        <div class="tc-subject" style="margin-bottom:12px">${t.notes || 'Teacher'}</div>
+        ${isEnrolled 
+          ? '<span class="badge badge-green">✓ Enrolled</span>'
+          : `<button class="btn-primary-sm" onclick="enrollTeacher('${t.id}','${tName}')">Enroll Now</button>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterTeachers() { renderAllTeachers(); }
+
+async function enrollTeacher(teacherId, teacherName) {
+  const modal = openModal('Enroll in Class', `
+    <p style="color:var(--text2);margin-bottom:16px">Select the batch you want to enroll in for <strong>${teacherName}</strong>:</p>
+    <div class="form-group" style="margin-bottom:16px">
+      <label>Select Batch</label>
+      <select id="enroll-batch" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit">
+        <option value="">Loading batches...</option>
+      </select>
+    </div>
+    <button class="btn-primary-sm" style="width:100%;padding:12px" onclick="confirmEnroll('${teacherId}')">Confirm Enrollment</button>
+  `);
+
+  // Load teacher's batches
+  const { data: ts } = await sb.from('teacher_subjects').select('*, batches(*), subjects(*)').eq('teacher_id', teacherId).eq('is_active', true);
+  const sel = document.getElementById('enroll-batch');
+  if (!ts?.length) {
+    sel.innerHTML = '<option value="">No batches available</option>';
+  } else {
+    sel.innerHTML = '<option value="">Select batch...</option>' + ts.map(t => `<option value="${t.batch_id}|${t.subject_id}">${t.subjects?.name} — ${t.batches?.name}</option>`).join('');
+  }
+}
+
+async function confirmEnroll(teacherId) {
+  const sel = document.getElementById('enroll-batch');
+  if (!sel?.value) { showToast('Please select a batch', 'error'); return; }
+  const [batchId, subjectId] = sel.value.split('|');
+
+  const { error } = await sb.from('enrollments').insert({
+    student_id: currentUser.id,
+    teacher_id: teacherId,
+    batch_id: batchId,
+    subject_id: subjectId
+  });
+
+  if (error) {
+    if (error.code === '23505') showToast('Already enrolled in this batch!', 'warn');
+    else showToast('Enrollment failed: ' + error.message, 'error');
+  } else {
+    showToast('Enrolled successfully! 🎉');
+    closeModal();
+    await loadDashboard();
+  }
+}
+
+// ──────────────────────────────────────────
+// RECORDINGS
+// ──────────────────────────────────────────
+async function loadRecordings() {
+  const grid = document.getElementById('recordings-grid');
+  grid.innerHTML = '<div class="loading-spinner" style="grid-column:1/-1"><div class="spinner"></div> Loading...</div>';
+
+  const teacherFilter = document.getElementById('rec-teacher')?.value || '';
+  const yearFilter = document.getElementById('rec-year')?.value || '';
+  const monthFilter = document.getElementById('rec-month')?.value || '';
+  const teacherIds = enrollments.map(e => e.profiles?.id).filter(Boolean);
+
+  if (!teacherIds.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🎬</div><div class="empty-title">No recordings yet</div><div class="empty-desc">Enroll in a class first!</div></div>';
+    return;
+  }
+
+  let query = sb.from('recordings').select('*, profiles!teacher_id(name,first_name,last_name)').eq('is_active', true).in('teacher_id', teacherIds);
+  if (teacherFilter) query = query.eq('teacher_id', teacherFilter);
+  if (yearFilter) query = query.eq('year', parseInt(yearFilter));
+  if (monthFilter) query = query.eq('month', parseInt(monthFilter));
+  if (recTypeFilter) query = query.eq('record_type', recTypeFilter);
+
+  const { data } = await query.order('created_at', { ascending: false });
+
+  if (!data?.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🎬</div><div class="empty-title">No recordings found</div></div>';
+    return;
+  }
+
+  const typeColors = { theory: '#7C3AED', revision: '#06B6D4', paper: '#F59E0B', extra: '#10B981' };
+  grid.innerHTML = data.map(r => {
+    const tName = r.profiles ? (r.profiles.name || `${r.profiles.first_name||''} ${r.profiles.last_name||''}`.trim()) : '—';
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return `
+    <div class="recording-card">
+      <div class="rec-thumb">
+        ${r.thumbnail_url ? `<img src="${r.thumbnail_url}" alt="${r.title}" />` : '<div class="rec-thumb-placeholder">🎬</div>'}
+        <div class="rec-type-badge" style="background:${typeColors[r.record_type]||'#7C3AED'};color:white">${r.record_type||'video'}</div>
+        ${r.is_free ? '<div class="rec-free-badge">FREE</div>' : ''}
+      </div>
+      <div class="rec-body">
+        <div class="rec-title">${r.title}</div>
+        <div class="rec-desc">${r.description || ''}</div>
+        <div class="rec-meta">
+          <div class="rec-meta-item">⏱ ${r.duration_minutes ? r.duration_minutes + ' min' : '—'}</div>
+          <div class="rec-meta-item">👁 ${r.view_count || 0} views</div>
+          ${r.year && r.month ? `<div class="rec-meta-item">📅 ${months[r.month-1]} ${r.year}</div>` : ''}
+          <div class="rec-meta-item">👤 ${tName}</div>
+        </div>
+        ${r.is_free || r.fee === 0 
+          ? `<button class="btn-primary-sm" style="width:100%" onclick="watchRecording('${r.id}','${r.video_url}')">▶ Watch Now</button>`
+          : `<button class="btn-sm" style="width:100%" onclick="requestRecordingAccess('${r.id}')">🔓 Request Access</button>`
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setRecType(type, el) {
+  recTypeFilter = type;
+  document.querySelectorAll('#rec-type-pills .pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  loadRecordings();
+}
+
+async function watchRecording(id, url) {
+  // Log view
+  await sb.from('recording_views').upsert({ recording_id: id, student_id: currentUser.id });
+  await sb.from('recordings').update({ view_count: sb.raw('view_count + 1') }).eq('id', id);
+  if (url) window.open(url, '_blank');
+  else showToast('Video link not available yet.', 'warn');
+}
+
+async function requestRecordingAccess(recordingId) {
+  const { error } = await sb.from('recording_access_requests').upsert({
+    student_id: currentUser.id,
+    recording_id: recordingId,
+    status: 'pending'
+  });
+  if (error && error.code !== '23505') showToast('Failed to request: ' + error.message, 'error');
+  else showToast('Access request sent! Your teacher will review it shortly. ⏳');
+}
+
+// ──────────────────────────────────────────
+// LIVE CLASSES
+// ──────────────────────────────────────────
+async function loadLiveClasses() {
+  const cont = document.getElementById('live-classes-list');
+  const teacherIds = enrollments.map(e => e.profiles?.id).filter(Boolean);
+  if (!teacherIds.length) {
+    cont.innerHTML = '<div class="empty-state"><div class="empty-icon">🔴</div><div class="empty-title">No live classes</div></div>';
+    return;
+  }
+  const { data } = await sb.from('live_classes').select('*, profiles!teacher_id(name,first_name,last_name)').in('teacher_id', teacherIds).eq('is_active', true).order('scheduled_at', { ascending: true });
+
+  if (!data?.length) {
+    cont.innerHTML = '<div class="empty-state"><div class="empty-icon">🔴</div><div class="empty-title">No live classes scheduled</div></div>';
+    return;
+  }
+  cont.innerHTML = '<div class="recording-grid">' + data.map(l => {
+    const tName = l.profiles ? (l.profiles.name || `${l.profiles.first_name||''} ${l.profiles.last_name||''}`.trim()) : '—';
+    const scheduled = l.scheduled_at ? new Date(l.scheduled_at).toLocaleString() : '—';
+    const now = new Date();
+    const isLive = l.scheduled_at && Math.abs(new Date(l.scheduled_at) - now) < 3600000;
+    return `
+    <div class="recording-card">
+      <div class="rec-thumb" style="height:100px;background:${isLive ? 'linear-gradient(135deg,#EF4444,#B91C1C)' : 'var(--bg3)'}">
+        <div style="font-size:32px">${isLive ? '🔴' : '📹'}</div>
+        ${isLive ? '<div class="rec-type-badge" style="background:var(--danger);color:white">LIVE</div>' : ''}
+      </div>
+      <div class="rec-body">
+        <div class="rec-title">${l.title}</div>
+        <div class="rec-meta">
+          <div class="rec-meta-item">📅 ${scheduled}</div>
+          <div class="rec-meta-item">⏱ ${l.duration_minutes || '?'} min</div>
+          <div class="rec-meta-item">👤 ${tName}</div>
+        </div>
+        ${l.meeting_link 
+          ? `<button class="btn-primary-sm" style="width:100%;background:${isLive?'var(--danger)':'var(--brand)'}" onclick="joinLive('${l.id}','${l.meeting_link}')">
+              ${isLive ? '🔴 Join Now' : '🔗 Get Link'}</button>`
+          : '<div class="badge badge-yellow" style="width:100%;text-align:center;padding:8px">Link coming soon</div>'
+        }
+      </div>
+    </div>`;
+  }).join('') + '</div>';
+}
+
+async function joinLive(id, url) {
+  await sb.from('live_class_joins').upsert({ live_class_id: id, student_id: currentUser.id });
+  window.open(url, '_blank');
+}
+
+// ──────────────────────────────────────────
+// NOTES
+// ──────────────────────────────────────────
+async function loadNotes() {
+  const grid = document.getElementById('notes-grid');
+  const teacherIds = enrollments.map(e => e.profiles?.id).filter(Boolean);
+  if (!teacherIds.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📝</div><div class="empty-title">No notes yet</div></div>';
+    return;
+  }
+  const { data } = await sb.from('notes').select('*, profiles!teacher_id(name,first_name,last_name)').in('teacher_id', teacherIds).eq('is_active', true).order('created_at', { ascending: false });
+
+  if (!data?.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📝</div><div class="empty-title">No notes available yet</div></div>';
+    return;
+  }
+  grid.innerHTML = data.map(n => {
+    const tName = n.profiles ? (n.profiles.name || `${n.profiles.first_name||''} ${n.profiles.last_name||''}`.trim()) : '—';
+    return `
+    <div class="recording-card">
+      <div class="rec-thumb" style="height:100px">
+        <div class="rec-thumb-placeholder">📄</div>
+        ${n.is_free ? '<div class="rec-free-badge">FREE</div>' : `<div class="rec-type-badge" style="background:var(--accent);color:white">LKR ${n.fee||0}</div>`}
+      </div>
+      <div class="rec-body">
+        <div class="rec-title">${n.title}</div>
+        <div class="rec-desc">${n.description || ''}</div>
+        <div class="rec-meta">
+          <div class="rec-meta-item">⬇ ${n.download_count || 0} downloads</div>
+          <div class="rec-meta-item">👤 ${tName}</div>
+        </div>
+        ${n.is_free || !n.fee
+          ? `<button class="btn-primary-sm" style="width:100%" onclick="downloadNote('${n.id}','${n.file_url}','${n.title}')">⬇ Download</button>`
+          : `<button class="btn-sm" style="width:100%">🔒 Paid Only</button>`
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function downloadNote(id, url, title) {
+  await sb.from('note_downloads').insert({ note_id: id, student_id: currentUser.id });
+  await sb.from('notes').update({ download_count: sb.raw('download_count + 1') }).eq('id', id);
+  if (url) {
+    const a = document.createElement('a');
+    a.href = url; a.download = title; a.target = '_blank';
+    a.click();
+  } else showToast('File link not available yet.', 'warn');
+}
+
+// ──────────────────────────────────────────
+// QUIZZES
+// ──────────────────────────────────────────
+async function loadQuizzes() {
+  const cont = document.getElementById('quizzes-list');
+  const teacherIds = enrollments.map(e => e.profiles?.id).filter(Boolean);
+  if (!teacherIds.length) {
+    cont.innerHTML = '<div class="empty-state"><div class="empty-icon">❓</div><div class="empty-title">No quizzes yet</div></div>';
+    return;
+  }
+  const { data } = await sb.from('quizzes').select('*, profiles!teacher_id(name,first_name,last_name)').in('teacher_id', teacherIds).eq('is_active', true).order('created_at', { ascending: false });
+  const { data: attempts } = await sb.from('quiz_attempts').select('quiz_id, score, passed').eq('student_id', currentUser.id);
+  const attemptMap = {};
+  (attempts||[]).forEach(a => attemptMap[a.quiz_id] = a);
+
+  if (!data?.length) {
+    cont.innerHTML = '<div class="empty-state"><div class="empty-icon">❓</div><div class="empty-title">No quizzes available</div></div>';
+    return;
+  }
+  cont.innerHTML = '<div class="recording-grid">' + data.map(q => {
+    const tName = q.profiles ? (q.profiles.name || `${q.profiles.first_name||''} ${q.profiles.last_name||''}`.trim()) : '—';
+    const attempt = attemptMap[q.id];
+    return `
+    <div class="recording-card">
+      <div style="padding:20px;text-align:center">
+        <div style="font-size:36px;margin-bottom:8px">❓</div>
+        <div class="rec-title">${q.title}</div>
+        <div class="rec-desc">${q.description || ''}</div>
+        <div class="rec-meta" style="justify-content:center">
+          <div class="rec-meta-item">⏱ ${q.duration_minutes || '?'} min</div>
+          <div class="rec-meta-item">📊 ${q.total_marks || '?'} marks</div>
+        </div>
+        <div class="rec-meta" style="justify-content:center"><div class="rec-meta-item">👤 ${tName}</div></div>
+        ${attempt 
+          ? `<div class="badge ${attempt.passed?'badge-green':'badge-red'}" style="margin:8px auto;display:block;width:fit-content">
+              Score: ${attempt.score}/${attempt.total_marks} ${attempt.passed?'✓ Passed':'✗ Failed'}
+            </div>`
+          : `<button class="btn-primary-sm" style="width:100%;margin-top:8px" onclick="startQuiz('${q.id}')">Start Quiz →</button>`
+        }
+      </div>
+    </div>`;
+  }).join('') + '</div>';
+}
+
+async function startQuiz(quizId) {
+  const { data: quiz } = await sb.from('quizzes').select('*').eq('id', quizId).single();
+  const { data: questions } = await sb.from('quiz_questions').select('*').eq('quiz_id', quizId).order('sort_order');
+  if (!questions?.length) { showToast('No questions in this quiz yet.', 'warn'); return; }
+
+  let currentQ = 0;
+  const answers = {};
+
+  function renderQuestion() {
+    const q = questions[currentQ];
+    document.getElementById('modal-body').innerHTML = `
+      <div style="margin-bottom:16px">
+        <div style="font-size:12px;color:var(--text3)">Question ${currentQ+1} of ${questions.length}</div>
+        <div style="height:3px;background:var(--border);border-radius:3px;margin-top:6px">
+          <div style="height:100%;background:var(--brand);border-radius:3px;width:${((currentQ+1)/questions.length*100)}%;transition:width 0.3s"></div>
+        </div>
+      </div>
+      <div style="font-size:16px;font-weight:600;margin-bottom:20px">${q.question}</div>
+      ${['a','b','c','d'].map(opt => q['option_'+opt] ? `
+      <div class="payment-method-card ${answers[q.id]===opt?'selected':''}" onclick="selectAnswer('${q.id}','${opt}',this)">
+        <div class="pm-header">
+          <div style="width:28px;height:28px;border-radius:50%;background:${answers[q.id]===opt?'var(--brand)':'var(--bg3)'};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:${answers[q.id]===opt?'white':'var(--text2)'}">${opt.toUpperCase()}</div>
+          <div class="pm-name">${q['option_'+opt]}</div>
+        </div>
+      </div>` : '').join('')}
+      <div style="display:flex;gap:10px;margin-top:16px">
+        ${currentQ > 0 ? `<button class="btn-sm" onclick="prevQuestion()">← Back</button>` : ''}
+        <button class="btn-primary-sm" style="flex:1" onclick="nextQuestion()">
+          ${currentQ < questions.length - 1 ? 'Next →' : '✓ Submit Quiz'}
+        </button>
+      </div>`;
+  }
+
+  window.selectAnswer = (qId, opt, el) => {
+    answers[qId] = opt;
+    document.querySelectorAll('#modal-body .payment-method-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+  };
+  window.nextQuestion = async () => {
+    if (currentQ < questions.length - 1) {
+      currentQ++; renderQuestion();
+    } else {
+      // Submit
+      let score = 0;
+      questions.forEach(q => { if (answers[q.id] === q.correct_option) score += (q.marks || 1); });
+      const passed = score >= (quiz.pass_marks || quiz.total_marks * 0.5);
+      await sb.from('quiz_attempts').insert({
+        quiz_id: quizId, student_id: currentUser.id,
+        answers, score, total_marks: quiz.total_marks || questions.length,
+        passed, completed_at: new Date().toISOString()
+      });
+      document.getElementById('modal-body').innerHTML = `
+        <div style="text-align:center;padding:20px">
+          <div style="font-size:60px">${passed ? '🎉' : '😔'}</div>
+          <h3 style="font-size:22px;margin:12px 0">${passed ? 'Well Done!' : 'Keep Trying!'}</h3>
+          <div class="badge ${passed?'badge-green':'badge-red'}" style="font-size:18px;padding:10px 24px;margin:12px auto;display:block;width:fit-content">
+            ${score} / ${quiz.total_marks || questions.length}
+          </div>
+          <button class="btn-primary-sm" style="margin-top:16px" onclick="closeModal()">Close</button>
+        </div>`;
+      await loadQuizzes();
+    }
+  };
+  window.prevQuestion = () => { if (currentQ > 0) { currentQ--; renderQuestion(); } };
+
+  openModal(`Quiz: ${quiz.title}`, '');
+  renderQuestion();
+}
+
+// ──────────────────────────────────────────
+// TIMETABLE
+// ──────────────────────────────────────────
+async function loadTimetable() {
+  const cont = document.getElementById('timetable-content');
+  const teacherIds = enrollments.map(e => e.profiles?.id).filter(Boolean);
+  if (!teacherIds.length) {
+    cont.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-title">No timetable yet</div></div>';
+    return;
+  }
+  const { data } = await sb.from('timetable').select('*, profiles!teacher_id(name,first_name,last_name)').in('teacher_id', teacherIds).eq('is_active', true);
+  
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  if (!data?.length) {
+    cont.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-title">No timetable available</div></div>';
+    return;
+  }
+
+  const byDay = {};
+  data.forEach(t => {
+    const day = days[t.day_of_week] || 'Unknown';
+    if (!byDay[day]) byDay[day] = [];
+    byDay[day].push(t);
+  });
+
+  cont.innerHTML = days.filter(d => byDay[d]).map(day => `
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">📅 ${day}</div>
+      ${byDay[day].map(t => {
+        const tName = t.profiles ? (t.profiles.name || `${t.profiles.first_name||''} ${t.profiles.last_name||''}`.trim()) : '—';
+        return `
+        <div style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--bg3);border-radius:10px;margin-bottom:8px">
+          <div style="font-size:13px;font-weight:600;color:var(--brand-light);min-width:80px">${t.start_time || '—'} – ${t.end_time || '—'}</div>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:600">${t.title}</div>
+            <div style="font-size:12px;color:var(--text3)">${tName} ${t.location ? '• ' + t.location : ''}</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`).join('');
+}
+
+// ──────────────────────────────────────────
+// PAYMENTS
+// ──────────────────────────────────────────
+async function loadPayments() {
+  const tbody = document.getElementById('payments-table');
+  const { data } = await sb.from('payments').select('*, profiles!teacher_id(name,first_name,last_name), subjects(name), batches(name)').eq('student_id', currentUser.id).order('created_at', { ascending: false });
+
+  if (!data?.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:24px">No payments yet</td></tr>';
+    return;
+  }
+  const statusColors = { pending: 'badge-yellow', approved: 'badge-green', rejected: 'badge-red' };
+  tbody.innerHTML = data.map(p => {
+    const tName = p.profiles ? (p.profiles.name || `${p.profiles.first_name||''} ${p.profiles.last_name||''}`.trim()) : '—';
+    return `<tr>
+      <td><code style="font-size:12px;color:var(--brand-light)">${p.transaction_id}</code></td>
+      <td><strong>LKR ${p.amount?.toLocaleString()}</strong></td>
+      <td>${tName}<br/><small style="color:var(--text3)">${p.subjects?.name || ''} • ${p.batches?.name || ''}</small></td>
+      <td>${p.month_year || '—'}</td>
+      <td>${p.payment_method?.replace('_',' ') || '—'}</td>
+      <td><span class="badge ${statusColors[p.payment_status] || 'badge-blue'}">${p.payment_status}</span></td>
+      <td style="font-size:12px">${new Date(p.created_at).toLocaleDateString()}</td>
+    </tr>`;
+  }).join('');
+}
+
+function openPaymentModal() {
+  openModal('Make Payment', `
+    <div class="form-group" style="margin-bottom:14px">
+      <label>Select Teacher / Class</label>
+      <select id="pay-enrollment" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit">
+        <option value="">Select class...</option>
+        ${enrollments.map(e => {
+          const t = e.profiles;
+          const tName = t ? (t.name || `${t.first_name||''} ${t.last_name||''}`.trim()) : '—';
+          return `<option value="${t?.id}|${e.subject_id}|${e.batch_id}">${tName} — ${e.subjects?.name} (${e.batches?.name})</option>`;
+        }).join('')}
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Amount (LKR)</label>
+        <input type="number" id="pay-amount" placeholder="e.g. 2000" />
+      </div>
+      <div class="form-group">
+        <label>Month / Year</label>
+        <input type="month" id="pay-month" />
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:16px">
+      <label>Payment Method</label>
+      <select id="pay-method" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit">
+        <option value="bank_transfer">Bank Transfer</option>
+      </select>
+    </div>
+    <button class="btn-primary-sm" style="width:100%;padding:12px" onclick="submitPayment()">Submit Payment</button>
+  `);
+}
+
+async function submitPayment() {
+  const enrollment = document.getElementById('pay-enrollment')?.value;
+  const amount = document.getElementById('pay-amount')?.value;
+  const month = document.getElementById('pay-month')?.value;
+  const method = document.getElementById('pay-method')?.value;
+
+  if (!enrollment || !amount || !month) { showToast('Please fill all fields', 'error'); return; }
+  const [teacherId, subjectId, batchId] = enrollment.split('|');
+
+  const { error } = await sb.from('payments').insert({
+    student_id: currentUser.id,
+    teacher_id: teacherId,
+    subject_id: subjectId,
+    batch_id: batchId,
+    amount: parseFloat(amount),
+    month_year: month,
+    payment_method: method,
+    payment_status: 'pending'
+  });
+
+  if (error) showToast('Payment failed: ' + error.message, 'error');
+  else {
+    showToast('Payment submitted! Awaiting teacher confirmation. 💳');
+    closeModal();
+    loadPayments();
+  }
+}
+
+// ──────────────────────────────────────────
+// STORE
+// ──────────────────────────────────────────
+async function loadStore() {
+  const grid = document.getElementById('store-grid');
+  const teacherIds = enrollments.map(e => e.profiles?.id).filter(Boolean);
+  if (!teacherIds.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🛒</div><div class="empty-title">Enroll in a class to access the store</div></div>';
+    return;
+  }
+  const { data } = await sb.from('store_products').select('*, profiles!teacher_id(name,first_name,last_name)').in('teacher_id', teacherIds).eq('is_active', true);
+
+  if (!data?.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🛒</div><div class="empty-title">No products available</div></div>';
+    return;
+  }
+  grid.innerHTML = data.map(p => {
+    const inCart = cart.find(c => c.id === p.id);
+    return `
+    <div class="store-card">
+      <div class="store-thumb">${p.thumbnail_url ? `<img src="${p.thumbnail_url}" style="width:100%;height:100%;object-fit:cover" />` : '📦'}</div>
+      <div class="store-body">
+        <div style="font-size:14px;font-weight:600;margin-bottom:4px">${p.title}</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:8px">${p.description || ''}</div>
+        <div class="store-price">LKR ${p.price?.toLocaleString()}</div>
+        <button class="btn-primary-sm" style="width:100%" onclick="addToCart(${JSON.stringify(p).replace(/"/g,'&quot;')})">
+          ${inCart ? '✓ In Cart' : '+ Add to Cart'}
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+  updateCartBadge();
+}
+
+function addToCart(product) {
+  const exists = cart.find(c => c.id === product.id);
+  if (exists) exists.qty = (exists.qty || 1) + 1;
+  else cart.push({ ...product, qty: 1 });
+  updateCartBadge();
+  showToast(`${product.title} added to cart! 🛒`);
+  loadStore(); // refresh to show checked state
+}
+
+function updateCartBadge() {
+  const total = cart.reduce((s, i) => s + i.qty, 0);
+  document.getElementById('cart-count').textContent = total;
+}
+
+function openCart() {
+  if (!cart.length) { showToast('Your cart is empty!', 'warn'); return; }
+  const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  openModal('🛒 Shopping Cart', `
+    <div id="cart-items">
+      ${cart.map(item => `
+      <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg3);border-radius:10px;margin-bottom:8px">
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:600">${item.title}</div>
+          <div style="font-size:12px;color:var(--text3)">LKR ${item.price?.toLocaleString()} each</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button class="btn-sm" onclick="cartQty('${item.id}',-1)" style="width:28px;height:28px;padding:0;text-align:center">−</button>
+          <span style="font-weight:600;min-width:20px;text-align:center">${item.qty}</span>
+          <button class="btn-sm" onclick="cartQty('${item.id}',1)" style="width:28px;height:28px;padding:0;text-align:center">+</button>
+        </div>
+        <div style="font-weight:700;min-width:70px;text-align:right">LKR ${(item.price*item.qty).toLocaleString()}</div>
+      </div>`).join('')}
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:8px;display:flex;justify-content:space-between;align-items:center">
+      <div><strong>Total</strong><br/><small style="color:var(--text3)">${cart.length} item(s)</small></div>
+      <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--brand-light)">LKR ${total.toLocaleString()}</div>
+    </div>
+    <button class="btn-primary-sm" style="width:100%;padding:14px;margin-top:16px" onclick="checkout()">Proceed to Checkout →</button>
+  `);
+  window.cartQty = (id, delta) => {
+    const item = cart.find(c => c.id === id);
+    if (item) { item.qty = Math.max(0, item.qty + delta); if (!item.qty) cart = cart.filter(c => c.id !== id); }
+    updateCartBadge();
+    openCart(); // refresh
+  };
+}
+
+async function checkout() {
+  const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const { data: methods } = await sb.from('payment_methods').select('*').eq('is_available', true);
+
+  openModal('Checkout', `
+    <div style="background:var(--bg3);border-radius:12px;padding:16px;margin-bottom:16px">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:8px">ORDER SUMMARY</div>
+      ${cart.map(i => `<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>${i.title} × ${i.qty}</span><span>LKR ${(i.price*i.qty).toLocaleString()}</span></div>`).join('')}
+      <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;font-weight:700">
+        <span>Total</span><span style="color:var(--brand-light)">LKR ${total.toLocaleString()}</span>
+      </div>
+    </div>
+    <div style="font-size:13px;font-weight:600;margin-bottom:10px">Payment Method</div>
+    ${(methods?.length ? methods : [{type:'bank_transfer',name:'Bank Transfer',bank_name:'—',account_number:'—',is_available:true}]).map(m => `
+    <div class="payment-method-card" onclick="selectCheckoutMethod('${m.type}',this,'${m.bank_name||''}','${m.account_number||''}','${m.account_name||''}','${m.branch||''}')">
+      <div class="pm-header">
+        <div class="pm-icon">${m.type==='card'?'💳':'🏦'}</div>
+        <div>
+          <div class="pm-name">${m.name}</div>
+          <div class="pm-desc">${m.is_available ? '' : '⚠️ Currently unavailable'}</div>
+        </div>
+      </div>
+      <div id="bank-info-${m.type}" style="display:none;font-size:12px;color:var(--text2);margin-top:8px;padding:8px;background:var(--bg4);border-radius:8px">
+        ${m.bank_name ? `Bank: <strong>${m.bank_name}</strong><br/>Account: <strong>${m.account_number}</strong><br/>Name: <strong>${m.account_name}</strong><br/>Branch: <strong>${m.branch}</strong>` : ''}
+      </div>
+    </div>`).join('')}
+    <div style="display:flex;align-items:center;gap:10px;margin:16px 0">
+      <input type="checkbox" id="agree-rules" style="width:16px;height:16px;accent-color:var(--brand)">
+      <label for="agree-rules" style="font-size:13px;color:var(--text2)">I agree to the <a href="rules.html" target="_blank" style="color:var(--brand-light)">Terms & Rules</a></label>
+    </div>
+    <button class="btn-primary-sm" style="width:100%;padding:14px" onclick="placeOrder()">Place Order</button>
+  `);
+
+  window.selectedPayMethod = null;
+  window.selectCheckoutMethod = (type, el, bank, acc, name, branch) => {
+    window.selectedPayMethod = type;
+    document.querySelectorAll('#modal-body .payment-method-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    document.querySelectorAll('[id^="bank-info-"]').forEach(d => d.style.display = 'none');
+    const info = document.getElementById('bank-info-' + type);
+    if (info) info.style.display = 'block';
+  };
+  window.placeOrder = async () => {
+    if (!window.selectedPayMethod) { showToast('Please select a payment method', 'error'); return; }
+    if (!document.getElementById('agree-rules')?.checked) { showToast('Please agree to terms', 'error'); return; }
+    
+    const teacherId = cart[0]?.teacher_id;
+    const { error } = await sb.from('store_orders').insert({
+      student_id: currentUser.id,
+      teacher_id: teacherId,
+      items: cart,
+      total_amount: total,
+      payment_method: window.selectedPayMethod,
+      payment_status: 'pending'
+    });
+
+    if (error) showToast('Order failed: ' + error.message, 'error');
+    else {
+      cart = [];
+      updateCartBadge();
+      showToast('Order placed! 🎉 Pending confirmation.');
+      closeModal();
+    }
+  };
+}
+
+// ──────────────────────────────────────────
+// SUPPORT
+// ──────────────────────────────────────────
+async function loadSupport() {
+  // Hotlines
+  const { data: hotlines } = await sb.from('hotlines').select('*').eq('is_active', true).order('sort_order');
+  const hList = document.getElementById('hotlines-list');
+  hList.innerHTML = hotlines?.length 
+    ? hotlines.map(h => `
+      <div style="padding:12px;background:var(--bg3);border-radius:10px;margin-bottom:8px">
+        <div style="font-size:13px;font-weight:600">${h.name}</div>
+        ${h.phone ? `<div style="font-size:13px;color:var(--brand-light)">📞 ${h.phone}</div>` : ''}
+        ${h.email ? `<div style="font-size:13px;color:var(--accent2)">✉️ ${h.email}</div>` : ''}
+        ${h.description ? `<div style="font-size:12px;color:var(--text3)">${h.description}</div>` : ''}
+      </div>`).join('')
+    : '<p style="color:var(--text3);font-size:13px">No contact info available</p>';
+
+  // Tickets
+  const { data: tickets } = await sb.from('support_tickets').select('*').eq('created_by', currentUser.id).order('created_at', { ascending: false });
+  const tList = document.getElementById('tickets-list');
+  tList.innerHTML = tickets?.length
+    ? tickets.map(t => `
+      <div class="ticket-card">
+        <div class="ticket-meta">
+          <span class="badge badge-${t.status==='open'?'yellow':t.status==='closed'?'green':'blue'}">${t.status}</span>
+          <span class="badge badge-${t.priority==='urgent'?'red':t.priority==='high'?'yellow':'blue'}">${t.priority}</span>
+          <code style="font-size:11px;color:var(--text3)">${t.ticket_number}</code>
+        </div>
+        <div class="ticket-subject">${t.subject}</div>
+        <div class="ticket-msg">${t.message.substring(0,100)}${t.message.length>100?'...':''}</div>
+      </div>`).join('')
+    : '<p style="color:var(--text3);font-size:13px">No tickets yet</p>';
+}
+
+function openTicketModal() {
+  openModal('New Support Ticket', `
+    <div class="form-group" style="margin-bottom:14px">
+      <label>Subject</label>
+      <input type="text" id="ticket-subject" placeholder="Brief description of your issue" />
+    </div>
+    <div class="form-group" style="margin-bottom:14px">
+      <label>Priority</label>
+      <select id="ticket-priority" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit">
+        <option value="low">Low</option>
+        <option value="medium" selected>Medium</option>
+        <option value="high">High</option>
+        <option value="urgent">Urgent</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin-bottom:16px">
+      <label>Message</label>
+      <textarea id="ticket-msg" rows="4" placeholder="Describe your issue in detail..." style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;resize:vertical"></textarea>
+    </div>
+    <button class="btn-primary-sm" style="width:100%;padding:12px" onclick="submitTicket()">Submit Ticket</button>
+  `);
+}
+
+async function submitTicket() {
+  const subject = document.getElementById('ticket-subject')?.value?.trim();
+  const message = document.getElementById('ticket-msg')?.value?.trim();
+  const priority = document.getElementById('ticket-priority')?.value;
+  if (!subject || !message) { showToast('Please fill all fields', 'error'); return; }
+
+  const { error } = await sb.from('support_tickets').insert({
+    created_by: currentUser.id, subject, message, priority, status: 'open'
+  });
+  if (error) showToast('Failed: ' + error.message, 'error');
+  else {
+    showToast('Ticket submitted! We\'ll respond soon. 🎫');
+    closeModal();
+    loadSupport();
+  }
+}
+
+// ──────────────────────────────────────────
+// REPORT TEACHER
+// ──────────────────────────────────────────
+function reportTeacher(teacherId, teacherName) {
+  openModal(`Report: ${teacherName}`, `
+    <p style="color:var(--text2);font-size:13px;margin-bottom:16px">Report a concern about this teacher to Nova X Edu admin.</p>
+    <div class="form-group" style="margin-bottom:14px">
+      <label>Reason</label>
+      <input type="text" id="report-reason" placeholder="e.g. Late payments, inappropriate content..." />
+    </div>
+    <div class="form-group" style="margin-bottom:16px">
+      <label>Description</label>
+      <textarea id="report-desc" rows="3" placeholder="Provide details..." style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;resize:vertical"></textarea>
+    </div>
+    <button class="btn-primary-sm" style="width:100%;padding:12px;background:var(--danger)" onclick="submitReport('${teacherId}')">Submit Report</button>
+  `);
+}
+
+async function submitReport(teacherId) {
+  const reason = document.getElementById('report-reason')?.value?.trim();
+  const description = document.getElementById('report-desc')?.value?.trim();
+  if (!reason) { showToast('Please provide a reason', 'error'); return; }
+
+  const { error } = await sb.from('teacher_reports').insert({
+    reporter_id: currentUser.id, teacher_id: teacherId, reason, description
+  });
+  if (error) showToast('Failed: ' + error.message, 'error');
+  else {
+    showToast('Report submitted. Our team will review it. 🔍');
+    closeModal();
+  }
+}
+
+// ──────────────────────────────────────────
+// ACTIVITY LOG
+// ──────────────────────────────────────────
+async function loadActivity() {
+  const { data } = await sb.from('activity_logs').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(50);
+  const tbody = document.getElementById('activity-table');
+  if (!data?.length) {
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text3);padding:24px">No activity recorded yet</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(a => `
+    <tr>
+      <td>${a.action}</td>
+      <td style="font-size:12px;color:var(--text3)">${a.entity_type ? `${a.entity_type}` : '—'}</td>
+      <td style="font-size:12px">${new Date(a.created_at).toLocaleString()}</td>
+    </tr>`).join('');
+}
+
+async function logActivity(action, entityType = null, entityId = null, details = null) {
+  try {
+    await sb.from('activity_logs').insert({
+      user_id: currentUser.id, action, entity_type: entityType,
+      entity_id: entityId, details
+    });
+  } catch(e) {}
+}
+
+// ──────────────────────────────────────────
+// NOTIFICATIONS
+// ──────────────────────────────────────────
+async function loadNotifications() {
+  const { data } = await sb.from('notifications').select('*').eq('recipient_id', currentUser.id).order('created_at', { ascending: false }).limit(20);
+  const unread = (data||[]).filter(n => !n.is_read).length;
+  
+  const badge = document.getElementById('notif-count');
+  if (unread > 0) { badge.style.display = 'flex'; badge.textContent = unread; }
+  
+  const list = document.getElementById('notif-list');
+  if (!data?.length) {
+    list.innerHTML = '<div class="loading-spinner">No notifications</div>';
+    return;
+  }
+  list.innerHTML = data.map(n => `
+    <div class="notif-item ${n.is_read?'':'unread'}" onclick="markRead('${n.id}')">
+      <div class="notif-item-title">${n.title}</div>
+      ${n.message ? `<div class="notif-item-msg">${n.message}</div>` : ''}
+      <div class="notif-item-time">${new Date(n.created_at).toLocaleString()}</div>
+    </div>`).join('');
+}
+
+async function markRead(id) {
+  await sb.from('notifications').update({ is_read: true }).eq('id', id);
+  loadNotifications();
+}
+
+async function markAllRead() {
+  await sb.from('notifications').update({ is_read: true }).eq('recipient_id', currentUser.id);
+  loadNotifications();
+}
+
+async function loadGradesFilter() {
+  const { data } = await sb.from('grades').select('*').eq('is_active', true).order('sort_order');
+  const sel = document.getElementById('teacher-grade-filter');
+  if (sel && data) {
+    sel.innerHTML = '<option value="">All Grades</option>' + data.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+  }
+  // Populate recording teacher filter
+  const recSel = document.getElementById('rec-teacher');
+  if (recSel && enrollments.length) {
+    const years = new Set();
+    const curr = new Date().getFullYear();
+    for (let y = curr - 2; y <= curr + 1; y++) years.add(y);
+    document.getElementById('rec-year').innerHTML = '<option value="">All Years</option>' + [...years].sort((a,b)=>b-a).map(y => `<option value="${y}">${y}</option>`).join('');
+    
+    recSel.innerHTML = '<option value="">All Teachers</option>' + enrollments.map(e => {
+      const t = e.profiles;
+      const tName = t ? (t.name || `${t.first_name||''} ${t.last_name||''}`.trim()) : '—';
+      return `<option value="${t?.id}">${tName}</option>`;
+    }).join('');
+  }
+}
+
+// ──────────────────────────────────────────
+// UI HELPERS
+// ──────────────────────────────────────────
+const tabLoaders = {
+  teachers: loadMyTeachers,
+  enroll: loadAllTeachers,
+  recordings: loadRecordings,
+  live: loadLiveClasses,
+  notes: loadNotes,
+  quizzes: loadQuizzes,
+  timetable: loadTimetable,
+  payments: loadPayments,
+  store: loadStore,
+  support: loadSupport,
+  activity: loadActivity,
+};
+
+function showTab(name, el) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name)?.classList.add('active');
+  
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el?.classList.add('active');
+
+  const titles = {
+    dashboard:'Dashboard', teachers:'My Teachers', enroll:'Find Classes',
+    recordings:'Recordings', live:'Live Classes', notes:'Notes', quizzes:'Quizzes',
+    timetable:'Timetable', payments:'Payments', store:'Store', profile:'Profile',
+    support:'Support', activity:'Activity Log'
+  };
+  document.getElementById('topbar-title').textContent = titles[name] || name;
+  
+  if (tabLoaders[name]) tabLoaders[name]();
+  
+  // Mobile: close sidebar
+  if (window.innerWidth <= 768) closeSidebar();
+}
+
+let sidebarOpen = false;
+function toggleSidebar() {
+  const sb2 = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  if (window.innerWidth <= 768) {
+    sidebarOpen = !sidebarOpen;
+    sb2.classList.toggle('mobile-open', sidebarOpen);
+    overlay.style.display = sidebarOpen ? 'block' : 'none';
+  } else {
+    sb2.classList.toggle('collapsed');
+  }
+}
+function closeSidebar() {
+  sidebarOpen = false;
+  document.getElementById('sidebar').classList.remove('mobile-open');
+  document.getElementById('sidebar-overlay').style.display = 'none';
+}
+
+function toggleNotifPanel() {
+  document.getElementById('notif-panel').classList.toggle('open');
+}
+
+// THEME
+let theme = localStorage.getItem('nxe-theme') || 'dark';
+function applyTheme(t) {
+  theme = t;
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('theme-btn').textContent = t === 'dark' ? '☀️' : '🌙';
+}
+function toggleTheme() {
+  applyTheme(theme === 'dark' ? 'light' : 'dark');
+  localStorage.setItem('nxe-theme', theme);
+}
+
+// MODAL
+function openModal(title, body) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = body;
+  document.getElementById('modal-backdrop').style.display = 'flex';
+  return document.getElementById('modal-body');
+}
+function closeModal() {
+  document.getElementById('modal-backdrop').style.display = 'none';
+}
+document.getElementById('modal-backdrop').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('modal-backdrop')) closeModal();
+});
+
+// TOAST
+function showToast(msg, type = 'success', duration = 3500) {
+  const icons = { success:'✅', error:'❌', warn:'⚠️', info:'ℹ️' };
+  const t = document.createElement('div');
+  t.style.cssText = `position:fixed;bottom:24px;right:24px;z-index:9999;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:10px;max-width:350px;box-shadow:var(--shadow);font-size:14px;animation:toastIn 0.4s ease`;
+  t.innerHTML = `<span style="font-size:18px">${icons[type]||'ℹ️'}</span><span>${msg}</span>`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), duration);
+}
+
+const style = document.createElement('style');
+style.textContent = '@keyframes toastIn{from{opacity:0;transform:translateX(50px)}to{opacity:1;transform:translateX(0)}}';
+document.head.appendChild(style);
+</script>
+</body>
+</html>
