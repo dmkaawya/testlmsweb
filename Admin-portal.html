@@ -1163,7 +1163,7 @@ async function init() {
   currentUser = session.user;
 
   const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
-  if (!profile || !['admin', 'staff'].includes(profile.role)) {
+  if (!profile || !['admin', 'super_admin', 'staff'].includes(profile.role)) {
     toast('Access denied. Admins only.', 'danger');
     await sb.auth.signOut();
     setTimeout(() => window.location.href = 'index.html', 1500);
