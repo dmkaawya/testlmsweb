@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms & Rules — Nova X Edu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <style>
+    :root { --brand: #7C3AED; --brand-light: #A78BFA; --brand-glow: rgba(124,58,237,0.25); }
+    [data-theme="dark"] {
+      --bg: #09090F; --bg2: #0F0F1A; --bg3: #16162A;
+      --border: rgba(255,255,255,0.08); --text: #F1F0FF; --text2: #A9A7C9; --text3: #6B6B8A;
+    }
+    [data-theme="light"] {
+      --bg: #F4F3FF; --bg2: #FFFFFF; --bg3: #EDE9FE;
+      --border: rgba(0,0,0,0.08); --text: #1A1133; --text2: #4C3D8A; --text3: #7C6FAF;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+    h1,h2,h3 { font-family: 'Syne', sans-serif; }
+
+    header {
+      background: var(--bg2); border-bottom: 1px solid var(--border);
+      padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
+    .logo-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--brand); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; color: white; box-shadow: 0 0 14px var(--brand-glow); }
+    .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px; }
+    .logo-text span { color: var(--brand-light); }
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; font-family: inherit; transition: all 0.2s; text-decoration: none; }
+    .btn-ghost { background: rgba(255,255,255,0.05); color: var(--text2); border: 1px solid var(--border); }
+    .btn-ghost:hover { color: var(--text); background: rgba(255,255,255,0.1); }
+    .btn-primary { background: var(--brand); color: white; box-shadow: 0 4px 14px var(--brand-glow); }
+    .btn-primary:hover { filter: brightness(1.1); }
+
+    .hero {
+      text-align: center; padding: 60px 24px 40px;
+      background: linear-gradient(180deg, var(--bg3) 0%, var(--bg) 100%);
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(124,58,237,0.15); color: var(--brand-light); border: 1px solid rgba(124,58,237,0.3); border-radius: 20px; padding: 4px 14px; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px; }
+    .hero h1 { font-size: clamp(28px,5vw,48px); font-weight: 800; margin-bottom: 10px; }
+    .hero p { color: var(--text2); font-size: 15px; max-width: 560px; margin: 0 auto; }
+    .last-updated { margin-top: 12px; font-size: 12px; color: var(--text3); }
+
+    .container { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+
+    .toc { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 20px 24px; margin-bottom: 40px; }
+    .toc h3 { font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--text2); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin: 6px 0; }
+    .toc a { color: var(--brand-light); font-size: 14px; text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+
+    .section { margin-bottom: 44px; scroll-margin-top: 80px; }
+    .section-num { font-size: 12px; font-weight: 700; color: var(--brand-light); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .section h2 { font-size: 22px; font-weight: 700; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .section p { color: var(--text2); font-size: 15px; margin-bottom: 12px; }
+    .section ul, .section ol { padding-left: 20px; margin-bottom: 12px; }
+    .section li { color: var(--text2); font-size: 15px; margin: 8px 0; }
+    .section li b { color: var(--text); }
+
+    .highlight { background: rgba(124,58,237,0.1); border-left: 3px solid var(--brand); border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 16px 0; }
+    .highlight p { margin: 0; }
+    .warn-box { background: rgba(249,115,22,0.1); border-left: 3px solid #F97316; border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 16px 0; }
+    .warn-box p { margin: 0; color: var(--text2); }
+
+    .rule-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 8px; background: var(--bg2); }
+    .rule-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+    .rule-title { font-weight: 700; font-size: 14px; margin-bottom: 2px; }
+    .rule-desc { font-size: 13px; color: var(--text2); }
+
+    .agree-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg2); border-top: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; z-index: 10; }
+    .agree-bar p { font-size: 13px; color: var(--text2); }
+    .agree-actions { display: flex; gap: 10px; flex-shrink: 0; }
+
+    @media (max-width: 600px) {
+      .agree-bar { flex-direction: column; text-align: center; }
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="logo">
+    <div class="logo-icon">N</div>
+    <div class="logo-text">Nova X <span>Edu</span></div>
+  </a>
+  <div class="header-actions">
+    <button class="btn btn-ghost" onclick="toggleTheme()">🌙 Theme</button>
+    <a href="index.html" class="btn btn-ghost">← Back to Portal</a>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-badge">📋 Legal Document</div>
+  <h1>Terms & Rules</h1>
+  <p>Please read these terms carefully before using Nova X Edu services. By registering or using our platform, you agree to these rules.</p>
+  <div class="last-updated">Last updated: March 2025 · Version 1.0</div>
+</div>
+
+<div class="container">
+
+  <!-- TABLE OF CONTENTS -->
+  <div class="toc">
+    <h3>📋 Table of Contents</h3>
+    <ol>
+      <li><a href="#s1">Platform Overview</a></li>
+      <li><a href="#s2">Student Rules & Conduct</a></li>
+      <li><a href="#s3">Teacher Rules & Responsibilities</a></li>
+      <li><a href="#s4">Payment & Refund Policy</a></li>
+      <li><a href="#s5">Content & Recording Policy</a></li>
+      <li><a href="#s6">Account Security & Devices</a></li>
+      <li><a href="#s7">Privacy Policy</a></li>
+      <li><a href="#s8">Prohibited Activities</a></li>
+      <li><a href="#s9">Store & Merchandise</a></li>
+      <li><a href="#s10">Termination & Suspension</a></li>
+      <li><a href="#s11">Changes & Updates</a></li>
+      <li><a href="#s12">Contact & Support</a></li>
+    </ol>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section" id="s1">
+    <div class="section-num">Section 1</div>
+    <h2>Platform Overview</h2>
+    <p>Nova X Edu is an online educational platform based in Sri Lanka, providing access to recorded lessons, live classes, study notes, quizzes, and educational resources from qualified teachers.</p>
+    <p>By registering on Nova X Edu as a student, teacher, or staff member, you confirm that you have read, understood, and agreed to these Terms & Rules in full.</p>
+    <div class="highlight">
+      <p>📌 These terms are legally binding. Violation of these rules may result in suspension or permanent removal from the platform without a refund.</p>
+    </div>
+    <p>Nova X Edu reserves the right to modify, update, or terminate any service at any time. Continued use of the platform after changes constitutes acceptance of the updated terms.</p>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section" id="s2">
+    <div class="section-num">Section 2</div>
+    <h2>Student Rules & Conduct</h2>
+    <p>Students must adhere to the following rules to maintain a respectful and productive learning environment:</p>
+
+    <div class="rule-item">
+      <div class="rule-icon">🎓</div>
+      <div><div class="rule-title">Genuine Enrollment Only</div><div class="rule-desc">Students must enroll using their own real identity. Creating fake accounts or sharing accounts with others is strictly prohibited.</div></div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-icon">🤝</div>
+      <div><div class="rule-title">Respectful Behavior</div><div class="rule-desc">Students must treat teachers, staff, and fellow students with respect at all times in live classes, chats, and any platform communication.</div></div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-icon">📵</div>
+      <div><div class="rule-title">No Screen Recording</div><div class="rule-desc">Recording, screenshot, or screen capturing of any paid content (videos, notes, live classes) is strictly prohibited. Violation will result in permanent ban.</div></div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-icon">🔒</div>
+      <div><div class="rule-title">Account Security</div><div class="rule-desc">Students are responsible for keeping their login credentials secure. Sharing login credentials with others is not permitted and may result in account suspension.</div></div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-icon">💳</div>
+      <div><div class="rule-title">Timely Payments</div><div class="rule-desc">Students must complete payments on time to maintain access to enrolled classes. Late payments may result in temporary access loss.</div></div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-icon">🚫</div>
+      <div><div class="rule-title">No Content Sharing</div><div class="rule-desc">Sharing, distributing, reselling, or uploading any platform content (videos, notes, quiz questions) to any third-party platform is strictly prohibited.</div></div>
+    </div>
+
+    <div class="warn-box">
+      <p>⚠️ Students found violating any of these rules will be subject to immediate account suspension. Repeated violations will result in permanent removal without refund.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section" id="s3">
+    <div class="section-num">Section 3</div>
+    <h2>Teacher Rules & Responsibilities</h2>
+    <p>Teachers on Nova X Edu are independent educators who provide content through the platform. By registering as a teacher, you agree to the following:</p>
+
+    <div class="rule-item">
+      <div class="rule-icon">✅</div>
+      <div><div class="rule-title">Accurate Information</div><div class="rule-desc">Teachers must provide accurate personal information, qualifications, and banking details during registration. False information will result in account termination.</div></div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-icon">📚</div>
+      <div><div class="rule-title">Quality Content</div><div class="rule-desc">Teachers are responsible for providing high-quality, accurate, and educational content. Misleading or harmful content is not allowed.</div></div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-icon">⏰</div>
+      <div><div class="rule-title">Scheduled Classes</div><div class="rule-desc">Teachers must maintain their published timetables and notify students in advance if a class needs to be rescheduled or cancelled.</div></div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-icon">💰</div>
+      <div><div class="rule-title">Package Subscription</div><div class="rule-desc">Teachers must maintain an active subscription plan (Basic/Standard/Pro) to upload content and manage students. Expired subscriptions will restrict content management features.</div></div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-icon">🏦</div>
+      <div><div class="rule-title">Bank Details Accuracy</div><div class="rule-desc">Teachers must provide valid bank account details for payments. Nova X Edu is not responsible for failed transfers due to incorrect banking information.</div></div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-icon">🤝</div>
+      <div><div class="rule-title">Student Respect</div><div class="rule-desc">Teachers must treat all students with respect and maintain professional conduct at all times.</div></div>
+    </div>
+
+    <p>Teachers are independent contractors and not employees of Nova X Edu. Nova X Edu acts as a platform provider only.</p>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="section" id="s4">
+    <div class="section-num">Section 4</div>
+    <h2>Payment & Refund Policy</h2>
+    <p>All payments on Nova X Edu are processed in Sri Lankan Rupees (LKR). The following payment policies apply:</p>
+
+    <ul>
+      <li><b>Payment Methods:</b> Bank transfers, online payments (where available). All payment methods are configured by the platform admin.</li>
+      <li><b>Payment Verification:</b> All payments must be verified by admin or teacher before access is granted. Please allow up to 24 hours for verification.</li>
+      <li><b>Proof of Payment:</b> Students must upload a valid payment receipt or provide a transaction ID when submitting payment.</li>
+      <li><b>Monthly Payments:</b> Class access is granted on a monthly basis. Failure to pay monthly fees will result in access suspension at the end of the billing period.</li>
+    </ul>
+
+    <div class="highlight">
+      <p>📌 <b>Refund Policy:</b> Nova X Edu does not offer refunds once payment has been verified and access has been granted, except in cases of platform error or technical failure on our part. Refund requests must be submitted within 7 days of payment.</p>
+    </div>
+
+    <ul>
+      <li><b>Disputed Payments:</b> Payment disputes must be raised through the support ticket system within 7 days of the payment date.</li>
+      <li><b>Fraudulent Payments:</b> Submitting fake payment receipts is a serious violation and will result in permanent account ban and potential legal action.</li>
+    </ul>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="section" id="s5">
+    <div class="section-num">Section 5</div>
+    <h2>Content & Recording Policy</h2>
+    <p>All content on Nova X Edu — including videos, notes, quiz questions, live class recordings, and any other materials — is the intellectual property of the respective teachers and/or Nova X Edu.</p>
+
+    <ul>
+      <li><b>Recorded Lessons:</b> Access to recorded lessons is subject to the expiry date set by the teacher. Nova X Edu does not guarantee permanent access to recordings.</li>
+      <li><b>Downloads:</b> Certain notes may be downloadable for personal study use only. Redistribution of downloaded materials is prohibited.</li>
+      <li><b>Copyright:</b> All content is protected by copyright law. Unauthorized use, reproduction, or distribution may result in legal action.</li>
+      <li><b>Screen Recording/Capture:</b> Any attempt to record or capture platform content using screen recording software, cameras, or any other means is strictly prohibited.</li>
+      <li><b>Free Content:</b> Some recordings may be marked as "free." Free content is provided at the teacher's discretion and may be removed at any time.</li>
+    </ul>
+
+    <div class="warn-box">
+      <p>⚠️ Students found distributing platform content will be permanently banned and may face legal action under the Intellectual Property Act of Sri Lanka.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section" id="s6">
+    <div class="section-num">Section 6</div>
+    <h2>Account Security & Device Limits</h2>
+    <p>To protect the integrity of the platform and prevent unauthorized access, the following device and session policies apply:</p>
+
+    <ul>
+      <li><b>Device Limit:</b> Each student account is allowed access from a maximum number of devices as set by the teacher (default: 2 devices). Exceeding this limit will result in access denial from new devices.</li>
+      <li><b>Session Management:</b> Active sessions are monitored. Suspicious login activity may result in automatic session termination.</li>
+      <li><b>Account Sharing:</b> Sharing your account login details with others is strictly prohibited. If account sharing is detected, the account will be suspended immediately.</li>
+      <li><b>Password Security:</b> Students and teachers are responsible for maintaining a strong, unique password. Use a combination of letters, numbers, and symbols.</li>
+      <li><b>Lost Credentials:</b> If you lose access to your account, use the password reset feature or contact support.</li>
+    </ul>
+
+    <div class="highlight">
+      <p>📌 Nova X Edu tracks login IP addresses and device fingerprints for security purposes. This data is used solely to protect your account and enforce device limits.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="section" id="s7">
+    <div class="section-num">Section 7</div>
+    <h2>Privacy Policy</h2>
+    <p>Nova X Edu is committed to protecting your personal information. Here is how we handle your data:</p>
+
+    <ul>
+      <li><b>Data Collected:</b> Name, NIC, date of birth, contact details, district, payment records, login history, and device information.</li>
+      <li><b>Purpose:</b> Data is collected for account management, payment verification, service delivery, and security monitoring only.</li>
+      <li><b>Data Sharing:</b> We do not sell or share your personal data with third parties, except as required by law or for payment processing purposes.</li>
+      <li><b>Data Storage:</b> All data is stored securely on our servers (Supabase/cloud infrastructure) with encryption in transit and at rest.</li>
+      <li><b>Data Retention:</b> User data is retained for as long as the account is active and up to 2 years after account closure for legal compliance purposes.</li>
+      <li><b>Your Rights:</b> You may request a copy of your data or request deletion of your account by contacting our support team.</li>
+    </ul>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="section" id="s8">
+    <div class="section-num">Section 8</div>
+    <h2>Prohibited Activities</h2>
+    <p>The following activities are strictly prohibited on Nova X Edu and will result in immediate account termination:</p>
+
+    <ul>
+      <li>Creating fake or multiple accounts</li>
+      <li>Sharing login credentials with others</li>
+      <li>Recording, screenshotting, or capturing paid content</li>
+      <li>Distributing or reselling platform content</li>
+      <li>Submitting fraudulent payment proofs</li>
+      <li>Harassing, bullying, or disrespecting teachers, staff, or fellow students</li>
+      <li>Attempting to hack, exploit, or gain unauthorized access to the platform</li>
+      <li>Using the platform for any illegal activity</li>
+      <li>Posting spam, advertisements, or irrelevant content</li>
+      <li>Impersonating Nova X Edu staff, teachers, or other users</li>
+    </ul>
+
+    <div class="warn-box">
+      <p>⚠️ Engaging in prohibited activities may result in permanent account termination without notice or refund, and may be reported to relevant authorities.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 9 -->
+  <div class="section" id="s9">
+    <div class="section-num">Section 9</div>
+    <h2>Store & Merchandise</h2>
+    <p>Some teachers may operate a store through the Nova X Edu platform to sell educational materials, books, or merchandise. The following rules apply:</p>
+
+    <ul>
+      <li><b>Orders:</b> All store orders must be paid through the approved payment methods configured by the admin.</li>
+      <li><b>Order Confirmation:</b> Orders are confirmed after payment verification. Processing times vary by teacher.</li>
+      <li><b>Returns:</b> Physical goods: returns within 7 days if the item is defective or damaged. Digital goods: no returns once downloaded.</li>
+      <li><b>Disputes:</b> Order disputes must be raised through the support ticket system within 14 days of purchase.</li>
+      <li><b>Teacher Responsibility:</b> Teachers are responsible for the fulfillment of their store orders. Nova X Edu acts only as the platform provider.</li>
+    </ul>
+  </div>
+
+  <!-- SECTION 10 -->
+  <div class="section" id="s10">
+    <div class="section-num">Section 10</div>
+    <h2>Termination & Suspension</h2>
+    <p>Nova X Edu reserves the right to suspend or permanently terminate any account at any time for violations of these terms, without prior notice or refund in cases of serious violations.</p>
+
+    <ul>
+      <li><b>Temporary Suspension:</b> May be applied for minor or first-time violations, pending investigation.</li>
+      <li><b>Permanent Ban:</b> Applied for serious violations including fraud, content piracy, or repeated offences.</li>
+      <li><b>Appeal:</b> Suspended users may appeal by submitting a support ticket. Appeals are reviewed within 5–7 business days.</li>
+      <li><b>Data After Termination:</b> Upon permanent account closure, data will be retained for up to 2 years for legal purposes, then deleted.</li>
+    </ul>
+  </div>
+
+  <!-- SECTION 11 -->
+  <div class="section" id="s11">
+    <div class="section-num">Section 11</div>
+    <h2>Changes & Updates</h2>
+    <p>Nova X Edu may update these Terms & Rules at any time. Significant changes will be communicated to users via:</p>
+    <ul>
+      <li>In-app notification on the Nova X Edu portal</li>
+      <li>Email notification to the registered email address</li>
+      <li>Updated "Last Updated" date on this page</li>
+    </ul>
+    <p>Continued use of the platform after notification of changes constitutes acceptance of the updated terms. If you do not agree with changes, you must discontinue use and may request account closure.</p>
+  </div>
+
+  <!-- SECTION 12 -->
+  <div class="section" id="s12">
+    <div class="section-num">Section 12</div>
+    <h2>Contact & Support</h2>
+    <p>If you have questions about these terms or need support, please contact us through the following channels:</p>
+    <ul>
+      <li>📧 <b>Email:</b> support@novaxedu.lk</li>
+      <li>📞 <b>Phone:</b> Contact details available in the Support tab of your portal</li>
+      <li>💬 <b>Support Tickets:</b> Submit a ticket through your student or teacher portal for the fastest response</li>
+      <li>📱 <b>WhatsApp/Telegram:</b> Hotline numbers are available in the Support tab of your portal</li>
+    </ul>
+    <p style="margin-top:16px">Support hours: Monday – Friday, 8:00 AM – 6:00 PM (Sri Lanka Standard Time)</p>
+
+    <div class="highlight">
+      <p>📌 Nova X Edu is governed by the laws of Sri Lanka. Any disputes arising from the use of the platform will be subject to the jurisdiction of Sri Lankan courts.</p>
+    </div>
+  </div>
+
+  <div style="height:80px"></div>
+</div>
+
+<!-- AGREE BAR (shown if accessed from checkout flow) -->
+<div class="agree-bar" id="agree-bar" style="display:none">
+  <p>By clicking "I Agree", you confirm that you have read and understood all Terms & Rules above.</p>
+  <div class="agree-actions">
+    <button class="btn btn-ghost" onclick="decline()">Decline</button>
+    <button class="btn btn-primary" onclick="agree()">✓ I Agree & Continue</button>
+  </div>
+</div>
+
+<script>
+  // Show agree bar if coming from checkout
+  if (document.referrer.includes('student-portal') || new URLSearchParams(location.search).get('checkout') === '1') {
+    document.getElementById('agree-bar').style.display = 'flex';
+    document.body.style.paddingBottom = '70px';
+  }
+
+  function agree() {
+    localStorage.setItem('novax_terms_agreed', 'true');
+    history.back();
+  }
+  function decline() { history.back(); }
+
+  function toggleTheme() {
+    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem('theme', next);
+  }
+  if (localStorage.getItem('theme')) document.documentElement.dataset.theme = localStorage.getItem('theme');
+
+  // Smooth scroll for TOC links
+  document.querySelectorAll('.toc a').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+</script>
+</body>
+</html>
