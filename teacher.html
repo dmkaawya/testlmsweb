@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nova X Edu — Teacher Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --brand: #7C3AED;
+  --brand-light: #9D5CF6;
+  --cyan: #06B6D4;
+  --amber: #F59E0B;
+  --green: #10B981;
+  --red: #EF4444;
+  --pink: #EC4899;
+}
+[data-theme="dark"] {
+  --bg: #0A0A0F;
+  --bg2: #111118;
+  --bg3: #1A1A25;
+  --bg4: #22222F;
+  --border: rgba(255,255,255,0.08);
+  --text: #F0F0FF;
+  --text2: #9090B0;
+  --text3: #5050708;
+  --card: rgba(255,255,255,0.04);
+  --card-hover: rgba(255,255,255,0.07);
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+[data-theme="light"] {
+  --bg: #F5F5FF;
+  --bg2: #FFFFFF;
+  --bg3: #EFEFFF;
+  --bg4: #E5E5F5;
+  --border: rgba(0,0,0,0.1);
+  --text: #0A0A1A;
+  --text2: #50507A;
+  --card: rgba(255,255,255,0.9);
+  --card-hover: rgba(255,255,255,1);
+  --shadow: 0 4px 24px rgba(0,0,0,0.1);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;overflow-x:hidden;}
+/* Sidebar */
+.sidebar{width:260px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;transition:transform 0.3s ease;}
+.sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.logo-mark{width:36px;height:36px;background:linear-gradient(135deg,var(--brand),var(--cyan));border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:14px;color:#fff;}
+.logo-text{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;}
+.logo-text span{color:var(--cyan);}
+.sidebar-role{padding:12px 20px;background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(6,182,212,0.1));margin:12px;border-radius:10px;border:1px solid rgba(124,58,237,0.2);}
+.sidebar-role .role-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;}
+.sidebar-role .role-name{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--brand-light);margin-top:2px;}
+.sidebar-role .role-sub{font-size:12px;color:var(--text2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.nav-section{padding:8px 12px 4px;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;margin-top:8px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;margin:2px 8px;border-radius:10px;cursor:pointer;color:var(--text2);transition:all 0.2s;font-size:14px;font-weight:500;position:relative;}
+.nav-item:hover{background:var(--card-hover);color:var(--text);}
+.nav-item.active{background:linear-gradient(135deg,rgba(124,58,237,0.25),rgba(6,182,212,0.1));color:var(--brand-light);border:1px solid rgba(124,58,237,0.2);}
+.nav-item svg{width:18px;height:18px;flex-shrink:0;}
+.nav-badge{margin-left:auto;background:var(--brand);color:#fff;font-size:11px;padding:2px 7px;border-radius:20px;}
+.sidebar-bottom{margin-top:auto;padding:12px;border-top:1px solid var(--border);}
+.sidebar-user{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;cursor:pointer;}
+.user-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--cyan));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff;flex-shrink:0;}
+.user-info{flex:1;overflow:hidden;}
+.user-name{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.user-email{font-size:11px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+/* Main */
+.main{flex:1;margin-left:260px;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{height:60px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:50;}
+.topbar-title{font-family:'Syne',sans-serif;font-weight:700;font-size:18px;flex:1;}
+.topbar-actions{display:flex;align-items:center;gap:12px;}
+.icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;position:relative;}
+.icon-btn:hover{background:var(--card-hover);}
+.notif-dot{width:8px;height:8px;background:var(--red);border-radius:50%;position:absolute;top:6px;right:6px;}
+.content{flex:1;padding:24px;overflow-y:auto;}
+/* Cards */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;margin-bottom:24px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;right:0;width:60px;height:60px;border-radius:50%;opacity:0.1;transform:translate(20px,-20px);}
+.stat-card.p::before{background:var(--brand);}
+.stat-card.c::before{background:var(--cyan);}
+.stat-card.a::before{background:var(--amber);}
+.stat-card.g::before{background:var(--green);}
+.stat-card.r::before{background:var(--red);}
+.stat-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
+.stat-icon.p{background:rgba(124,58,237,0.15);color:var(--brand-light);}
+.stat-icon.c{background:rgba(6,182,212,0.15);color:var(--cyan);}
+.stat-icon.a{background:rgba(245,158,11,0.15);color:var(--amber);}
+.stat-icon.g{background:rgba(16,185,129,0.15);color:var(--green);}
+.stat-icon.r{background:rgba(239,68,68,0.15);color:var(--red);}
+.stat-val{font-family:'Syne',sans-serif;font-weight:800;font-size:24px;}
+.stat-label{font-size:12px;color:var(--text2);margin-top:2px;}
+/* Buttons */
+.btn{padding:9px 18px;border-radius:10px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;transition:all 0.2s;display:inline-flex;align-items:center;gap:7px;}
+.btn-primary{background:linear-gradient(135deg,var(--brand),var(--brand-light));color:#fff;}
+.btn-primary:hover{opacity:0.9;transform:translateY(-1px);}
+.btn-secondary{background:var(--bg4);color:var(--text);border:1px solid var(--border);}
+.btn-secondary:hover{background:var(--card-hover);}
+.btn-danger{background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.2);}
+.btn-danger:hover{background:rgba(239,68,68,0.25);}
+.btn-success{background:rgba(16,185,129,0.15);color:var(--green);border:1px solid rgba(16,185,129,0.2);}
+.btn-success:hover{background:rgba(16,185,129,0.25);}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:8px;}
+.btn-cyan{background:linear-gradient(135deg,var(--cyan),#0891b2);color:#fff;}
+/* Table */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;padding:10px 14px;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;}
+td{padding:12px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--card-hover);}
+/* Badge */
+.badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+.badge-green{background:rgba(16,185,129,0.15);color:var(--green);}
+.badge-red{background:rgba(239,68,68,0.15);color:var(--red);}
+.badge-amber{background:rgba(245,158,11,0.15);color:var(--amber);}
+.badge-blue{background:rgba(6,182,212,0.15);color:var(--cyan);}
+.badge-purple{background:rgba(124,58,237,0.15);color:var(--brand-light);}
+/* Tabs */
+.tabs{display:flex;gap:4px;background:var(--bg3);border-radius:12px;padding:4px;}
+.tab{padding:8px 16px;border-radius:9px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:all 0.2s;}
+.tab.active{background:var(--bg2);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,0.2);}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;}
+.modal-title{font-family:'Syne',sans-serif;font-weight:700;font-size:18px;margin-bottom:20px;}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);}
+/* Forms */
+.form-group{margin-bottom:16px;}
+.form-label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text2);}
+.form-control{width:100%;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;transition:border-color 0.2s;}
+.form-control:focus{outline:none;border-color:var(--brand);}
+select.form-control option{background:var(--bg2);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+/* Toast */
+.toast-container{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.toast{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px 18px;font-size:13px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow);animation:toastIn 0.3s ease;min-width:240px;}
+@keyframes toastIn{from{opacity:0;transform:translateX(40px);}to{opacity:1;transform:translateX(0);}}
+.toast.success{border-color:rgba(16,185,129,0.3);}
+.toast.error{border-color:rgba(239,68,68,0.3);}
+/* Mobile sidebar */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;}
+.hamburger{display:none;background:transparent;border:none;color:var(--text);cursor:pointer;padding:4px;}
+/* Upload area */
+.upload-area{border:2px dashed var(--border);border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:all 0.2s;}
+.upload-area:hover{border-color:var(--brand);background:rgba(124,58,237,0.05);}
+/* Progress */
+.progress-bar{background:var(--bg3);border-radius:20px;height:6px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:20px;background:linear-gradient(135deg,var(--brand),var(--cyan));transition:width 0.5s ease;}
+/* Section title */
+.section-title{font-family:'Syne',sans-serif;font-weight:700;font-size:20px;margin-bottom:20px;}
+/* Package cards */
+.pkg-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;text-align:center;position:relative;transition:all 0.3s;}
+.pkg-card.current-pkg{border-color:var(--brand);box-shadow:0 0 0 2px rgba(124,58,237,0.2);}
+.pkg-badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--brand);color:#fff;padding:3px 14px;border-radius:20px;font-size:11px;font-weight:700;}
+/* Notification panel */
+.notif-panel{position:fixed;top:60px;right:0;width:340px;height:calc(100vh - 60px);background:var(--bg2);border-left:1px solid var(--border);z-index:200;transform:translateX(100%);transition:transform 0.3s ease;overflow-y:auto;}
+.notif-panel.open{transform:translateX(0);}
+.notif-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.notif-item{padding:14px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.2s;}
+.notif-item:hover{background:var(--card-hover);}
+.notif-item.unread{background:rgba(124,58,237,0.05);}
+.notif-dot2{width:8px;height:8px;border-radius:50%;background:var(--brand);flex-shrink:0;}
+/* Timetable */
+.timetable-day{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden;}
+.timetable-day-header{padding:10px 16px;background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(6,182,212,0.05));font-weight:700;font-size:13px;}
+.timetable-slot{padding:10px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+/* Access toggle */
+.toggle-switch{position:relative;width:40px;height:22px;flex-shrink:0;}
+.toggle-switch input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:var(--bg4);border-radius:22px;cursor:pointer;transition:0.3s;}
+.toggle-slider:before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:0.3s;}
+input:checked+.toggle-slider{background:var(--brand);}
+input:checked+.toggle-slider:before{transform:translateX(18px);}
+/* Student list */
+.student-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;border:1px solid var(--border);margin-bottom:8px;transition:all 0.2s;}
+.student-item:hover{background:var(--card-hover);}
+/* Recording card */
+.rec-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:all 0.2s;}
+.rec-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);}
+.rec-thumb{width:100%;height:140px;object-fit:cover;background:var(--bg3);display:flex;align-items:center;justify-content:center;}
+.rec-body{padding:14px;}
+.rec-meta{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;}
+/* Announcement card */
+.announce-card{background:linear-gradient(135deg,rgba(124,58,237,0.1),rgba(6,182,212,0.05));border:1px solid rgba(124,58,237,0.2);border-radius:12px;padding:16px;margin-bottom:12px;}
+/* Subscription card */
+.sub-feature{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.sub-feature:last-child{border-bottom:none;}
+.sub-check{color:var(--green);}
+.sub-cross{color:var(--red);}
+/* Loading */
+.loading-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:9999;display:none;}
+.loading-overlay.show{display:flex;}
+.spinner{width:44px;height:44px;border:3px solid rgba(255,255,255,0.1);border-top-color:var(--brand);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+/* Responsive */
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0;}
+  .hamburger{display:block;}
+  .sidebar-overlay{display:block;pointer-events:none;}
+  .sidebar-overlay.show{pointer-events:all;}
+  .form-row{grid-template-columns:1fr;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .content{padding:16px;}
+  .notif-panel{width:100%;}
+}
+/* Tab content */
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+/* Inline tabs (small) */
+.inline-tabs{display:flex;gap:4px;margin-bottom:16px;}
+.inline-tab{padding:6px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:500;color:var(--text2);transition:all 0.2s;border:1px solid transparent;}
+.inline-tab.active{background:rgba(124,58,237,0.15);color:var(--brand-light);border-color:rgba(124,58,237,0.2);}
+/* Empty state */
+.empty-state{text-align:center;padding:40px;color:var(--text2);}
+.empty-state svg{width:48px;height:48px;opacity:0.3;margin-bottom:12px;}
+.empty-state p{font-size:14px;}
+/* Access settings */
+.access-item{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:10px;border:1px solid var(--border);margin-bottom:8px;}
+</style>
+</head>
+<body>
+<div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div></div>
+
+<!-- Sidebar Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">NX</div>
+    <div class="logo-text">Nova X <span>Edu</span></div>
+  </div>
+  <div class="sidebar-role">
+    <div class="role-label">Teacher Portal</div>
+    <div class="role-name" id="sidebarName">Loading...</div>
+    <div class="role-sub" id="sidebarSubject">—</div>
+  </div>
+  
+  <div class="nav-section">Main</div>
+  <div class="nav-item active" onclick="showTab('dashboard')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+    Dashboard
+  </div>
+  <div class="nav-item" onclick="showTab('students')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-435 4.01 4.01 0 00-3 1.528z"/></svg>
+    My Students
+  </div>
+  <div class="nav-section">Content</div>
+  <div class="nav-item" onclick="showTab('recordings')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.656v6.688a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>
+    Recordings
+  </div>
+  <div class="nav-item" onclick="showTab('notes')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+    Notes
+  </div>
+  <div class="nav-item" onclick="showTab('quizzes')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+    Quizzes
+  </div>
+  <div class="nav-item" onclick="showTab('live')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.656v6.688a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>
+    Live Classes
+  </div>
+  <div class="nav-section">Schedule & Store</div>
+  <div class="nav-item" onclick="showTab('timetable')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+    Timetable
+  </div>
+  <div class="nav-item" onclick="showTab('store')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+    Store
+  </div>
+  <div class="nav-section">Management</div>
+  <div class="nav-item" onclick="showTab('payments')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+    Payments
+  </div>
+  <div class="nav-item" onclick="showTab('access')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+    Access Settings
+  </div>
+  <div class="nav-item" onclick="showTab('announcements')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+    Announcements
+  </div>
+  <div class="nav-item" onclick="showTab('subscription')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+    Subscription
+  </div>
+  <div class="nav-item" onclick="showTab('reports')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+    Reports
+  </div>
+  <div class="nav-item" onclick="showTab('support')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+    Support
+  </div>
+  <div class="nav-item" onclick="showTab('profile')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+    Profile
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="sidebar-user" onclick="logout()">
+      <div class="user-avatar" id="avatarInitial">T</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebarEmail">Loading...</div>
+        <div class="user-email" style="color:var(--red);">Sign Out</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<div class="main">
+  <div class="topbar">
+    <button class="hamburger" onclick="toggleSidebar()">
+      <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <div class="topbar-title" id="topbarTitle">Dashboard</div>
+    <div class="topbar-actions">
+      <button class="icon-btn" onclick="toggleTheme()">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+      </button>
+      <button class="icon-btn" onclick="toggleNotifPanel()" style="position:relative;">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+        <span class="notif-dot" id="notifDot" style="display:none;"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Notification Panel -->
+  <div class="notif-panel" id="notifPanel">
+    <div class="notif-header">
+      <span style="font-family:'Syne',sans-serif;font-weight:700;">Notifications</span>
+      <button class="btn btn-sm btn-secondary" onclick="markAllRead()">Mark All Read</button>
+    </div>
+    <div id="notifList"><div class="empty-state"><p>No notifications</p></div></div>
+  </div>
+
+  <div class="content">
+    <!-- ===== DASHBOARD ===== -->
+    <div class="tab-content active" id="tab-dashboard">
+      <div class="section-title">👋 Welcome back, <span id="welcomeName">Teacher</span></div>
+      <div class="stats-grid" id="dashStats">
+        <div class="stat-card c"><div class="stat-icon c"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1z"/></svg></div><div class="stat-val" id="statStudents">0</div><div class="stat-label">Total Students</div></div>
+        <div class="stat-card p"><div class="stat-icon p"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.656v6.688a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg></div><div class="stat-val" id="statRecs">0</div><div class="stat-label">Recordings</div></div>
+        <div class="stat-card g"><div class="stat-icon g"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div><div class="stat-val" id="statNotes">0</div><div class="stat-label">Notes</div></div>
+        <div class="stat-card a"><div class="stat-icon a"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div><div class="stat-val" id="statQuizzes">0</div><div class="stat-label">Quizzes</div></div>
+        <div class="stat-card r"><div class="stat-icon r"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg></div><div class="stat-val" id="statPending">0</div><div class="stat-label">Pending Payments</div></div>
+        <div class="stat-card p"><div class="stat-icon p"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.656v6.688a1 1 0 01-1.447.894L15 14"/></svg></div><div class="stat-val" id="statLive">0</div><div class="stat-label">Live Classes</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Recent Access Requests</div><button class="btn btn-primary btn-sm" onclick="showTab('payments')">View All</button></div>
+        <div class="table-wrap"><table><thead><tr><th>Student</th><th>Month</th><th>Type</th><th>Date</th><th>Action</th></tr></thead><tbody id="recentRequestsBody"><tr><td colspan="5" class="empty-state"><p>No pending requests</p></td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ===== STUDENTS ===== -->
+    <div class="tab-content" id="tab-students">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div class="section-title" style="margin:0;">My Students</div>
+        <input class="form-control" style="width:220px;" placeholder="🔍 Search students..." oninput="filterStudents(this.value)">
+      </div>
+      <div class="card">
+        <div class="table-wrap"><table><thead><tr><th>Student</th><th>Grade</th><th>Batch</th><th>District</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="studentsBody"><tr><td colspan="6" style="text-align:center;color:var(--text2);padding:32px;">Loading students...</td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ===== RECORDINGS ===== -->
+    <div class="tab-content" id="tab-recordings">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div class="section-title" style="margin:0;">Recordings</div>
+        <button class="btn btn-primary" onclick="openModal('addRecordingModal')">+ Add Recording</button>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+        <select class="form-control" style="width:auto;" id="recYearFilter" onchange="loadRecordings()"><option value="">All Years</option></select>
+        <select class="form-control" style="width:auto;" id="recMonthFilter" onchange="loadRecordings()"><option value="">All Months</option><option>January</option><option>February</option><option>March</option><option>April</option><option>May</option><option>June</option><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option></select>
+        <select class="form-control" style="width:auto;" id="recTypeFilter" onchange="loadRecordings()"><option value="">All Types</option><option>theory</option><option>revision</option><option>paper</option><option>extra</option></select>
+      </div>
+      <div class="card">
+        <div class="table-wrap"><table><thead><tr><th>Title</th><th>Type</th><th>Month</th><th>Duration</th><th>Views</th><th>Access</th><th>Actions</th></tr></thead>
+        <tbody id="recordingsBody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ===== NOTES ===== -->
+    <div class="tab-content" id="tab-notes">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div class="section-title" style="margin:0;">Notes</div>
+        <button class="btn btn-primary" onclick="openModal('addNoteModal')">+ Add Note</button>
+      </div>
+      <div class="card">
+        <div class="table-wrap"><table><thead><tr><th>Title</th><th>Grade</th><th>Subject</th><th>Downloads</th><th>Access</th><th>Actions</th></tr></thead>
+        <tbody id="notesBody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ===== QUIZZES ===== -->
+    <div class="tab-content" id="tab-quizzes">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div class="section-title" style="margin:0;">Quizzes</div>
+        <button class="btn btn-primary" onclick="openModal('addQuizModal')">+ Create Quiz</button>
+      </div>
+      <div class="card">
+        <div class="table-wrap"><table><thead><tr><th>Title</th><th>Questions</th><th>Pass Mark</th><th>Attempts</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="quizzesBody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ===== LIVE CLASSES ===== -->
+    <div class="tab-content" id="tab-live">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div class="section-title" style="margin:0;">Live Classes</div>
+        <button class="btn btn-primary" onclick="openModal('addLiveModal')">+ Schedule Class</button>
+      </div>
+      <div class="card">
+        <div class="table-wrap"><table><thead><tr><th>Title</th><th>Date & Time</th><th>Platform</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="liveBody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ===== TIMETABLE ===== -->
+    <div class="tab-content" id="tab-timetable">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div class="section-title" style="margin:0;">Timetable</div>
+        <button class="btn btn-primary" onclick="openModal('addTimetableModal')">+ Add Slot</button>
+      </div>
+      <div id="timetableContainer"></div>
+    </div>
+
+    <!-- ===== STORE ===== -->
+    <div class="tab-content" id="tab-store">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div class="section-title" style="margin:0;">Store Products</div>
+        <button class="btn btn-primary" onclick="openModal('addProductModal')">+ Add Product</button>
+      </div>
+      <div class="card">
+        <div class="table-wrap"><table><thead><tr><th>Product</th><th>Price</th><th>Orders</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="storeBody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ===== PAYMENTS ===== -->
+    <div class="tab-content" id="tab-payments">
+      <div class="section-title">Payment Management</div>
+      <div class="tabs" style="margin-bottom:20px;">
+        <div class="tab active" onclick="switchPayTab('access')">Access Requests</div>
+        <div class="tab" onclick="switchPayTab('history')">Payment History</div>
+        <div class="tab" onclick="switchPayTab('methods')">Payment Methods</div>
+      </div>
+      <div id="payTab-access">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Recording Access Requests</div></div>
+          <div class="table-wrap"><table><thead><tr><th>Student</th><th>Month/Year</th><th>Requested</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="accessReqBody"></tbody></table></div>
+        </div>
+      </div>
+      <div id="payTab-history" style="display:none;">
+        <div class="card">
+          <div class="table-wrap"><table><thead><tr><th>Student</th><th>Amount</th><th>Month</th><th>Transaction ID</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody id="payHistBody"></tbody></table></div>
+        </div>
+      </div>
+      <div id="payTab-methods" style="display:none;">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:16px;"><button class="btn btn-primary" onclick="openModal('addMethodModal')">+ Add Payment Method</button></div>
+        <div class="card">
+          <div class="table-wrap"><table><thead><tr><th>Method</th><th>Details</th><th>Available</th><th>Actions</th></tr></thead>
+          <tbody id="methodsBody"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ACCESS SETTINGS ===== -->
+    <div class="tab-content" id="tab-access">
+      <div class="section-title">Access Settings</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;" class="access-grid">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Portal Features</div></div>
+          <div id="featureAccessList"></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Recording Expiry</div></div>
+          <div class="form-group"><div class="form-label">Recording Access Expires After (days)</div><input type="number" class="form-control" id="recExpiry" placeholder="e.g. 30 (0 = no expiry)"><p style="font-size:12px;color:var(--text2);margin-top:6px;">Students can only watch recordings within this many days of payment.</p></div>
+          <div class="form-group"><div class="form-label">Max Devices Per Student</div><input type="number" class="form-control" id="maxDevices" placeholder="e.g. 2"></div>
+          <div style="display:flex;gap:10px;margin-top:8px;">
+            <button class="btn btn-primary" onclick="saveAccessSettings()">Save Settings</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ANNOUNCEMENTS ===== -->
+    <div class="tab-content" id="tab-announcements">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div class="section-title" style="margin:0;">Announcements</div>
+        <button class="btn btn-primary" onclick="openModal('addAnnouncementModal')">+ New Announcement</button>
+      </div>
+      <div id="announcementsList"></div>
+    </div>
+
+    <!-- ===== SUBSCRIPTION ===== -->
+    <div class="tab-content" id="tab-subscription">
+      <div class="section-title">My Subscription</div>
+      <div id="subscriptionContent" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;"></div>
+    </div>
+
+    <!-- ===== REPORTS ===== -->
+    <div class="tab-content" id="tab-reports">
+      <div class="section-title">Student Reports</div>
+      <div class="card">
+        <div class="table-wrap"><table><thead><tr><th>Student</th><th>Report</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="reportsBody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ===== SUPPORT ===== -->
+    <div class="tab-content" id="tab-support">
+      <div class="section-title">Support</div>
+      <div class="tabs" style="margin-bottom:20px;">
+        <div class="tab active" onclick="switchSupportTab('tickets')">My Tickets</div>
+        <div class="tab" onclick="switchSupportTab('hotlines')">Hotlines</div>
+      </div>
+      <div id="supportTab-tickets">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:16px;"><button class="btn btn-primary" onclick="openModal('addTicketModal')">+ New Ticket</button></div>
+        <div class="card">
+          <div class="table-wrap"><table><thead><tr><th>Subject</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+          <tbody id="ticketsBody"></tbody></table></div>
+        </div>
+      </div>
+      <div id="supportTab-hotlines" style="display:none;">
+        <div class="card"><div id="hotlinesList"></div></div>
+      </div>
+    </div>
+
+    <!-- ===== PROFILE ===== -->
+    <div class="tab-content" id="tab-profile">
+      <div class="section-title">My Profile</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;" class="profile-grid">
+        <div class="card">
+          <div class="card-title" style="margin-bottom:16px;">Personal Information</div>
+          <div class="form-row">
+            <div class="form-group"><div class="form-label">First Name</div><input class="form-control" id="pFirstName"></div>
+            <div class="form-group"><div class="form-label">Last Name</div><input class="form-control" id="pLastName"></div>
+          </div>
+          <div class="form-group"><div class="form-label">NIC Number</div><input class="form-control" id="pNic"></div>
+          <div class="form-row">
+            <div class="form-group"><div class="form-label">Phone</div><input class="form-control" id="pPhone"></div>
+            <div class="form-group"><div class="form-label">WhatsApp/Telegram</div><input class="form-control" id="pWa"></div>
+          </div>
+          <div class="form-group"><div class="form-label">Address</div><textarea class="form-control" id="pAddress" rows="2"></textarea></div>
+          <div class="form-row">
+            <div class="form-group"><div class="form-label">City</div><input class="form-control" id="pCity"></div>
+            <div class="form-group"><div class="form-label">District</div><input class="form-control" id="pDistrict"></div>
+          </div>
+          <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:16px;">Bank Details</div>
+          <div class="form-group"><div class="form-label">Bank Name</div><input class="form-control" id="pBank"></div>
+          <div class="form-group"><div class="form-label">Branch</div><input class="form-control" id="pBranch"></div>
+          <div class="form-group"><div class="form-label">Account Number</div><input class="form-control" id="pAccNum"></div>
+          <div class="form-group"><div class="form-label">Account Name</div><input class="form-control" id="pAccName"></div>
+          <button class="btn btn-primary" onclick="saveBankDetails()">Update Bank Details</button>
+          <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+            <div class="card-title" style="margin-bottom:12px;">Teaching Info</div>
+            <div class="form-group"><div class="form-label">Subject</div><input class="form-control" id="pSubject" readonly></div>
+            <div class="form-group"><div class="form-label">Grade</div><input class="form-control" id="pGrade" readonly></div>
+            <div class="form-group"><div class="form-label">Notes / Bio</div><textarea class="form-control" id="pBio" rows="3"></textarea></div>
+            <button class="btn btn-primary" onclick="saveBio()">Save Bio</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODALS ===== -->
+
+<!-- Add Recording -->
+<div class="modal-overlay" id="addRecordingModal">
+  <div class="modal">
+    <div class="modal-title">Add Recording</div>
+    <div class="form-row">
+      <div class="form-group"><div class="form-label">Title</div><input class="form-control" id="recTitle" placeholder="Class title"></div>
+      <div class="form-group"><div class="form-label">Type</div><select class="form-control" id="recType"><option>theory</option><option>revision</option><option>paper</option><option>extra</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><div class="form-label">Year</div><input type="number" class="form-control" id="recYear" placeholder="2025"></div>
+      <div class="form-group"><div class="form-label">Month</div><select class="form-control" id="recMonth"><option>January</option><option>February</option><option>March</option><option>April</option><option>May</option><option>June</option><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option></select></div>
+    </div>
+    <div class="form-group"><div class="form-label">Video URL</div><input class="form-control" id="recUrl" placeholder="https://youtube.com/..."></div>
+    <div class="form-group"><div class="form-label">Thumbnail URL</div><input class="form-control" id="recThumb" placeholder="https://...image.jpg"></div>
+    <div class="form-group"><div class="form-label">Description</div><textarea class="form-control" id="recDesc" rows="2"></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><div class="form-label">Duration</div><input class="form-control" id="recDuration" placeholder="1h 30m"></div>
+      <div class="form-group"><div class="form-label">Access</div><select class="form-control" id="recAccess"><option value="free">Free</option><option value="paid">Paid</option></select></div>
+    </div>
+    <div class="form-group"><div class="form-label">Class Fee (LKR)</div><input type="number" class="form-control" id="recFee" placeholder="0"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('addRecordingModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addRecording()">Add Recording</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Note -->
+<div class="modal-overlay" id="addNoteModal">
+  <div class="modal">
+    <div class="modal-title">Add Note</div>
+    <div class="form-group"><div class="form-label">Title</div><input class="form-control" id="noteTitle"></div>
+    <div class="form-group"><div class="form-label">Description</div><textarea class="form-control" id="noteDesc" rows="2"></textarea></div>
+    <div class="form-group"><div class="form-label">File URL / Download Link</div><input class="form-control" id="noteUrl"></div>
+    <div class="form-row">
+      <div class="form-group"><div class="form-label">Grade</div><select class="form-control" id="noteGrade"><option value="">Select Grade</option></select></div>
+      <div class="form-group"><div class="form-label">Subject</div><select class="form-control" id="noteSubject"><option value="">Select Subject</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><div class="form-label">Access</div><select class="form-control" id="noteAccess"><option value="free">Free</option><option value="paid">Paid</option></select></div>
+      <div class="form-group"><div class="form-label">Price (LKR)</div><input type="number" class="form-control" id="notePrice" value="0"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('addNoteModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addNote()">Add Note</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Quiz -->
+<div class="modal-overlay" id="addQuizModal">
+  <div class="modal" style="max-width:700px;">
+    <div class="modal-title">Create Quiz</div>
+    <div class="form-row">
+      <div class="form-group"><div class="form-label">Quiz Title</div><input class="form-control" id="quizTitle"></div>
+      <div class="form-group"><div class="form-label">Pass Mark (%)</div><input type="number" class="form-control" id="quizPass" value="60"></div>
+    </div>
+    <div class="form-group"><div class="form-label">Time Limit (minutes, 0=unlimited)</div><input type="number" class="form-control" id="quizTime" value="0"></div>
+    <div style="margin-bottom:12px;font-weight:600;font-size:14px;">Questions</div>
+    <div id="quizQuestionsContainer"></div>
+    <button class="btn btn-secondary" onclick="addQuestion()" style="margin-bottom:16px;">+ Add Question</button>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('addQuizModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveQuiz()">Create Quiz</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Live Class -->
+<div class="modal-overlay" id="addLiveModal">
+  <div class="modal">
+    <div class="modal-title">Schedule Live Class</div>
+    <div class="form-group"><div class="form-label">Title</div><input class="form-control" id="liveTitle"></div>
+    <div class="form-row">
+      <div class="form-group"><div class="form-label">Date</div><input type="date" class="form-control" id="liveDate"></div>
+      <div class="form-group"><div class="form-label">Time</div><input type="time" class="form-control" id="liveTime"></div>
+    </div>
+    <div class="form-group"><div class="form-label">Platform</div><select class="form-control" id="livePlatform"><option>Zoom</option><option>Google Meet</option><option>YouTube Live</option><option>Other</option></select></div>
+    <div class="form-group"><div class="form-label">Join Link</div><input class="form-control" id="liveLink"></div>
+    <div class="form-group"><div class="form-label">Description</div><textarea class="form-control" id="liveDesc" rows="2"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('addLiveModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addLiveClass()">Schedule</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Timetable -->
+<div class="modal-overlay" id="addTimetableModal">
+  <div class="modal">
+    <div class="modal-title">Add Timetable Slot</div>
+    <div class="form-row">
+      <div class="form-group"><div class="form-label">Day</div><select class="form-control" id="ttDay"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option></select></div>
+      <div class="form-group"><div class="form-label">Subject</div><input class="form-control" id="ttSubject"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><div class="form-label">Start Time</div><input type="time" class="form-control" id="ttStart"></div>
+      <div class="form-group"><div class="form-label">End Time</div><input type="time" class="form-control" id="ttEnd"></div>
+    </div>
+    <div class="form-group"><div class="form-label">Venue / Notes</div><input class="form-control" id="ttVenue"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('addTimetableModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addTimetableSlot()">Add Slot</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Product -->
+<div class="modal-overlay" id="addProductModal">
+  <div class="modal">
+    <div class="modal-title">Add Store Product</div>
+    <div class="form-group"><div class="form-label">Product Name</div><input class="form-control" id="prodName"></div>
+    <div class="form-group"><div class="form-label">Description</div><textarea class="form-control" id="prodDesc" rows="2"></textarea></div>
+    <div class="form-group"><div class="form-label">Image/Preview URL</div><input class="form-control" id="prodImg"></div>
+    <div class="form-row">
+      <div class="form-group"><div class="form-label">Price (LKR)</div><input type="number" class="form-control" id="prodPrice"></div>
+      <div class="form-group"><div class="form-label">Stock</div><input type="number" class="form-control" id="prodStock" value="100"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('addProductModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addProduct()">Add Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Announcement -->
+<div class="modal-overlay" id="addAnnouncementModal">
+  <div class="modal">
+    <div class="modal-title">New Announcement</div>
+    <div class="form-group"><div class="form-label">Title</div><input class="form-control" id="annTitle"></div>
+    <div class="form-group"><div class="form-label">Message</div><textarea class="form-control" id="annMsg" rows="4"></textarea></div>
+    <div class="form-group"><div class="form-label">Priority</div><select class="form-control" id="annPriority"><option value="normal">Normal</option><option value="important">Important</option><option value="urgent">Urgent</option></select></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('addAnnouncementModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="sendAnnouncement()">Send to All Students</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Payment Method -->
+<div class="modal-overlay" id="addMethodModal">
+  <div class="modal">
+    <div class="modal-title">Add Payment Method</div>
+    <div class="form-group"><div class="form-label">Method Name</div><input class="form-control" id="methName" placeholder="e.g. Bank Transfer"></div>
+    <div class="form-group"><div class="form-label">Details (account info, etc.)</div><textarea class="form-control" id="methDetails" rows="3"></textarea></div>
+    <div class="form-group"><div class="form-label">Available</div><select class="form-control" id="methAvail"><option value="true">Yes</option><option value="false">No</option></select></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('addMethodModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addPayMethod()">Add Method</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Support Ticket -->
+<div class="modal-overlay" id="addTicketModal">
+  <div class="modal">
+    <div class="modal-title">New Support Ticket</div>
+    <div class="form-group"><div class="form-label">Subject</div><input class="form-control" id="tickSubject"></div>
+    <div class="form-group"><div class="form-label">Message</div><textarea class="form-control" id="tickMsg" rows="4"></textarea></div>
+    <div class="form-group"><div class="form-label">Priority</div><select class="form-control" id="tickPriority"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('addTicketModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitTicket()">Submit Ticket</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+const SUPABASE_URL = 'https://vxrxncjixwqqaasmkpvw.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4cnhuY2ppeHdxcWFhc21rcHZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTI3MzMsImV4cCI6MjA4OTE2ODczM30.QESIHemwVvSierW1k_H_np9w60kPs4rMku5n2vzQeG0';
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let teacherProfile = null;
+let currentTab = 'dashboard';
+let quizQCount = 0;
+
+// ===== INIT =====
+async function init() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { window.location.href = 'index.html'; return; }
+  currentUser = session.user;
+  await loadProfile();
+  await loadDashboard();
+  await loadNotifications();
+  // Log session
+  logActivity('Viewed teacher portal');
+}
+
+async function loadProfile() {
+  const { data: p } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  const { data: t } = await sb.from('teacher_profiles').select('*').eq('user_id', currentUser.id).single();
+  teacherProfile = { ...p, ...t };
+  const name = (p?.first_name || '') + ' ' + (p?.last_name || '');
+  document.getElementById('sidebarName').textContent = name.trim() || 'Teacher';
+  document.getElementById('sidebarSubject').textContent = t?.subject || '—';
+  document.getElementById('sidebarEmail').textContent = currentUser.email;
+  document.getElementById('welcomeName').textContent = p?.first_name || 'Teacher';
+  document.getElementById('avatarInitial').textContent = (p?.first_name?.[0] || 'T').toUpperCase();
+  // Fill profile form
+  if (p) {
+    document.getElementById('pFirstName').value = p.first_name || '';
+    document.getElementById('pLastName').value = p.last_name || '';
+    document.getElementById('pNic').value = p.nic_number || '';
+    document.getElementById('pPhone').value = p.work_number || '';
+    document.getElementById('pWa').value = p.whatsapp_number || '';
+    document.getElementById('pAddress').value = p.address || '';
+    document.getElementById('pCity').value = p.city || '';
+    document.getElementById('pDistrict').value = p.district || '';
+  }
+  if (t) {
+    document.getElementById('pBank').value = t.bank_name || '';
+    document.getElementById('pBranch').value = t.bank_branch || '';
+    document.getElementById('pAccNum').value = t.bank_number || '';
+    document.getElementById('pAccName').value = t.bank_account_name || '';
+    document.getElementById('pSubject').value = t.subject || '';
+    document.getElementById('pGrade').value = t.grade || '';
+    document.getElementById('pBio').value = t.notes || '';
+  }
+  // Access settings
+  document.getElementById('recExpiry').value = t?.recording_expiry_days || 0;
+  document.getElementById('maxDevices').value = t?.max_devices || 3;
+}
+
+async function loadDashboard() {
+  const uid = currentUser.id;
+  const [students, recs, notes, quizzes, live, pending] = await Promise.all([
+    sb.from('enrollments').select('id', { count: 'exact' }).eq('teacher_id', uid),
+    sb.from('recordings').select('id', { count: 'exact' }).eq('teacher_id', uid),
+    sb.from('notes').select('id', { count: 'exact' }).eq('teacher_id', uid),
+    sb.from('quizzes').select('id', { count: 'exact' }).eq('teacher_id', uid),
+    sb.from('live_classes').select('id', { count: 'exact' }).eq('teacher_id', uid),
+    sb.from('recording_access_requests').select('id', { count: 'exact' }).eq('teacher_id', uid).eq('status', 'pending'),
+  ]);
+  document.getElementById('statStudents').textContent = students.count || 0;
+  document.getElementById('statRecs').textContent = recs.count || 0;
+  document.getElementById('statNotes').textContent = notes.count || 0;
+  document.getElementById('statQuizzes').textContent = quizzes.count || 0;
+  document.getElementById('statLive').textContent = live.count || 0;
+  document.getElementById('statPending').textContent = pending.count || 0;
+  // Recent access requests
+  const { data: reqs } = await sb.from('recording_access_requests')
+    .select('*, profiles!student_id(first_name, last_name)')
+    .eq('teacher_id', uid).eq('status','pending').limit(5);
+  const tbody = document.getElementById('recentRequestsBody');
+  if (reqs?.length) {
+    tbody.innerHTML = reqs.map(r => `<tr>
+      <td>${r.profiles?.first_name} ${r.profiles?.last_name}</td>
+      <td>${r.month} ${r.year}</td>
+      <td><span class="badge badge-blue">${r.access_type||'recording'}</span></td>
+      <td>${new Date(r.created_at).toLocaleDateString()}</td>
+      <td><button class="btn btn-success btn-sm" onclick="approveAccess('${r.id}')">Approve</button> <button class="btn btn-danger btn-sm" onclick="rejectAccess('${r.id}')">Reject</button></td>
+    </tr>`).join('');
+  } else {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text2);padding:20px;">No pending requests</td></tr>';
+  }
+}
+
+// ===== STUDENTS =====
+async function loadStudents() {
+  const { data } = await sb.from('enrollments')
+    .select('*, profiles!student_id(first_name, last_name, district), student_profiles!student_id(grade, batch)')
+    .eq('teacher_id', currentUser.id);
+  const tbody = document.getElementById('studentsBody');
+  if (!data?.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:32px;">No students enrolled yet</td></tr>'; return; }
+  tbody.innerHTML = data.map(e => `<tr>
+    <td>${e.profiles?.first_name} ${e.profiles?.last_name}</td>
+    <td>${e.student_profiles?.grade||'—'}</td>
+    <td>${e.student_profiles?.batch||'—'}</td>
+    <td>${e.profiles?.district||'—'}</td>
+    <td><span class="badge ${e.status==='active'?'badge-green':'badge-red'}">${e.status||'active'}</span></td>
+    <td><button class="btn btn-secondary btn-sm" onclick="removeEnrollment('${e.id}')">Remove</button></td>
+  </tr>`).join('');
+}
+function filterStudents(q) { /* client-side filter */ const rows = document.querySelectorAll('#studentsBody tr'); rows.forEach(r => { r.style.display = r.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none'; }); }
+async function removeEnrollment(id) { if (!confirm('Remove this student?')) return; await sb.from('enrollments').delete().eq('id', id); await loadStudents(); toast('Student removed','success'); }
+
+// ===== RECORDINGS =====
+async function loadRecordings() {
+  let q = sb.from('recordings').select('*').eq('teacher_id', currentUser.id);
+  const yr = document.getElementById('recYearFilter')?.value;
+  const mo = document.getElementById('recMonthFilter')?.value;
+  const ty = document.getElementById('recTypeFilter')?.value;
+  if (yr) q = q.eq('year', yr);
+  if (mo) q = q.eq('month', mo);
+  if (ty) q = q.eq('type', ty);
+  const { data } = await q.order('created_at', { ascending: false });
+  const tbody = document.getElementById('recordingsBody');
+  if (!data?.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text2);padding:32px;">No recordings yet</td></tr>'; return; }
+  tbody.innerHTML = data.map(r => `<tr>
+    <td><div style="font-weight:600;">${r.title}</div><div style="font-size:11px;color:var(--text2);">${r.description||''}</div></td>
+    <td><span class="badge badge-purple">${r.type}</span></td>
+    <td>${r.month} ${r.year}</td>
+    <td>${r.duration||'—'}</td>
+    <td>${r.view_count||0}</td>
+    <td><span class="badge ${r.access_type==='free'?'badge-green':'badge-amber'}">${r.access_type||'free'}</span></td>
+    <td style="white-space:nowrap;">
+      <button class="btn btn-secondary btn-sm" onclick="editRecording('${r.id}')">Edit</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteRecording('${r.id}')">Del</button>
+    </td>
+  </tr>`).join('');
+}
+async function addRecording() {
+  const data = { teacher_id: currentUser.id, title: v('recTitle'), type: v('recType'), year: parseInt(v('recYear')), month: v('recMonth'), video_url: v('recUrl'), thumbnail_url: v('recThumb'), description: v('recDesc'), duration: v('recDuration'), access_type: v('recAccess'), class_fee: parseFloat(v('recFee'))||0 };
+  const { error } = await sb.from('recordings').insert(data);
+  if (error) { toast(error.message,'error'); return; }
+  closeModal('addRecordingModal'); toast('Recording added!','success'); await loadRecordings();
+}
+async function deleteRecording(id) { if (!confirm('Delete this recording?')) return; await sb.from('recordings').delete().eq('id',id); await loadRecordings(); toast('Deleted','success'); }
+
+// ===== NOTES =====
+async function loadNotes() {
+  const { data } = await sb.from('notes').select('*').eq('teacher_id', currentUser.id).order('created_at', { ascending: false });
+  const tbody = document.getElementById('notesBody');
+  if (!data?.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:32px;">No notes yet</td></tr>'; return; }
+  tbody.innerHTML = data.map(n => `<tr>
+    <td><div style="font-weight:600;">${n.title}</div></td>
+    <td>${n.grade||'—'}</td>
+    <td>${n.subject||'—'}</td>
+    <td>${n.download_count||0}</td>
+    <td><span class="badge ${n.access_type==='free'?'badge-green':'badge-amber'}">${n.access_type||'free'}</span></td>
+    <td><button class="btn btn-danger btn-sm" onclick="deleteNote('${n.id}')">Delete</button></td>
+  </tr>`).join('');
+}
+async function addNote() {
+  const data = { teacher_id: currentUser.id, title: v('noteTitle'), description: v('noteDesc'), file_url: v('noteUrl'), grade: v('noteGrade'), subject: v('noteSubject'), access_type: v('noteAccess'), price: parseFloat(v('notePrice'))||0 };
+  const { error } = await sb.from('notes').insert(data);
+  if (error) { toast(error.message,'error'); return; }
+  closeModal('addNoteModal'); toast('Note added!','success'); await loadNotes();
+}
+async function deleteNote(id) { if (!confirm('Delete this note?')) return; await sb.from('notes').delete().eq('id',id); await loadNotes(); toast('Deleted','success'); }
+
+// ===== QUIZZES =====
+async function loadQuizzes() {
+  const { data } = await sb.from('quizzes').select('*, quiz_questions(id), quiz_attempts(id)').eq('teacher_id', currentUser.id);
+  const tbody = document.getElementById('quizzesBody');
+  if (!data?.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:32px;">No quizzes yet</td></tr>'; return; }
+  tbody.innerHTML = data.map(q => `<tr>
+    <td style="font-weight:600;">${q.title}</td>
+    <td>${q.quiz_questions?.length||0}</td>
+    <td>${q.pass_mark||60}%</td>
+    <td>${q.quiz_attempts?.length||0}</td>
+    <td><span class="badge ${q.is_active?'badge-green':'badge-red'}">${q.is_active?'Active':'Inactive'}</span></td>
+    <td><button class="btn btn-danger btn-sm" onclick="deleteQuiz('${q.id}')">Delete</button></td>
+  </tr>`).join('');
+}
+function addQuestion() {
+  quizQCount++;
+  const c = document.getElementById('quizQuestionsContainer');
+  c.insertAdjacentHTML('beforeend', `<div id="qq${quizQCount}" style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:10px;">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span style="font-weight:600;font-size:13px;">Q${quizQCount}</span><button class="btn btn-danger btn-sm" onclick="this.parentElement.parentElement.remove()">Remove</button></div>
+    <input class="form-control" placeholder="Question text" style="margin-bottom:8px;" data-role="question">
+    ${[1,2,3,4].map(i=>`<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;"><input type="radio" name="correct_${quizQCount}" value="${i}"><input class="form-control" placeholder="Option ${i}" data-role="opt${i}"></div>`).join('')}
+  </div>`);
+}
+async function saveQuiz() {
+  const title = v('quizTitle'); const pass = parseInt(v('quizPass'))||60; const time = parseInt(v('quizTime'))||0;
+  const { data: quiz, error } = await sb.from('quizzes').insert({ teacher_id: currentUser.id, title, pass_mark: pass, time_limit: time, is_active: true }).select().single();
+  if (error) { toast(error.message,'error'); return; }
+  const questions = [];
+  document.querySelectorAll('#quizQuestionsContainer > div').forEach(qDiv => {
+    const q = qDiv.querySelector('[data-role="question"]')?.value;
+    const opts = [1,2,3,4].map(i => qDiv.querySelector(`[data-role="opt${i}"]`)?.value);
+    const correct = qDiv.querySelector('input[type="radio"]:checked')?.value;
+    if (q) questions.push({ quiz_id: quiz.id, question_text: q, option_a: opts[0], option_b: opts[1], option_c: opts[2], option_d: opts[3], correct_answer: ['a','b','c','d'][parseInt(correct)-1] });
+  });
+  if (questions.length) await sb.from('quiz_questions').insert(questions);
+  closeModal('addQuizModal'); toast('Quiz created!','success'); await loadQuizzes();
+}
+async function deleteQuiz(id) { if(!confirm('Delete quiz?'))return; await sb.from('quizzes').delete().eq('id',id); await loadQuizzes(); toast('Deleted','success'); }
+
+// ===== LIVE CLASSES =====
+async function loadLiveClasses() {
+  const { data } = await sb.from('live_classes').select('*, live_class_joins(id)').eq('teacher_id', currentUser.id).order('scheduled_at', { ascending: false });
+  const tbody = document.getElementById('liveBody');
+  if (!data?.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:32px;">No live classes yet</td></tr>'; return; }
+  const now = new Date();
+  tbody.innerHTML = data.map(l => {
+    const dt = new Date(l.scheduled_at);
+    const status = dt > now ? 'upcoming' : 'completed';
+    return `<tr>
+      <td style="font-weight:600;">${l.title}</td>
+      <td>${dt.toLocaleDateString()} ${dt.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</td>
+      <td>${l.platform||'—'}</td>
+      <td>${l.live_class_joins?.length||0}</td>
+      <td><span class="badge ${status==='upcoming'?'badge-blue':'badge-green'}">${status}</span></td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteLive('${l.id}')">Delete</button></td>
+    </tr>`;
+  }).join('');
+}
+async function addLiveClass() {
+  const dt = v('liveDate') + 'T' + v('liveTime');
+  const { error } = await sb.from('live_classes').insert({ teacher_id: currentUser.id, title: v('liveTitle'), scheduled_at: dt, platform: v('livePlatform'), join_link: v('liveLink'), description: v('liveDesc') });
+  if (error) { toast(error.message,'error'); return; }
+  // Notify students
+  const { data: enrolls } = await sb.from('enrollments').select('student_id').eq('teacher_id', currentUser.id);
+  if (enrolls?.length) {
+    const notifs = enrolls.map(e => ({ user_id: e.student_id, title: 'New Live Class', message: `${v('liveTitle')} scheduled on ${v('liveDate')}`, type: 'live_class' }));
+    await sb.from('notifications').insert(notifs);
+  }
+  closeModal('addLiveModal'); toast('Live class scheduled!','success'); await loadLiveClasses();
+}
+async function deleteLive(id) { if(!confirm('Delete?'))return; await sb.from('live_classes').delete().eq('id',id); await loadLiveClasses(); toast('Deleted','success'); }
+
+// ===== TIMETABLE =====
+async function loadTimetable() {
+  const { data } = await sb.from('timetable').select('*').eq('teacher_id', currentUser.id).order('day_order');
+  const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  const container = document.getElementById('timetableContainer');
+  if (!data?.length) { container.innerHTML = '<div class="empty-state"><p>No timetable entries yet</p></div>'; return; }
+  const grouped = {};
+  data.forEach(s => { if (!grouped[s.day]) grouped[s.day] = []; grouped[s.day].push(s); });
+  container.innerHTML = days.filter(d => grouped[d]).map(day => `<div class="timetable-day">
+    <div class="timetable-day-header">📅 ${day}</div>
+    ${grouped[day].map(s => `<div class="timetable-slot">
+      <span style="color:var(--cyan);font-weight:600;min-width:100px;">${s.start_time} - ${s.end_time}</span>
+      <span style="font-weight:500;">${s.subject||'—'}</span>
+      <span style="color:var(--text2);font-size:12px;margin-left:auto;">${s.venue||''}</span>
+      <button class="btn btn-danger btn-sm" onclick="deleteTimetable('${s.id}')">Del</button>
+    </div>`).join('')}
+  </div>`).join('');
+}
+async function addTimetableSlot() {
+  const day = v('ttDay');
+  const dayOrder = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].indexOf(day);
+  const { error } = await sb.from('timetable').insert({ teacher_id: currentUser.id, day, subject: v('ttSubject'), start_time: v('ttStart'), end_time: v('ttEnd'), venue: v('ttVenue'), day_order: dayOrder });
+  if (error) { toast(error.message,'error'); return; }
+  closeModal('addTimetableModal'); toast('Slot added!','success'); await loadTimetable();
+}
+async function deleteTimetable(id) { if(!confirm('Delete slot?'))return; await sb.from('timetable').delete().eq('id',id); await loadTimetable(); toast('Deleted','success'); }
+
+// ===== STORE =====
+async function loadStore() {
+  const { data } = await sb.from('store_products').select('*, store_orders(id)').eq('teacher_id', currentUser.id).order('created_at', { ascending: false });
+  const tbody = document.getElementById('storeBody');
+  if (!data?.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text2);padding:32px;">No products yet</td></tr>'; return; }
+  tbody.innerHTML = data.map(p => `<tr>
+    <td><div style="font-weight:600;">${p.name}</div><div style="font-size:11px;color:var(--text2);">${p.description||''}</div></td>
+    <td>LKR ${(p.price||0).toLocaleString()}</td>
+    <td>${p.store_orders?.length||0}</td>
+    <td><span class="badge ${p.is_active?'badge-green':'badge-red'}">${p.is_active?'Active':'Inactive'}</span></td>
+    <td><button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')">Delete</button></td>
+  </tr>`).join('');
+}
+async function addProduct() {
+  const { error } = await sb.from('store_products').insert({ teacher_id: currentUser.id, name: v('prodName'), description: v('prodDesc'), image_url: v('prodImg'), price: parseFloat(v('prodPrice'))||0, stock: parseInt(v('prodStock'))||100, is_active: true });
+  if (error) { toast(error.message,'error'); return; }
+  closeModal('addProductModal'); toast('Product added!','success'); await loadStore();
+}
+async function deleteProduct(id) { if(!confirm('Delete product?'))return; await sb.from('store_products').delete().eq('id',id); await loadStore(); toast('Deleted','success'); }
+
+// ===== PAYMENTS =====
+async function loadPayments() {
+  // Access requests
+  const { data: reqs } = await sb.from('recording_access_requests')
+    .select('*, profiles!student_id(first_name, last_name)')
+    .eq('teacher_id', currentUser.id).order('created_at', { ascending: false });
+  const tbody = document.getElementById('accessReqBody');
+  if (!reqs?.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text2);padding:32px;">No access requests</td></tr>'; }
+  else tbody.innerHTML = reqs.map(r => `<tr>
+    <td>${r.profiles?.first_name} ${r.profiles?.last_name}</td>
+    <td>${r.month} ${r.year}</td>
+    <td>${new Date(r.created_at).toLocaleDateString()}</td>
+    <td><span class="badge ${r.status==='approved'?'badge-green':r.status==='rejected'?'badge-red':'badge-amber'}">${r.status}</span></td>
+    <td>${r.status==='pending'?`<button class="btn btn-success btn-sm" onclick="approveAccess('${r.id}')">Approve</button> <button class="btn btn-danger btn-sm" onclick="rejectAccess('${r.id}')">Reject</button>`:'—'}</td>
+  </tr>`).join('');
+  // Payment history
+  const { data: pays } = await sb.from('payments')
+    .select('*, profiles!student_id(first_name, last_name)')
+    .eq('teacher_id', currentUser.id).order('created_at', { ascending: false });
+  const payTbody = document.getElementById('payHistBody');
+  if (!pays?.length) { payTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:32px;">No payment history</td></tr>'; }
+  else payTbody.innerHTML = pays.map(p => `<tr>
+    <td>${p.profiles?.first_name} ${p.profiles?.last_name}</td>
+    <td>LKR ${(p.amount||0).toLocaleString()}</td>
+    <td>${p.month||'—'} ${p.year||''}</td>
+    <td style="font-size:12px;font-family:monospace;">${p.transaction_id||'—'}</td>
+    <td>${new Date(p.created_at).toLocaleDateString()}</td>
+    <td><span class="badge ${p.status==='confirmed'?'badge-green':'badge-amber'}">${p.status||'pending'}</span></td>
+  </tr>`).join('');
+  // Payment methods
+  await loadPayMethods();
+}
+async function loadPayMethods() {
+  const { data } = await sb.from('payment_methods').select('*').eq('teacher_id', currentUser.id);
+  const tbody = document.getElementById('methodsBody');
+  if (!data?.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text2);padding:32px;">No payment methods added</td></tr>'; return; }
+  tbody.innerHTML = data.map(m => `<tr>
+    <td style="font-weight:600;">${m.name}</td>
+    <td style="font-size:12px;">${m.details||'—'}</td>
+    <td><span class="badge ${m.is_available?'badge-green':'badge-red'}">${m.is_available?'Available':'Unavailable'}</span></td>
+    <td>
+      <button class="btn btn-secondary btn-sm" onclick="toggleMethod('${m.id}',${!m.is_available})">${m.is_available?'Disable':'Enable'}</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteMethod('${m.id}')">Delete</button>
+    </td>
+  </tr>`).join('');
+}
+async function approveAccess(id) { await sb.from('recording_access_requests').update({ status: 'approved' }).eq('id', id); toast('Access approved!','success'); await loadPayments(); await loadDashboard(); }
+async function rejectAccess(id) { await sb.from('recording_access_requests').update({ status: 'rejected' }).eq('id', id); toast('Access rejected','success'); await loadPayments(); await loadDashboard(); }
+async function addPayMethod() {
+  const { error } = await sb.from('payment_methods').insert({ teacher_id: currentUser.id, name: v('methName'), details: v('methDetails'), is_available: v('methAvail')==='true' });
+  if (error) { toast(error.message,'error'); return; }
+  closeModal('addMethodModal'); toast('Method added!','success'); await loadPayMethods();
+}
+async function toggleMethod(id, val) { await sb.from('payment_methods').update({ is_available: val }).eq('id',id); await loadPayMethods(); }
+async function deleteMethod(id) { if(!confirm('Delete?'))return; await sb.from('payment_methods').delete().eq('id',id); await loadPayMethods(); toast('Deleted','success'); }
+
+// ===== ACCESS SETTINGS =====
+function loadFeatureAccess() {
+  const features = ['Recordings','Notes','Quizzes','Live Classes','Timetable','Store','Payments'];
+  const container = document.getElementById('featureAccessList');
+  container.innerHTML = features.map(f => `<div class="access-item">
+    <span style="font-size:14px;font-weight:500;">${f}</span>
+    <label class="toggle-switch"><input type="checkbox" id="feat${f.replace(/\s/g,'')}" checked><span class="toggle-slider"></span></label>
+  </div>`).join('');
+}
+async function saveAccessSettings() {
+  const { error } = await sb.from('teacher_access_settings').upsert({ teacher_id: currentUser.id, recording_expiry_days: parseInt(v('recExpiry'))||0, max_devices: parseInt(v('maxDevices'))||3 });
+  if (error) { toast(error.message,'error'); return; }
+  toast('Settings saved!','success');
+}
+
+// ===== ANNOUNCEMENTS =====
+async function loadAnnouncements() {
+  const { data } = await sb.from('notifications').select('*').eq('sender_id', currentUser.id).eq('type','announcement').order('created_at', { ascending: false });
+  const container = document.getElementById('announcementsList');
+  if (!data?.length) { container.innerHTML = '<div class="empty-state"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6"/></svg><p>No announcements sent yet</p></div>'; return; }
+  container.innerHTML = data.map(a => `<div class="announce-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <span style="font-weight:700;font-size:15px;">${a.title}</span>
+      <span style="font-size:12px;color:var(--text2);">${new Date(a.created_at).toLocaleDateString()}</span>
+    </div>
+    <p style="font-size:13px;color:var(--text2);">${a.message}</p>
+  </div>`).join('');
+}
+async function sendAnnouncement() {
+  const { data: enrolls } = await sb.from('enrollments').select('student_id').eq('teacher_id', currentUser.id);
+  if (!enrolls?.length) { toast('No students enrolled','error'); return; }
+  const notifs = enrolls.map(e => ({ user_id: e.student_id, sender_id: currentUser.id, title: v('annTitle'), message: v('annMsg'), type: 'announcement', priority: v('annPriority') }));
+  const { error } = await sb.from('notifications').insert(notifs);
+  if (error) { toast(error.message,'error'); return; }
+  closeModal('addAnnouncementModal'); toast(`Announcement sent to ${enrolls.length} students!`,'success'); await loadAnnouncements();
+}
+
+// ===== SUBSCRIPTION =====
+async function loadSubscription() {
+  const { data: tp } = await sb.from('teacher_profiles').select('*, packages(*)').eq('user_id', currentUser.id).single();
+  const { data: pkgs } = await sb.from('packages').select('*').order('price_monthly');
+  const container = document.getElementById('subscriptionContent');
+  const currentPkg = tp?.packages;
+  const pkgMap = { basic: 'Basic', standard: 'Standard', pro: 'Pro' };
+  container.innerHTML = `<div class="card" style="grid-column:1/-1;">
+    <div class="card-title" style="margin-bottom:16px;">Current Plan: <span style="color:var(--brand-light);">${currentPkg?.name||'None'}</span></div>
+    ${currentPkg ? `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+      ${['Commission Rate','Monthly Fee','Yearly Fee'].map((l,i) => `<div class="stat-card ${['p','c','a'][i]}">
+        <div class="stat-icon ${['p','c','a'][i]}">%</div>
+        <div class="stat-val">${i===0?(currentPkg.commission_rate||0)+'%':i===1?'LKR '+(currentPkg.price_monthly||0).toLocaleString():'LKR '+(currentPkg.price_yearly||0).toLocaleString()}</div>
+        <div class="stat-label">${l}</div>
+      </div>`).join('')}
+    </div>` : '<p style="color:var(--text2);">No active plan</p>'}
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+      <div style="font-weight:700;margin-bottom:12px;">Upgrade Your Plan</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+        ${(pkgs||[]).map(p => `<div class="pkg-card ${currentPkg?.id===p.id?'current-pkg':''}">
+          ${currentPkg?.id===p.id?'<div class="pkg-badge">Current</div>':''}
+          <div style="font-family:\'Syne\',sans-serif;font-weight:700;font-size:16px;margin-bottom:8px;">${p.name}</div>
+          <div style="font-size:22px;font-weight:800;color:var(--brand-light);">LKR ${(p.price_monthly||0).toLocaleString()}<span style="font-size:13px;color:var(--text2);">/mo</span></div>
+          <div style="font-size:12px;color:var(--text2);margin:8px 0;">Commission: ${p.commission_rate||0}%</div>
+          ${currentPkg?.id!==p.id?`<button class="btn btn-primary btn-sm" style="width:100%;margin-top:8px;" onclick="requestUpgrade('${p.id}','${p.name}')">Request Upgrade</button>`:''}
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+  // Upgrade requests
+  const { data: reqs } = await sb.from('package_upgrade_requests').select('*, packages!new_package_id(name)').eq('teacher_id', currentUser.id).order('created_at', { ascending: false });
+  if (reqs?.length) {
+    container.insertAdjacentHTML('beforeend', `<div class="card" style="grid-column:1/-1;">
+      <div class="card-title" style="margin-bottom:12px;">Upgrade Requests</div>
+      <div class="table-wrap"><table><thead><tr><th>Package</th><th>Requested</th><th>Status</th></tr></thead>
+      <tbody>${reqs.map(r=>`<tr><td>${r.packages?.name}</td><td>${new Date(r.created_at).toLocaleDateString()}</td><td><span class="badge ${r.status==='approved'?'badge-green':r.status==='rejected'?'badge-red':'badge-amber'}">${r.status}</span></td></tr>`).join('')}</tbody></table></div>
+    </div>`);
+  }
+}
+async function requestUpgrade(pkgId, pkgName) {
+  if (!confirm(`Request upgrade to ${pkgName}? This will be reviewed by admin.`)) return;
+  const { error } = await sb.from('package_upgrade_requests').insert({ teacher_id: currentUser.id, new_package_id: pkgId, status: 'pending' });
+  if (error) { toast(error.message,'error'); return; }
+  toast('Upgrade request submitted! Pending admin approval.','success'); await loadSubscription();
+}
+
+// ===== REPORTS =====
+async function loadReports() {
+  const { data } = await sb.from('teacher_reports').select('*, profiles!student_id(first_name, last_name)').eq('teacher_id', currentUser.id).order('created_at', { ascending: false });
+  const tbody = document.getElementById('reportsBody');
+  if (!data?.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text2);padding:32px;">No reports received</td></tr>'; return; }
+  tbody.innerHTML = data.map(r => `<tr>
+    <td>${r.profiles?.first_name} ${r.profiles?.last_name}</td>
+    <td>${r.reason||'—'}</td>
+    <td>${new Date(r.created_at).toLocaleDateString()}</td>
+    <td><span class="badge ${r.status==='reviewed'?'badge-green':'badge-amber'}">${r.status||'pending'}</span></td>
+    <td><button class="btn btn-secondary btn-sm" onclick="markReportReviewed('${r.id}')">Mark Reviewed</button></td>
+  </tr>`).join('');
+}
+async function markReportReviewed(id) { await sb.from('teacher_reports').update({ status:'reviewed' }).eq('id',id); await loadReports(); toast('Marked as reviewed','success'); }
+
+// ===== SUPPORT =====
+async function loadSupport() {
+  const { data } = await sb.from('support_tickets').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+  const tbody = document.getElementById('ticketsBody');
+  if (!data?.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text2);padding:32px;">No tickets yet</td></tr>'; return; }
+  tbody.innerHTML = data.map(t => `<tr>
+    <td style="font-weight:600;">${t.subject}</td>
+    <td><span class="badge ${t.status==='resolved'?'badge-green':t.status==='open'?'badge-blue':'badge-amber'}">${t.status}</span></td>
+    <td>${new Date(t.created_at).toLocaleDateString()}</td>
+    <td><button class="btn btn-secondary btn-sm">View</button></td>
+  </tr>`).join('');
+  // Hotlines
+  const { data: hl } = await sb.from('hotlines').select('*').eq('is_active', true);
+  document.getElementById('hotlinesList').innerHTML = hl?.length ? hl.map(h => `<div style="display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--border);">
+    <span style="font-size:20px;">📞</span>
+    <div><div style="font-weight:600;">${h.name}</div><div style="color:var(--cyan);font-size:14px;">${h.number}</div><div style="font-size:12px;color:var(--text2);">${h.description||''}</div></div>
+  </div>`).join('') : '<div class="empty-state"><p>No hotlines available</p></div>';
+}
+async function submitTicket() {
+  const { error } = await sb.from('support_tickets').insert({ user_id: currentUser.id, subject: v('tickSubject'), message: v('tickMsg'), priority: v('tickPriority'), status: 'open', role: 'teacher' });
+  if (error) { toast(error.message,'error'); return; }
+  closeModal('addTicketModal'); toast('Ticket submitted!','success'); await loadSupport();
+}
+
+// ===== NOTIFICATIONS =====
+async function loadNotifications() {
+  const { data } = await sb.from('notifications').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(30);
+  const unread = data?.filter(n => !n.is_read).length || 0;
+  document.getElementById('notifDot').style.display = unread > 0 ? 'block' : 'none';
+  const list = document.getElementById('notifList');
+  if (!data?.length) { list.innerHTML = '<div class="empty-state"><p>No notifications</p></div>'; return; }
+  list.innerHTML = data.map(n => `<div class="notif-item ${n.is_read?'':'unread'}" onclick="markRead('${n.id}')">
+    <div style="display:flex;gap:8px;align-items:flex-start;">
+      ${!n.is_read?'<div class="notif-dot2"></div>':'<div style="width:8px;"></div>'}
+      <div><div style="font-size:13px;font-weight:600;">${n.title}</div><div style="font-size:12px;color:var(--text2);">${n.message}</div><div style="font-size:11px;color:var(--text2);margin-top:4px;">${new Date(n.created_at).toLocaleString()}</div></div>
+    </div>
+  </div>`).join('');
+}
+async function markRead(id) { await sb.from('notifications').update({ is_read: true }).eq('id', id); await loadNotifications(); }
+async function markAllRead() { await sb.from('notifications').update({ is_read: true }).eq('user_id', currentUser.id); await loadNotifications(); toast('All marked as read','success'); }
+
+// ===== ACTIVITY LOG =====
+async function logActivity(action) {
+  await sb.from('activity_logs').insert({ user_id: currentUser.id, action, ip_address: 'client', user_agent: navigator.userAgent });
+}
+
+// ===== NAVIGATION =====
+function showTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => { if (n.getAttribute('onclick')?.includes(`'${tab}'`)) n.classList.add('active'); });
+  document.getElementById('topbarTitle').textContent = tab.charAt(0).toUpperCase() + tab.slice(1);
+  currentTab = tab;
+  closeSidebar();
+  // Lazy load
+  const loaders = {
+    students: loadStudents,
+    recordings: loadRecordings,
+    notes: loadNotes,
+    quizzes: loadQuizzes,
+    live: loadLiveClasses,
+    timetable: loadTimetable,
+    store: loadStore,
+    payments: loadPayments,
+    access: () => { loadFeatureAccess(); },
+    announcements: loadAnnouncements,
+    subscription: loadSubscription,
+    reports: loadReports,
+    support: loadSupport,
+  };
+  loaders[tab]?.();
+  logActivity(`Viewed ${tab} tab`);
+}
+
+function switchPayTab(t) {
+  ['access','history','methods'].forEach(x => { document.getElementById(`payTab-${x}`).style.display = x===t?'block':'none'; });
+  document.querySelectorAll('#tab-payments .tab').forEach((el,i) => { el.classList.toggle('active', ['access','history','methods'][i]===t); });
+}
+function switchSupportTab(t) {
+  ['tickets','hotlines'].forEach(x => { document.getElementById(`supportTab-${x}`).style.display = x===t?'block':'none'; });
+  document.querySelectorAll('#tab-support .tab').forEach((el,i) => { el.classList.toggle('active', ['tickets','hotlines'][i]===t); });
+}
+
+// ===== PROFILE =====
+async function saveProfile() {
+  const { error } = await sb.from('profiles').update({ first_name: v('pFirstName'), last_name: v('pLastName'), nic_number: v('pNic'), work_number: v('pPhone'), whatsapp_number: v('pWa'), address: v('pAddress'), city: v('pCity'), district: v('pDistrict') }).eq('id', currentUser.id);
+  if (error) { toast(error.message,'error'); return; }
+  toast('Profile saved!','success'); await loadProfile();
+}
+async function saveBankDetails() {
+  const { error } = await sb.from('teacher_profiles').update({ bank_name: v('pBank'), bank_branch: v('pBranch'), bank_number: v('pAccNum'), bank_account_name: v('pAccName') }).eq('user_id', currentUser.id);
+  if (error) { toast(error.message,'error'); return; }
+  toast('Bank details updated!','success');
+}
+async function saveBio() {
+  const { error } = await sb.from('teacher_profiles').update({ notes: v('pBio') }).eq('user_id', currentUser.id);
+  if (error) { toast(error.message,'error'); return; }
+  toast('Bio saved!','success');
+}
+
+// ===== MODAL =====
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); }));
+
+// ===== SIDEBAR =====
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('show'); }
+
+// ===== THEME =====
+function toggleTheme() { const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', t); localStorage.setItem('nvx-theme', t); }
+
+// ===== TOAST =====
+function toast(msg, type='success') {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${type==='success'?'✅':'❌'}</span>${msg}`;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+// ===== NOTIF PANEL =====
+function toggleNotifPanel() { document.getElementById('notifPanel').classList.toggle('open'); }
+
+// ===== LOGOUT =====
+async function logout() {
+  if (!confirm('Sign out?')) return;
+  await sb.from('session_logs').update({ logout_at: new Date().toISOString() }).eq('user_id', currentUser.id).is('logout_at', null);
+  await sb.auth.signOut();
+  window.location.href = 'index.html';
+}
+
+// ===== HELPER =====
+function v(id) { return document.getElementById(id)?.value || ''; }
+
+// ===== RESPONSIVE =====
+window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
+
+// ===== INIT THEME =====
+const savedTheme = localStorage.getItem('nvx-theme') || 'dark';
+document.documentElement.setAttribute('data-theme', savedTheme);
+
+// ===== START =====
+init();
+</script>
+</body>
+</html>
