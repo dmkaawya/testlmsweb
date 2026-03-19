@@ -602,7 +602,7 @@ async function boot(){
     sb.from('grades').select('id,name,sort_order').eq('is_active',true).order('sort_order'),
     sb.from('packages').select('*').eq('is_active',true),
   ]);
-  const dOpts='<option value="">Select district</option>'+(dists||[]).map(d=>`<option value="${d.name}">${d.name}</option>`).join('');
+  const dOpts='<option value="">Select district</option><option value="kalutara">Kalutara</option><option value="colombo">colombo</option>'+(dists||[]).map(d=>`<option value="${d.name}">${d.name}</option>`).join('');
   document.getElementById('s-dist').innerHTML=dOpts;
   document.getElementById('t-dist').innerHTML=dOpts;
   const gOpts='<option value="">Select grade</option>'+(grades||[]).map(g=>`<option value="${g.id}">${g.name}</option>`).join('');
