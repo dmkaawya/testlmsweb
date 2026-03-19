@@ -1,448 +1,847 @@
 <!DOCTYPE html>
-<html lang="si" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nova X Edu - Smart Learning Platform</title>
-  <meta name="description" content="Nova X Edu - Sri Lanka's Most Advanced Learning Management System for Students">
-  
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  
-  <!-- Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="description" content="Nova X Edu — Sri Lanka's Premier Learning Platform. Live classes, recordings, notes, quizzes and more." />
+  <title>Nova X Edu — Learning Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    /* ════ TOKENS ════ */
+    :root{
+      --brand:#6D28D9;--brand2:#9333EA;--bl:#C4B5FD;
+      --a1:#F59E0B;--a2:#06B6D4;--ok:#10B981;--err:#EF4444;--warn:#F97316;
+      --glow:rgba(109,40,217,.3);--glow2:rgba(109,40,217,.12);
+    }
+    [data-theme="dark"]{
+      --bg:#07071A;--b1:#0C0C24;--b2:#11112E;--b3:#181838;--b4:#1E1E42;--b5:#242452;
+      --s1:rgba(255,255,255,.03);--s2:rgba(255,255,255,.06);--s3:rgba(255,255,255,.1);
+      --br:rgba(255,255,255,.07);--br2:rgba(255,255,255,.12);--br3:rgba(255,255,255,.2);
+      --t:#EFECFF;--t2:#A89EC8;--t3:#6D668C;--t4:#3E3958;
+      --sh:0 4px 30px rgba(0,0,0,.55);--sh2:0 12px 60px rgba(0,0,0,.75);
+    }
+    [data-theme="light"]{
+      --bg:#F5F3FF;--b1:#EDE9FE;--b2:#FFFFFF;--b3:#F3F1FF;--b4:#E9E4FF;--b5:#DDD6FE;
+      --s1:rgba(109,40,217,.03);--s2:rgba(109,40,217,.06);--s3:rgba(109,40,217,.1);
+      --br:rgba(0,0,0,.07);--br2:rgba(0,0,0,.12);--br3:rgba(109,40,217,.28);
+      --t:#19104A;--t2:#4A3A8A;--t3:#7A6BAF;--t4:#B0A5D4;
+      --sh:0 4px 30px rgba(109,40,217,.08);--sh2:0 12px 60px rgba(109,40,217,.18);
+    }
+
+    /* ════ RESET ════ */
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;overflow-x:hidden;transition:background .35s,color .35s;-webkit-font-smoothing:antialiased}
+    h1,h2,h3,h4{font-family:'Syne',sans-serif;letter-spacing:-.02em}
+    a{text-decoration:none;color:inherit}
+    button{cursor:pointer;border:none;outline:none;font-family:inherit}
+    input,select,textarea{outline:none;font-family:inherit}
+
+    /* ════ BG SCENE ════ */
+    .scene{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+    .orb{position:absolute;border-radius:50%;filter:blur(100px);will-change:transform}
+    .o1{width:700px;height:700px;background:radial-gradient(circle,rgba(109,40,217,.35),transparent 70%);top:-250px;left:-200px;animation:float1 20s ease-in-out infinite}
+    .o2{width:500px;height:500px;background:radial-gradient(circle,rgba(6,182,212,.2),transparent 70%);bottom:-150px;right:-150px;animation:float2 24s ease-in-out infinite}
+    .o3{width:350px;height:350px;background:radial-gradient(circle,rgba(245,158,11,.15),transparent 70%);top:45%;left:55%;animation:float3 18s ease-in-out infinite}
+    @keyframes float1{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(40px,-30px) scale(1.07)}66%{transform:translate(-25px,45px) scale(.94)}}
+    @keyframes float2{0%,100%{transform:translate(0,0)}50%{transform:translate(-50px,-45px) scale(1.1)}}
+    @keyframes float3{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(calc(-50% + 35px),calc(-50% - 25px)) scale(1.08)}}
+    [data-theme="dark"] .grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.023) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.023) 1px,transparent 1px);background-size:56px 56px}
+    [data-theme="light"] .orb{filter:blur(130px)}
+
+    /* ════ LOADING ════ */
+    #ldr{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;transition:opacity .4s}
+    #ldr.out{opacity:0;pointer-events:none}
+    .ldr-logo{display:flex;align-items:center;gap:12px;font-family:'Syne',sans-serif;font-size:28px;font-weight:800}
+    .ldr-mark{width:46px;height:46px;background:linear-gradient(135deg,var(--brand),var(--brand2));border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;font-weight:800;box-shadow:0 0 30px var(--glow);animation:markPulse 2s ease infinite}
+    @keyframes markPulse{0%,100%{box-shadow:0 0 30px var(--glow)}50%{box-shadow:0 0 55px rgba(109,40,217,.6)}}
+    .ldr-logo em{font-style:normal;color:var(--bl)}
+    .ldr-track{width:200px;height:2px;background:var(--b4);border-radius:2px;overflow:hidden}
+    .ldr-fill{height:100%;background:linear-gradient(90deg,var(--brand),var(--a2),var(--bl));animation:fill 1.6s cubic-bezier(.25,1,.5,1) forwards}
+    @keyframes fill{from{width:0}to{width:100%}}
+    .ldr-tag{font-size:12px;color:var(--t3);animation:blink 1.5s ease infinite}
+    @keyframes blink{0%,100%{opacity:.4}50%{opacity:1}}
+
+    /* ════ NAV ════ */
+    nav{position:fixed;top:0;inset-inline:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:66px;background:rgba(7,7,26,.72);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--br);transition:all .3s}
+    [data-theme="light"] nav{background:rgba(245,243,255,.82)}
+    .nlogo{display:flex;align-items:center;gap:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:20px;cursor:pointer;transition:opacity .2s}
+    .nlogo:hover{opacity:.85}
+    .nmark{width:34px;height:34px;background:linear-gradient(135deg,var(--brand),#A855F7);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;font-weight:800;box-shadow:0 0 18px var(--glow);flex-shrink:0}
+    .nlogo em{font-style:normal;color:var(--bl)}
+    .nlinks{display:flex;gap:2px}
+    .nlink{padding:8px 14px;border-radius:8px;font-size:13.5px;font-weight:500;color:var(--t2);background:none;transition:all .2s}
+    .nlink:hover{color:var(--t);background:var(--s2)}
+    .nacts{display:flex;align-items:center;gap:10px}
+    .iconbtn{width:38px;height:38px;border-radius:9px;background:var(--s1);border:1px solid var(--br);display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s;flex-shrink:0}
+    .iconbtn:hover{background:var(--s2);border-color:var(--br2)}
+    .btn{padding:8px 20px;border-radius:9px;font-size:13.5px;font-weight:700;transition:all .25s;font-family:'Syne',sans-serif}
+    .btn-out{background:transparent;border:1px solid var(--br2);color:var(--t2)}
+    .btn-out:hover{border-color:var(--bl);color:var(--bl)}
+    .btn-fill{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border:1px solid transparent;box-shadow:0 0 0 var(--glow)}
+    .btn-fill:hover{transform:translateY(-1px);box-shadow:0 4px 22px var(--glow),0 0 0 3px var(--glow2)}
+
+    /* ════ PAGE SYSTEM ════ */
+    .pg,.pgf{position:relative;z-index:1;display:none}
+    .pg.on{display:block}.pgf.on{display:flex}
+
+    /* ════ HOME ════ */
+    #home{flex-direction:column;align-items:center;min-height:100vh;padding-top:66px}
+    .hero{display:flex;flex-direction:column;align-items:center;padding:80px 24px 60px;text-align:center;max-width:920px;margin:0 auto}
+    .badge{display:inline-flex;align-items:center;gap:9px;background:var(--s1);border:1px solid var(--br2);border-radius:100px;padding:5px 16px 5px 8px;margin-bottom:36px;animation:up .7s ease both}
+    .badge-dot{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--a2));display:flex;align-items:center;justify-content:center;font-size:11px}
+    .badge span{font-size:13px;font-weight:600;color:var(--t2)}
+    .h1{font-size:clamp(44px,8vw,96px);line-height:1;font-weight:800;letter-spacing:-.03em;margin-bottom:26px;animation:up .7s ease .08s both}
+    .grad{background:linear-gradient(120deg,#C4B5FD 0%,#38BDF8 55%,#34D399 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hsub{font-size:clamp(16px,2.2vw,20px);color:var(--t2);line-height:1.65;max-width:580px;margin-bottom:44px;animation:up .7s ease .16s both}
+    .hbtns{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;animation:up .7s ease .24s both}
+    .hbtn{padding:14px 32px;border-radius:12px;font-size:15px;font-weight:800;font-family:'Syne',sans-serif;transition:all .25s}
+    .hbtn-p{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;box-shadow:0 4px 28px var(--glow)}
+    .hbtn-p:hover{transform:translateY(-2px);box-shadow:0 8px 40px var(--glow),0 0 0 4px var(--glow2)}
+    .hbtn-s{background:var(--s1);border:1px solid var(--br2);color:var(--t)}
+    .hbtn-s:hover{background:var(--s3);border-color:var(--br3)}
+    @keyframes up{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+
+    /* Stats */
+    .stats{display:flex;flex-wrap:wrap;justify-content:center;margin-top:72px;animation:up .7s ease .32s both}
+    .stat{flex:1;min-width:155px;text-align:center;padding:26px 18px;border-right:1px solid var(--br)}
+    .stat:last-child{border-right:none}
+    .sv{font-family:'Syne',sans-serif;font-size:38px;font-weight:800;background:linear-gradient(135deg,var(--bl),var(--a2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .sl{font-size:12.5px;color:var(--t3);margin-top:4px;font-weight:600}
+
+    /* Feature cards */
+    .sec{width:100%;max-width:1100px;margin:0 auto;padding:0 24px 80px}
+    .sec-tag{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.8px;color:var(--bl);margin-bottom:16px}
+    .sec-tag::before{content:'';width:16px;height:2px;background:var(--bl);border-radius:2px}
+    .sec-h2{font-size:clamp(28px,4vw,42px);font-weight:800;margin-bottom:48px;max-width:480px}
+    .fcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+    .fc{background:var(--s1);border:1px solid var(--br);border-radius:20px;padding:28px;transition:all .3s;position:relative;overflow:hidden}
+    .fc::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--glow2),transparent);opacity:0;transition:opacity .3s}
+    .fc:hover{border-color:var(--br3);transform:translateY(-4px);box-shadow:var(--sh2)}
+    .fc:hover::before{opacity:1}
+    .fi{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:18px;position:relative;z-index:1}
+    .fc h3{font-size:17px;font-weight:700;margin-bottom:10px;position:relative;z-index:1}
+    .fc p{font-size:13.5px;color:var(--t2);line-height:1.55;position:relative;z-index:1}
+
+    /* Teacher CTA */
+    .tcta{background:linear-gradient(135deg,var(--b3),var(--b4));border:1px solid var(--br2);border-radius:28px;padding:52px 48px;display:flex;align-items:center;gap:48px;flex-wrap:wrap;position:relative;overflow:hidden;max-width:1100px;margin:0 auto 80px;width:calc(100% - 48px)}
+    .tcta::before{content:'';position:absolute;right:-80px;top:-80px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,var(--glow),transparent 60%);pointer-events:none}
+    .tcta-txt{flex:1;min-width:260px;position:relative;z-index:1}
+    .tcta-txt h2{font-size:32px;font-weight:800;margin-bottom:12px}
+    .tcta-txt p{color:var(--t2);font-size:15px;line-height:1.6}
+    .tcta-btn{flex-shrink:0;position:relative;z-index:1}
+    .hfooter{width:100%;border-top:1px solid var(--br);padding:28px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+    .hfooter p{font-size:12.5px;color:var(--t3)}
+    .flinks{display:flex;gap:24px}
+    .flinks a{font-size:12.5px;color:var(--t3);transition:color .2s}
+    .flinks a:hover{color:var(--bl)}
+
+    /* ════ AUTH ════ */
+    #signin,#register{flex-direction:column;align-items:center;min-height:100vh;padding:86px 20px 60px}
+    .aw{width:100%;max-width:500px}
+    .aw.wide{max-width:640px}
+    .backlink{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--t3);background:var(--s1);border:1px solid var(--br);border-radius:8px;padding:7px 14px;margin-bottom:22px;transition:all .2s}
+    .backlink:hover{color:var(--t);border-color:var(--br2)}
+    .acard{background:var(--b2);border:1px solid var(--br);border-radius:24px;padding:38px;box-shadow:var(--sh);animation:up .45s ease both}
+    .ahead{text-align:center;margin-bottom:30px}
+    .alogo{display:inline-flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin-bottom:20px}
+    .alogo .nmark{width:30px;height:30px;font-size:13px;border-radius:8px}
+    .alogo em{font-style:normal;color:var(--bl)}
+    .ahead h2{font-size:29px;font-weight:800;margin-bottom:7px}
+    .ahead p{color:var(--t2);font-size:13.5px}
+    .tabs{display:flex;gap:5px;margin-bottom:26px;background:var(--b3);border-radius:11px;padding:4px}
+    .tab{flex:1;padding:9px;border-radius:8px;font-size:13px;font-weight:700;text-align:center;background:transparent;color:var(--t3);transition:all .2s;font-family:'Syne',sans-serif}
+    .tab.on{background:var(--b2);color:var(--t);box-shadow:0 2px 8px rgba(0,0,0,.12),0 0 0 1px var(--br)}
+    .alert{display:none;align-items:flex-start;gap:10px;padding:12px 16px;border-radius:11px;font-size:13px;margin-bottom:18px;line-height:1.5}
+    .alert.show{display:flex}
+    .ae{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#FCA5A5}
+    .ao{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);color:#6EE7B7}
+    .ai{font-size:14px;flex-shrink:0;margin-top:1px}
+    .fsec{margin-bottom:20px}
+    .ftag{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:var(--bl);padding-bottom:10px;margin-bottom:14px;border-bottom:1px solid var(--br)}
+    .fg{display:grid;gap:13px}
+    .fg.t{grid-template-columns:1fr 1fr}
+    .frow{display:flex;flex-direction:column;gap:5px}
+    .frow label{font-size:12px;font-weight:700;color:var(--t2);letter-spacing:.2px}
+    .frow label .rq{color:var(--err);margin-left:2px}
+    .fc2{width:100%;padding:11px 14px;background:var(--b3);border:1px solid var(--br);border-radius:10px;color:var(--t);font-size:14px;transition:all .2s}
+    .fc2:focus{border-color:var(--brand);background:var(--b4);box-shadow:0 0 0 3px var(--glow2),0 0 0 1px var(--brand)}
+    .fc2::placeholder{color:var(--t4)}
+    select.fc2{appearance:none;cursor:pointer}
+    .sw{position:relative}
+    .sw::after{content:'▾';position:absolute;right:13px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:11px;pointer-events:none}
+    .fhint{font-size:11px;color:var(--t3);margin-top:3px}
+    .pf{position:relative}
+    .pf .fc2{padding-right:44px}
+    .peye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;color:var(--t3);font-size:16px;transition:color .2s;padding:4px}
+    .peye:hover{color:var(--t2)}
+    .pbars{display:flex;gap:4px;margin-top:6px}
+    .pbar{flex:1;height:3px;border-radius:3px;background:var(--b5);transition:background .3s}
+    .pbar.w{background:var(--err)}.pbar.f{background:var(--warn)}.pbar.g{background:var(--a1)}.pbar.s{background:var(--ok)}
+    .ptxt{font-size:11px;color:var(--t3);margin-top:4px;height:14px}
+    .rscroll{max-height:55vh;overflow-y:auto;padding-right:4px;margin-right:-4px}
+    .rscroll::-webkit-scrollbar{width:3px}
+    .rscroll::-webkit-scrollbar-thumb{background:var(--br2);border-radius:3px}
+    .full{grid-column:span 2}
+    @media(max-width:640px){.fg.t{grid-template-columns:1fr}.full{grid-column:span 1}}
+    .bsub{width:100%;padding:13px;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border-radius:11px;font-size:15px;font-weight:800;font-family:'Syne',sans-serif;transition:all .25s;margin-top:10px;box-shadow:0 4px 22px var(--glow);position:relative;overflow:hidden}
+    .bsub::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.1),transparent);opacity:0;transition:opacity .2s}
+    .bsub:hover:not(:disabled)::before{opacity:1}
+    .bsub:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 32px var(--glow)}
+    .bsub:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+    .balt{width:100%;padding:13px;border-radius:11px;background:var(--b3);color:var(--t2);border:1px solid var(--br2);font-size:14px;font-weight:600;transition:all .2s;margin-top:10px}
+    .balt:hover{background:var(--b4);color:var(--t)}
+    .spn{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite;vertical-align:middle;margin-right:6px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .afoot{text-align:center;margin-top:20px;font-size:13px;color:var(--t2)}
+    .afoot a{color:var(--bl);font-weight:700;cursor:pointer}
+    .afoot a:hover{text-decoration:underline}
+    .dvd{display:flex;align-items:center;gap:12px;margin:18px 0}
+    .dvd::before,.dvd::after{content:'';flex:1;height:1px;background:var(--br)}
+    .dvd span{font-size:12px;color:var(--t3);white-space:nowrap}
+
+    /* ════ STEPS ════ */
+    .stepbar{display:flex;align-items:center;margin-bottom:28px}
+    .snode{width:33px;height:33px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;font-family:'Syne',sans-serif;border:2px solid var(--br2);color:var(--t3);transition:all .3s;flex-shrink:0;z-index:1}
+    .snode.act{border-color:var(--brand);background:var(--brand);color:#fff}
+    .snode.done{border-color:var(--ok);background:var(--ok);color:#fff}
+    .sconn{flex:1;height:2px;background:var(--br);transition:background .3s}
+    .sconn.done{background:var(--ok)}
+
+    /* ════ PACKAGES ════ */
+    .brow{display:flex;gap:5px;margin-bottom:18px;background:var(--b3);border-radius:10px;padding:4px}
+    .bbtn{flex:1;padding:8px;border-radius:7px;font-size:12px;font-weight:800;text-align:center;color:var(--t3);background:transparent;transition:all .2s;font-family:'Syne',sans-serif}
+    .bbtn.on{background:var(--b2);color:var(--t);box-shadow:var(--sh)}
+    .sbadge{display:inline-block;font-size:9px;background:rgba(16,185,129,.15);color:var(--ok);border-radius:4px;padding:1px 5px;margin-left:4px}
+    .pgrid{display:grid;gap:13px;margin-bottom:18px}
+    .pcard{border:2px solid var(--br);border-radius:17px;padding:20px;cursor:pointer;transition:all .25s;position:relative;background:var(--b3)}
+    .pcard:hover{border-color:var(--br3)}
+    .pcard.sel{border-color:var(--brand);background:var(--b4)}
+    .pcard.sel::after{content:'✓';position:absolute;top:14px;right:14px;width:22px;height:22px;background:var(--brand);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff}
+    .pbadge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:10px}
+    .pk-basic .pbadge{background:rgba(100,116,139,.18);color:#94A3B8}
+    .pk-standard .pbadge{background:rgba(6,182,212,.15);color:var(--a2)}
+    .pk-pro .pbadge{background:rgba(245,158,11,.15);color:var(--a1)}
+    .pname{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;margin-bottom:6px}
+    .pprice{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;margin-bottom:2px}
+    .pprice sub{font-size:13px;font-weight:400;color:var(--t3);vertical-align:bottom}
+    .pcomm{font-size:11.5px;color:var(--t3);margin-bottom:11px}
+    .pfts{list-style:none}
+    .pfts li{font-size:13px;color:var(--t2);padding:3px 0;display:flex;align-items:center;gap:7px}
+    .pfts li::before{content:'→';color:var(--bl);font-size:11px;flex-shrink:0}
+
+    /* ════ SUCCESS ════ */
+    .suc{text-align:center;padding:20px 0}
+    .suc-em{font-size:56px;margin-bottom:16px}
+    .suc h3{font-size:26px;font-weight:800;margin-bottom:12px}
+    .suc p{font-size:14px;color:var(--t2);line-height:1.65;max-width:380px;margin:0 auto 22px}
+    .nxbox{background:var(--b3);border:1px solid var(--br);border-radius:13px;padding:16px;text-align:left;margin-bottom:22px}
+    .nxtitle{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin-bottom:10px}
+    .nxbox li{font-size:13px;color:var(--t2);padding:4px 0;line-height:1.5;list-style:none}
+
+    /* ════ TOASTS ════ */
+    #tz{position:fixed;bottom:22px;right:22px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+    .tk{min-width:290px;max-width:390px;background:var(--b2);border:1px solid var(--br2);border-radius:14px;padding:13px 17px;display:flex;gap:12px;align-items:flex-start;box-shadow:var(--sh2);animation:tkin .4s cubic-bezier(.34,1.56,.64,1) both;pointer-events:auto}
+    @keyframes tkin{from{opacity:0;transform:translateX(60px) scale(.9)}to{opacity:1;transform:translateX(0) scale(1)}}
+    .tk.out{animation:tkout .3s ease both}
+    @keyframes tkout{to{opacity:0;transform:translateX(60px) scale(.9)}}
+    .tk-ico{font-size:19px;flex-shrink:0}
+    .tk-t{font-size:13.5px;font-weight:700;margin-bottom:2px}
+    .tk-m{font-size:12px;color:var(--t2);line-height:1.4}
+    .tk-ok{border-left:3px solid var(--ok)}
+    .tk-err{border-left:3px solid var(--err)}
+    .tk-info{border-left:3px solid var(--brand)}
+
+    /* ════ RESPONSIVE ════ */
+    @media(max-width:768px){
+      nav{padding:0 16px}
+      .nlinks{display:none}
+      .nacts .btn-out{display:none}
+      .hero{padding:60px 16px 40px}
+      .stats{margin-top:40px}
+      .stat{min-width:140px;padding:18px 12px}
+      .acard{padding:26px 18px}
+      .tcta{padding:34px 26px;margin:0 0 60px;width:100%}
+      .tcta h2{font-size:24px}
+      .hfooter{padding:22px 18px}
+      .sec{padding:0 16px 60px}
+      #tz{bottom:14px;right:14px;left:14px}
+      .tk{min-width:unset;width:100%}
+    }
+    @media(max-width:480px){
+      .h1{letter-spacing:-.015em}
+      .pgrid{grid-template-columns:1fr}
+    }
+  </style>
 </head>
 <body>
-  <!-- Navigation -->
-  <nav class="navbar" id="navbar">
-    <div class="container">
-      <a href="index.html" class="nav-brand">
-        <svg viewBox="0 0 40 40" fill="none">
-          <defs>
-            <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#6366f1"/>
-              <stop offset="100%" stop-color="#a855f7"/>
-            </linearGradient>
-          </defs>
-          <rect width="40" height="40" rx="10" fill="url(#logoGrad)"/>
-          <path d="M12 28V12l16 8-16 8z" fill="white"/>
-        </svg>
-        <span>Nova X Edu</span>
-      </a>
-      
-      <ul class="nav-links">
-        <li><a href="index.html" class="active">Home</a></li>
-        <li><a href="free-courses.html">Free Courses</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="contact.html">Contact</a></li>
-      </ul>
-      
-      <div class="nav-actions">
-        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
-          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-          </svg>
-          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="5"/>
-            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-          </svg>
-        </button>
-        
-        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">
-          <i data-lucide="menu"></i>
-        </button>
-        
-        <a href="login.html" class="btn btn-secondary">Login</a>
-        <a href="login.html?register=true" class="btn btn-primary">Get Started</a>
-      </div>
-    </div>
-  </nav>
 
-  <!-- Hero Section -->
+<!-- Loading -->
+<div id="ldr">
+  <div class="ldr-logo">
+    <div class="ldr-mark">N</div>
+    Nova<em>X</em> Edu
+  </div>
+  <div class="ldr-track"><div class="ldr-fill"></div></div>
+  <div class="ldr-tag">Initializing secure session…</div>
+</div>
+
+<!-- BG -->
+<div class="scene">
+  <div class="grid-bg"></div>
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
+  <div class="orb o3"></div>
+</div>
+
+<!-- Nav -->
+<nav>
+  <div class="nlogo" onclick="gp('home')">
+    <div class="nmark">N</div>
+    Nova<em>X</em> Edu
+  </div>
+  <div class="nlinks">
+    <button class="nlink" onclick="gp('home')">Home</button>
+    <button class="nlink">About</button>
+    <button class="nlink">For Teachers</button>
+  </div>
+  <div class="nacts">
+    <button class="iconbtn" id="thm" title="Toggle theme">🌙</button>
+    <button class="btn btn-out" onclick="gp('signin')">Sign In</button>
+    <button class="btn btn-fill" onclick="gp('register')">Get Started</button>
+  </div>
+</nav>
+
+<!-- ══════ HOME ══════ -->
+<div class="pgf on" id="home">
   <section class="hero">
-    <div class="hero-bg"></div>
-    <div class="container">
-      <div class="hero-content">
-        <div class="hero-text">
-          <h1>Learn Smarter with <span>Nova X Edu</span></h1>
-          <p>Sri Lanka's most advanced Learning Management System. Access quality education, interactive content, and expert guidance all in one place.</p>
-          <div class="hero-buttons">
-            <a href="free-courses.html" class="btn btn-lg btn-primary">
-              <i data-lucide="play-circle"></i>
-              Explore Free Courses
-            </a>
-            <a href="login.html?register=true" class="btn btn-lg btn-outline">
-              <i data-lucide="user-plus"></i>
-              Create Account
-            </a>
-          </div>
-        </div>
-        
-        <div class="hero-visual">
-          <div class="hero-card">
-            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
-              <div style="width: 50px; height: 50px; background: var(--accent-gradient); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                <i data-lucide="graduation-cap" style="color: white; width: 24px; height: 24px;"></i>
-              </div>
-              <div>
-                <div style="font-weight: 700; font-size: 1.25rem;">A/L Physics</div>
-                <div style="color: var(--text-muted); font-size: 0.875rem;">2026 Batch</div>
-              </div>
-            </div>
-            
-            <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 1rem; margin-bottom: 1rem;">
-              <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                <span style="color: var(--text-secondary);">Progress</span>
-                <span style="font-weight: 600;">75%</span>
-              </div>
-              <div style="height: 8px; background: var(--border-color); border-radius: 4px; overflow: hidden;">
-                <div style="height: 100%; width: 75%; background: var(--accent-gradient); border-radius: 4px;"></div>
-              </div>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; text-align: center;">
-              <div style="background: var(--bg-tertiary); border-radius: 10px; padding: 0.75rem;">
-                <div style="font-weight: 700; color: var(--accent-primary);">24</div>
-                <div style="font-size: 0.75rem; color: var(--text-muted);">Videos</div>
-              </div>
-              <div style="background: var(--bg-tertiary); border-radius: 10px; padding: 0.75rem;">
-                <div style="font-weight: 700; color: var(--success);">12</div>
-                <div style="font-size: 0.75rem; color: var(--text-muted);">Notes</div>
-              </div>
-              <div style="background: var(--bg-tertiary); border-radius: 10px; padding: 0.75rem;">
-                <div style="font-weight: 700; color: var(--warning);">8</div>
-                <div style="font-size: 0.75rem; color: var(--text-muted);">Quizzes</div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="floating-badge top">
-            <i data-lucide="video" style="color: var(--accent-primary); width: 16px; height: 16px;"></i>
-            <span>Live Classes</span>
-          </div>
-          
-          <div class="floating-badge bottom">
-            <i data-lucide="award" style="color: var(--warning); width: 16px; height: 16px;"></i>
-            <span>Certified</span>
-          </div>
-        </div>
-      </div>
+    <div class="badge">
+      <div class="badge-dot">🇱🇰</div>
+      <span>Sri Lanka's #1 Education Platform</span>
+    </div>
+    <h1 class="h1">
+      Learn<br/><span class="grad">Beyond Limits.</span>
+    </h1>
+    <p class="hsub">Connect with expert teachers, access HD recordings, live classes, smart notes, quizzes, and more — all in one beautifully designed platform.</p>
+    <div class="hbtns">
+      <button class="hbtn hbtn-p" onclick="gp('register')">Start Learning Free →</button>
+      <button class="hbtn hbtn-s" onclick="gp('signin')">Sign In</button>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="sv">500+</div><div class="sl">Expert Teachers</div></div>
+      <div class="stat"><div class="sv">15K+</div><div class="sl">Students Enrolled</div></div>
+      <div class="stat"><div class="sv">10K+</div><div class="sl">Recorded Classes</div></div>
+      <div class="stat"><div class="sv">98%</div><div class="sl">Satisfaction Rate</div></div>
     </div>
   </section>
 
-  <!-- Stats Section -->
-  <section class="container" style="padding-top: 2rem;">
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-number">5000+</div>
-        <div class="stat-label">Active Students</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">200+</div>
-        <div class="stat-label">Video Lessons</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">50+</div>
-        <div class="stat-label">Expert Teachers</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">98%</div>
-        <div class="stat-label">Success Rate</div>
-      </div>
+  <div class="sec" style="padding-top:20px">
+    <div class="sec-tag">Platform Features</div>
+    <h2 class="sec-h2">Everything you need to excel</h2>
+    <div class="fcards">
+      <div class="fc"><div class="fi" style="background:rgba(109,40,217,.15)">🎬</div><h3>HD Recordings</h3><p>Access theory, revision, papers & extra sessions. Organised by month and year, always available.</p></div>
+      <div class="fc"><div class="fi" style="background:rgba(239,68,68,.12)">🔴</div><h3>Live Classes</h3><p>Join interactive live sessions with your teacher. Ask questions in real-time and get instant guidance.</p></div>
+      <div class="fc"><div class="fi" style="background:rgba(245,158,11,.12)">📝</div><h3>Smart Notes</h3><p>Download comprehensive notes and materials prepared by your teacher. Always accessible.</p></div>
+      <div class="fc"><div class="fi" style="background:rgba(16,185,129,.12)">🧠</div><h3>Interactive Quizzes</h3><p>Test your knowledge with teacher-crafted quizzes. Track progress and identify weak areas.</p></div>
+      <div class="fc"><div class="fi" style="background:rgba(6,182,212,.12)">🛍️</div><h3>Learning Store</h3><p>Purchase books, papers, and materials directly from your teacher with secure payment integration.</p></div>
+      <div class="fc"><div class="fi" style="background:rgba(59,130,246,.12)">🔐</div><h3>Secure & Private</h3><p>Enterprise-grade security with row-level access control. Your data is always encrypted and protected.</p></div>
     </div>
-  </section>
+  </div>
 
-  <!-- Features Section -->
-  <section class="container" style="padding: 4rem 0;">
-    <div style="text-align: center; margin-bottom: 3rem;">
-      <h2>Why Choose Nova X Edu?</h2>
-      <p style="max-width: 600px; margin: 0 auto;">Experience the future of education with our cutting-edge features designed for modern learners.</p>
-    </div>
-    
-    <div class="features-grid">
-      <div class="feature-card">
-        <div class="feature-icon">
-          <i data-lucide="video"></i>
-        </div>
-        <h3>HD Video Lessons</h3>
-        <p>High-quality recorded lessons with organized folders by year, month, and topic for easy navigation.</p>
+  <div class="sec">
+    <div class="tcta">
+      <div class="tcta-txt">
+        <h2>Ready to teach? 🎓</h2>
+        <p>Join Nova X Edu and reach thousands of students across Sri Lanka. Choose your package, manage students, upload content, and grow your teaching business — all in one place.</p>
       </div>
-      
-      <div class="feature-card">
-        <div class="feature-icon">
-          <i data-lucide="file-text"></i>
-        </div>
-        <h3>Study Materials</h3>
-        <p>Comprehensive notes, past papers, and practice questions available for download.</p>
-      </div>
-      
-      <div class="feature-card">
-        <div class="feature-icon">
-          <i data-lucide="check-circle"></i>
-        </div>
-        <h3>Interactive Quizzes</h3>
-        <p>Test your knowledge with MCQ quizzes and get instant results with detailed explanations.</p>
-      </div>
-      
-      <div class="feature-card">
-        <div class="feature-icon">
-          <i data-lucide="shield-check"></i>
-        </div>
-        <h3>Secure Platform</h3>
-        <p>Advanced security with device limiting and activity monitoring to protect your account.</p>
-      </div>
-      
-      <div class="feature-card">
-        <div class="feature-icon">
-          <i data-lucide="smartphone"></i>
-        </div>
-        <h3>Mobile Friendly</h3>
-        <p>Access your courses from any device - desktop, tablet, or mobile with optimized experience.</p>
-      </div>
-      
-      <div class="feature-card">
-        <div class="feature-icon">
-          <i data-lucide="headphones"></i>
-        </div>
-        <h3>24/7 Support</h3>
-        <p>Get help whenever you need it with our dedicated support team via WhatsApp.</p>
+      <div class="tcta-btn">
+        <button class="btn btn-fill" style="padding:14px 32px;font-size:15px;font-family:'Syne',sans-serif;font-weight:800" onclick="gp('register');swRole('teacher')">Register as Teacher →</button>
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- Free Courses Preview -->
-  <section class="container" style="padding: 4rem 0;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-      <div>
-        <h2>Free Courses</h2>
-        <p>Start learning today with our free content</p>
-      </div>
-      <a href="free-courses.html" class="btn btn-secondary">View All</a>
-    </div>
-    
-    <div class="grid-3" id="freeCoursesGrid">
-      <!-- Will be populated by JS -->
-    </div>
-  </section>
-
-  <!-- Testimonials -->
-  <section class="container" style="padding: 4rem 0;">
-    <div style="text-align: center; margin-bottom: 3rem;">
-      <h2>What Our Students Say</h2>
-    </div>
-    
-    <div class="grid-3">
-      <div class="card">
-        <div style="display: flex; gap: 0.25rem; margin-bottom: 1rem;">
-          <i data-lucide="star" style="color: #f59e0b; width: 20px; height: 20px; fill: #f59e0b;"></i>
-          <i data-lucide="star" style="color: #f59e0b; width: 20px; height: 20px; fill: #f59e0b;"></i>
-          <i data-lucide="star" style="color: #f59e0b; width: 20px; height: 20px; fill: #f59e0b;"></i>
-          <i data-lucide="star" style="color: #f59e0b; width: 20px; height: 20px; fill: #f59e0b;"></i>
-          <i data-lucide="star" style="color: #f59e0b; width: 20px; height: 20px; fill: #f59e0b;"></i>
-        </div>
-        <p style="margin-bottom: 1rem;">"The video lessons are very clear and well organized. I improved my Physics grade significantly thanks to Nova X Edu!"</p>
-        <div style="display: flex; align-items: center; gap: 0.75rem;">
-          <div style="width: 40px; height: 40px; background: var(--accent-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">K</div>
-          <div>
-            <div style="font-weight: 600;">Kasun Perera</div>
-            <div style="font-size: 0.875rem; color: var(--text-muted);">A/L Student, Colombo</div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="card">
-        <div style="display: flex; gap: 0.25rem; margin-bottom: 1rem;">
-          <i data-lucide="star" style="color: #f59e0b; width: 20px; height: 20px; fill: #f59e0b;"></i>
-          <i data-lucide="star" style="color: #f59e0b; width: 20px; height: 20px; fill: #f59e0b;"></i>
-          <i data-lucide="star" style="color: #f59e0b; width: 20px; height: 20px; fill: #f59e0b;"></i>
-          <i data-lucide="star" style="color: #f59e0b; width: 20px; height: 20px; fill: #f59e0b;"></i>
-          <i data-lucide="star" style="color: #f59e0b; width: 20px; height: 20px; fill: #f59e0b;"></i>
-        </div>
-        <p style="margin-bottom: 1rem;">"Best online learning platform I've used. The quiz feature helps me track my progress and identify areas to improve."</p>
-        <div style="display: flex; align-items: center; gap: 0.75rem;">
-          <div style="width: 40px; height: 40px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">S</div>
-          <div>
-            <div style="font-weight: 600;">Sanduni Fernando</div>
-            <div style="font-size: 0.8rem; color: var(--text-muted);">O/L Student, Kandy</div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="card">
-        <div style="display: flex; gap: 0.25rem; margin-bottom: 1rem;">
-          <i data-lucide="star" style="color: #f59e0b; width: 20px; height: 20px; fill: #f59e0b;"></i>
-          <i data-lucide="star" style="color: #f59e0b; width: 20px; height: 20px; fill: #f59e0b;"></i>
-          <i data-lucide="star" style="color: #f59e0b; width: 20px; height: 20px; fill: #f59e0b;"></i>
-          <i data-lucide="star" style="color: #f59e0b; width: 20px; height: 20px; fill: #f59e0b;"></i>
-          <i data-lucide="star" style="color: #f59e0b; width: 20px; height: 20px; fill: #f59e0b;"></i>
-        </div>
-        <p style="margin-bottom: 1rem;">"The teachers are very supportive and the payment system is transparent. Highly recommended for serious students!"</p>
-        <div style="display: flex; align-items: center; gap: 0.75rem;">
-          <div style="width: 40px; height: 40px; background: var(--info); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">R</div>
-          <div>
-            <div style="font-weight: 600;">Ruwan Silva</div>
-            <div style="font-size: 0.875rem; color: var(--text-muted);">A/L Student, Galle</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA Section -->
-  <section class="container" style="padding: 4rem 0;">
-    <div style="background: var(--accent-gradient); border-radius: 24px; padding: 4rem; text-align: center; color: white; position: relative; overflow: hidden;">
-      <div style="position: absolute; inset: 0; background: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"none\" stroke=\"white\" stroke-opacity=\"0.1\" stroke-width=\"0.5\"/></svg>'); background-size: 50px;"></div>
-      <div style="position: relative;">
-        <h2 style="color: white; margin-bottom: 1rem;">Ready to Start Learning?</h2>
-        <p style="color: rgba(255,255,255,0.9); margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;">Join thousands of students who are already achieving their academic goals with Nova X Edu.</p>
-        <a href="login.html?register=true" class="btn btn-lg" style="background: white; color: var(--accent-primary);">
-          <i data-lucide="rocket"></i>
-          Get Started Free
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-grid">
-        <div>
-          <div class="footer-brand">
-            <span>Nova X Edu</span>
-          </div>
-          <p class="footer-desc">Empowering students across Sri Lanka with quality education and innovative learning solutions.</p>
-          <div style="display: flex; gap: 0.75rem;">
-            <a href="#" style="width: 40px; height: 40px; background: var(--bg-tertiary); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary);">
-              <i data-lucide="facebook" style="width: 20px; height: 20px;"></i>
-            </a>
-            <a href="#" style="width: 40px; height: 40px; background: var(--bg-tertiary); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary);">
-              <i data-lucide="instagram" style="width: 20px; height: 20px;"></i>
-            </a>
-            <a href="#" style="width: 40px; height: 40px; background: var(--bg-tertiary); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary);">
-              <i data-lucide="youtube" style="width: 20px; height: 20px;"></i>
-            </a>
-          </div>
-        </div>
-        
-        <div>
-          <h4 class="footer-title">Quick Links</h4>
-          <ul class="footer-links">
-            <li><a href="free-courses.html">Free Courses</a></li>
-            <li><a href="about.html">About Us</a></li>
-            <li><a href="contact.html">Contact</a></li>
-            <li><a href="rules.html">Terms & Rules</a></li>
-          </ul>
-        </div>
-        
-        <div>
-          <h4 class="footer-title">Categories</h4>
-          <ul class="footer-links">
-            <li><a href="#">A/L Science</a></li>
-            <li><a href="#">A/L Commerce</a></li>
-            <li><a href="#">O/L Classes</a></li>
-            <li><a href="#">Diploma Courses</a></li>
-          </ul>
-        </div>
-        
-        <div>
-          <h4 class="footer-title">Contact</h4>
-          <ul class="footer-links">
-            <li style="display: flex; align-items: center; gap: 0.5rem;">
-              <i data-lucide="mail" style="width: 16px; height: 16px;"></i>
-              info@novaxedu.lk
-            </li>
-            <li style="display: flex; align-items: center; gap: 0.5rem;">
-              <i data-lucide="phone" style="width: 16px; height: 16px;"></i>
-              +94 77 123 4567
-            </li>
-            <li style="display: flex; align-items: center; gap: 0.5rem;">
-              <i data-lucide="map-pin" style="width: 16px; height: 16px;"></i>
-              Colombo, Sri Lanka
-            </li>
-          </ul>
-        </div>
-      </div>
-      
-      <div class="footer-bottom">
-        <div>&copy; 2025 Nova X Edu. All rights reserved.</div>
-        <div>Designed with passion for education</div>
-      </div>
+  <footer class="hfooter">
+    <p>© 2025 Nova X Edu · All rights reserved · Built for Sri Lanka 🇱🇰</p>
+    <div class="flinks">
+      <a href="rules.html">Terms & Rules</a>
+      <a href="rules.html#privacy">Privacy</a>
+      <a href="mailto:support@novaxedu.com">Support</a>
     </div>
   </footer>
+</div>
 
-  <!-- WhatsApp Float -->
-  <a href="https://wa.me/94771234567" target="_blank" class="whatsapp-float" aria-label="Contact via WhatsApp">
-    <i data-lucide="message-circle"></i>
-  </a>
+<!-- ══════ SIGN IN ══════ -->
+<div class="pgf" id="signin">
+  <div class="aw">
+    <button class="backlink" onclick="gp('home')">← Back to Home</button>
+    <div class="acard">
+      <div class="ahead">
+        <div class="alogo"><div class="nmark">N</div>Nova<em>X</em> Edu</div>
+        <h2>Welcome back</h2>
+        <p>Sign in to your account to continue learning</p>
+      </div>
 
-  <!-- Toast Container -->
-  <div class="toast-container" id="toastContainer"></div>
+      <div class="tabs" id="si-tabs">
+        <button class="tab on" onclick="setSiRole('student',this)">👨‍🎓 Student</button>
+        <button class="tab" onclick="setSiRole('teacher',this)">🧑‍🏫 Teacher</button>
+        <button class="tab" onclick="setSiRole('staff',this)">🏢 Staff</button>
+      </div>
 
-  <script src="app.js"></script>
-  <script>
-    // Initialize icons
-    lucide.createIcons();
-    
-    // Theme toggle
-    const themeToggle = document.getElementById('themeToggle');
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    
-    themeToggle.addEventListener('click', () => {
-      const currentTheme = document.documentElement.getAttribute('data-theme');
-      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-theme', newTheme);
-      localStorage.setItem('theme', newTheme);
-    });
-    
-    // Navbar scroll effect
-    window.addEventListener('scroll', () => {
-      const navbar = document.getElementById('navbar');
-      if (window.scrollY > 50) {
-        navbar.classList.add('scrolled');
-      } else {
-        navbar.classList.remove('scrolled');
-      }
-    });
-    
-    // Load free courses preview
-    async function loadFreeCourses() {
-      const grid = document.getElementById('freeCoursesGrid');
-      // Sample data - in production this would fetch from Supabase
-      const courses = [
-        { title: 'Introduction to Physics', desc: 'Basic concepts and fundamentals', image: 'https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?w=400&h=225&fit=crop', duration: '2 hours' },
-        { title: 'Chemistry Basics', desc: 'Understanding chemical reactions', image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=400&h=225&fit=crop', duration: '1.5 hours' },
-        { title: 'Mathematics Foundation', desc: 'Essential math concepts', image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400&h=225&fit=crop', duration: '3 hours' }
-      ];
-      
-      grid.innerHTML = courses.map(course => `
-        <div class="content-card">
-          <div class="content-thumbnail">
-            <img src="${course.image}" alt="${course.title}" loading="lazy">
-            <div class="play-btn">
-              <i data-lucide="play" style="color: white; width: 24px; height: 24px;"></i>
+      <div class="alert ae" id="sie"><span class="ai">⚠️</span><span id="sie-m">Invalid credentials.</span></div>
+      <div class="alert ao" id="sio"><span class="ai">✅</span><span id="sio-m">Signed in!</span></div>
+
+      <div class="fg">
+        <div class="frow">
+          <label>Email Address <span class="rq">*</span></label>
+          <input type="email" id="si-e" class="fc2" placeholder="you@example.com" autocomplete="email"/>
+        </div>
+        <div class="frow">
+          <label>Password <span class="rq">*</span></label>
+          <div class="pf">
+            <input type="password" id="si-p" class="fc2" placeholder="••••••••" autocomplete="current-password"/>
+            <button class="peye" onclick="tpwd('si-p',this)">👁</button>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <a href="#" style="font-size:12px;color:var(--bl);font-weight:700">Forgot password?</a>
+        </div>
+      </div>
+
+      <button class="bsub" id="si-btn" onclick="doSignIn()">Sign In</button>
+      <div class="dvd"><span>New to Nova X Edu?</span></div>
+      <button class="balt" onclick="gp('register')">Create an Account</button>
+      <div class="afoot" style="margin-top:16px">By signing in you agree to our <a href="rules.html">Terms of Service</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ REGISTER ══════ -->
+<div class="pgf" id="register">
+  <div class="aw wide">
+    <button class="backlink" onclick="gp('home')">← Back to Home</button>
+    <div class="acard">
+      <div class="ahead">
+        <div class="alogo"><div class="nmark">N</div>Nova<em>X</em> Edu</div>
+        <h2>Create your account</h2>
+        <p>Join thousands of learners and teachers across Sri Lanka</p>
+      </div>
+
+      <div class="tabs" id="reg-tabs">
+        <button class="tab on" onclick="swRole('student',this)">👨‍🎓 Student</button>
+        <button class="tab" onclick="swRole('teacher',this)">🧑‍🏫 Teacher / Admin</button>
+      </div>
+
+      <div class="stepbar" id="stepbar" style="display:none">
+        <div class="snode act" id="sn1">1</div>
+        <div class="sconn" id="sc1"></div>
+        <div class="snode" id="sn2">2</div>
+        <div class="sconn" id="sc2"></div>
+        <div class="snode" id="sn3">3</div>
+      </div>
+
+      <div class="alert ae" id="re"><span class="ai">⚠️</span><span id="re-m"></span></div>
+      <div class="alert ao" id="ro"><span class="ai">✅</span><span id="ro-m"></span></div>
+
+      <!-- Student form -->
+      <div id="frm-s">
+        <div class="rscroll">
+          <div class="fsec">
+            <div class="ftag">Personal Information</div>
+            <div class="fg t">
+              <div class="frow"><label>First Name <span class="rq">*</span></label><input type="text" id="s-fn" class="fc2" placeholder="Saman" autocomplete="given-name"/></div>
+              <div class="frow"><label>Last Name <span class="rq">*</span></label><input type="text" id="s-ln" class="fc2" placeholder="Perera" autocomplete="family-name"/></div>
+              <div class="frow"><label>NIC Number <span class="rq">*</span></label><input type="text" id="s-nic" class="fc2" placeholder="200012345678 or 991234567V"/></div>
+              <div class="frow"><label>Date of Birth <span class="rq">*</span></label><input type="date" id="s-dob" class="fc2"/></div>
+              <div class="frow"><label>Gender <span class="rq">*</span></label><div class="sw"><select id="s-gender" class="fc2"><option value="">Select gender</option><option value="male">Male</option><option value="female">Female</option></select></div></div>
+              <div class="frow"><label>District <span class="rq">*</span></label><div class="sw"><select id="s-dist" class="fc2"></select></div></div>
+              <div class="frow full"><label>Address <span class="rq">*</span></label><input type="text" id="s-addr" class="fc2" placeholder="No. 45, Main Street" autocomplete="street-address"/></div>
+              <div class="frow"><label>City <span class="rq">*</span></label><input type="text" id="s-city" class="fc2" placeholder="Colombo" autocomplete="address-level2"/></div>
+              <div class="frow"><label>Work / School Phone</label><input type="tel" id="s-ph" class="fc2" placeholder="+94 77 000 0000"/></div>
+              <div class="frow full"><label>WhatsApp / Telegram <span class="rq">*</span></label><input type="tel" id="s-wa" class="fc2" placeholder="+94 77 000 0000"/></div>
             </div>
           </div>
-          <div class="content-info">
-            <span class="badge badge-free">Free</span>
-            <h4 class="content-title" style="margin-top: 0.5rem;">${course.title}</h4>
-            <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.75rem;">${course.desc}</p>
-            <div class="content-meta">
-              <span><i data-lucide="clock" style="width: 14px; height: 14px;"></i> ${course.duration}</span>
+          <div class="fsec">
+            <div class="ftag">Academic Information</div>
+            <div class="fg t">
+              <div class="frow"><label>Grade <span class="rq">*</span></label><div class="sw"><select id="s-grade" class="fc2" onchange="loadSubjs(this.value)"><option value="">Select grade</option></select></div></div>
+              <div class="frow"><label>Subject <span class="rq">*</span></label><div class="sw"><select id="s-subj" class="fc2" onchange="loadBatches(this.value)"><option value="">Select subject</option></select></div></div>
+              <div class="frow full"><label>Batch</label><div class="sw"><select id="s-batch" class="fc2"><option value="">Select batch</option></select></div></div>
+            </div>
+          </div>
+          <div class="fsec">
+            <div class="ftag">Account Security</div>
+            <div class="fg t">
+              <div class="frow full"><label>Email Address <span class="rq">*</span></label><input type="email" id="s-email" class="fc2" placeholder="you@example.com" autocomplete="email"/></div>
+              <div class="frow"><label>Password <span class="rq">*</span></label><div class="pf"><input type="password" id="s-pwd" class="fc2" placeholder="Min. 8 characters" oninput="chkPw(this,'s-bars','s-pt')" autocomplete="new-password"/><button class="peye" onclick="tpwd('s-pwd',this)">👁</button></div><div class="pbars" id="s-bars"><div class="pbar"></div><div class="pbar"></div><div class="pbar"></div><div class="pbar"></div></div><div class="ptxt" id="s-pt"></div></div>
+              <div class="frow"><label>Confirm Password <span class="rq">*</span></label><div class="pf"><input type="password" id="s-pwd2" class="fc2" placeholder="Repeat password" autocomplete="new-password"/><button class="peye" onclick="tpwd('s-pwd2',this)">👁</button></div></div>
             </div>
           </div>
         </div>
-      `).join('');
-      
-      lucide.createIcons();
-    }
-    
-    loadFreeCourses();
-  </script>
+        <button class="bsub" id="s-btn" onclick="doStudentReg()">Create Student Account</button>
+        <div class="afoot">Already have an account? <a onclick="gp('signin')">Sign in</a></div>
+      </div>
+
+      <!-- Teacher form -->
+      <div id="frm-t" style="display:none">
+
+        <!-- Step 1 -->
+        <div id="t1">
+          <div class="rscroll">
+            <div class="fsec">
+              <div class="ftag">Personal Information</div>
+              <div class="fg t">
+                <div class="frow full"><label>Full Name <span class="rq">*</span></label><input type="text" id="t-name" class="fc2" placeholder="Mr. Kasun Perera" autocomplete="name"/></div>
+                <div class="frow"><label>NIC Number <span class="rq">*</span></label><input type="text" id="t-nic" class="fc2" placeholder="200012345678"/></div>
+                <div class="frow"><label>Date of Birth <span class="rq">*</span></label><input type="date" id="t-dob" class="fc2"/></div>
+                <div class="frow"><label>Gender <span class="rq">*</span></label><div class="sw"><select id="t-gen" class="fc2"><option value="">Select gender</option><option value="male">Male</option><option value="female">Female</option></select></div></div>
+                <div class="frow"><label>District <span class="rq">*</span></label><div class="sw"><select id="t-dist" class="fc2"></select></div></div>
+                <div class="frow full"><label>Address <span class="rq">*</span></label><input type="text" id="t-addr" class="fc2" placeholder="No. 45, Main Street"/></div>
+                <div class="frow"><label>Work Phone <span class="rq">*</span></label><input type="tel" id="t-ph" class="fc2" placeholder="+94 77 000 0000"/></div>
+                <div class="frow"><label>WhatsApp / Telegram <span class="rq">*</span></label><input type="tel" id="t-wa" class="fc2" placeholder="+94 77 000 0000"/></div>
+              </div>
+            </div>
+            <div class="fsec">
+              <div class="ftag">Teaching Details</div>
+              <div class="fg t">
+                <div class="frow"><label>Subject(s) <span class="rq">*</span></label><input type="text" id="t-subj" class="fc2" placeholder="Mathematics, Physics…"/></div>
+                <div class="frow"><label>Grade(s) <span class="rq">*</span></label><input type="text" id="t-grade" class="fc2" placeholder="Grade 10, A/L…"/></div>
+                <div class="frow full"><label>Batch Information <span class="rq">*</span></label><input type="text" id="t-batch" class="fc2" placeholder="2024 Batch A, 2025 Theory…"/><div class="fhint">Describe the batches you currently teach</div></div>
+                <div class="frow full"><label>Bio / Notes</label><textarea id="t-notes" class="fc2" rows="3" placeholder="Brief description about yourself…" style="resize:vertical"></textarea></div>
+              </div>
+            </div>
+            <div class="fsec">
+              <div class="ftag">Bank Details (for receiving payments)</div>
+              <div class="fg t">
+                <div class="frow full"><label>Bank Name <span class="rq">*</span></label><input type="text" id="t-bank" class="fc2" placeholder="Bank of Ceylon"/></div>
+                <div class="frow"><label>Account Number <span class="rq">*</span></label><input type="text" id="t-acc" class="fc2" placeholder="0001234567890"/></div>
+                <div class="frow"><label>Branch <span class="rq">*</span></label><input type="text" id="t-brnch" class="fc2" placeholder="Colombo Main"/></div>
+                <div class="frow full"><label>Account Holder Name <span class="rq">*</span></label><input type="text" id="t-holder" class="fc2" placeholder="As on bank passbook"/></div>
+              </div>
+            </div>
+            <div class="fsec">
+              <div class="ftag">Account Security</div>
+              <div class="fg t">
+                <div class="frow full"><label>Email Address <span class="rq">*</span></label><input type="email" id="t-email" class="fc2" placeholder="teacher@example.com" autocomplete="email"/></div>
+                <div class="frow"><label>Password <span class="rq">*</span></label><div class="pf"><input type="password" id="t-pwd" class="fc2" placeholder="Min. 8 characters" oninput="chkPw(this,'t-bars','t-pt')" autocomplete="new-password"/><button class="peye" onclick="tpwd('t-pwd',this)">👁</button></div><div class="pbars" id="t-bars"><div class="pbar"></div><div class="pbar"></div><div class="pbar"></div><div class="pbar"></div></div><div class="ptxt" id="t-pt"></div></div>
+                <div class="frow"><label>Confirm Password <span class="rq">*</span></label><div class="pf"><input type="password" id="t-pwd2" class="fc2" placeholder="Repeat password" autocomplete="new-password"/><button class="peye" onclick="tpwd('t-pwd2',this)">👁</button></div></div>
+              </div>
+            </div>
+          </div>
+          <button class="bsub" onclick="ts2()">Continue to Package Selection →</button>
+          <div class="afoot">Already have an account? <a onclick="gp('signin')">Sign in</a></div>
+        </div>
+
+        <!-- Step 2: Package -->
+        <div id="t2" style="display:none">
+          <h3 style="font-size:18px;margin-bottom:6px">Choose Your Package</h3>
+          <p style="font-size:13px;color:var(--t2);margin-bottom:18px">Select a plan that fits your needs. You can upgrade anytime.</p>
+          <div class="brow">
+            <button class="bbtn on" onclick="setBill('monthly',this)">Monthly</button>
+            <button class="bbtn" onclick="setBill('yearly',this)">Yearly <span class="sbadge">-15%</span></button>
+            <button class="bbtn" onclick="setBill('lifetime',this)">Lifetime <span class="sbadge">Best</span></button>
+          </div>
+          <div class="pgrid" id="pkg-ct"></div>
+          <div style="display:flex;gap:10px">
+            <button class="balt" style="width:auto;padding:13px 18px;flex-shrink:0" onclick="tb()">← Back</button>
+            <button class="bsub" style="margin-top:0" id="t-btn" onclick="doTeacherReg()">Register & Request Package</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Done -->
+        <div id="t3" style="display:none">
+          <div class="suc">
+            <div class="suc-em">🎉</div>
+            <h3>Registration Submitted!</h3>
+            <p>Your teacher account has been created. Your package request is <strong>pending approval</strong> from our team. We'll notify you once it's reviewed.</p>
+            <div class="nxbox">
+              <div class="nxtitle">What happens next?</div>
+              <ul>
+                <li>✅ Check your email for a verification link</li>
+                <li>⏳ Package approval takes 1–2 business days</li>
+                <li>📱 Our team may contact you via WhatsApp</li>
+                <li>🚀 Once approved, your full dashboard unlocks</li>
+              </ul>
+            </div>
+            <button class="bsub" onclick="gp('signin')">Go to Sign In</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toasts -->
+<div id="tz"></div>
+
+<script>
+// ─── SUPABASE ───
+const SB_URL='https://vxrxncjixwqqaasmkpvw.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4cnhuY2ppeHdxcWFhc21rcHZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTI3MzMsImV4cCI6MjA4OTE2ODczM30.QESIHemwVvSierW1k_H_np9w60kPs4rMku5n2vzQeG0';
+const sb=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
+
+// ─── STATE ───
+let siRole='student',regRole='student',selPkg=null,selBill='monthly',pkgs=[];
+
+// ─── INIT ───
+(async()=>{
+  try{
+    const{data:{session}}=await sb.auth.getSession();
+    if(session){rdx(session);return}
+    await boot();
+  }catch(e){console.warn('Boot:',e)}
+  hideLdr();
+})();
+
+async function boot(){
+  const[{data:dists},{data:grades},{data:pkgData}]=await Promise.all([
+    sb.from('districts').select('name').order('name'),
+    sb.from('grades').select('id,name,sort_order').eq('is_active',true).order('sort_order'),
+    sb.from('packages').select('*').eq('is_active',true),
+  ]);
+  const dOpts='<option value="">Select district</option>'+(dists||[]).map(d=>`<option value="${d.name}">${d.name}</option>`).join('');
+  document.getElementById('s-dist').innerHTML=dOpts;
+  document.getElementById('t-dist').innerHTML=dOpts;
+  const gOpts='<option value="">Select grade</option>'+(grades||[]).map(g=>`<option value="${g.id}">${g.name}</option>`).join('');
+  document.getElementById('s-grade').innerHTML=gOpts;
+  pkgs=pkgData&&pkgData.length?pkgData:defPkgs();
+  renderPkgs();
+}
+
+function defPkgs(){return[
+  {type:'basic',display_name:'Basic',monthly_fee:999,yearly_fee:9999,lifetime_fee:29999,commission_rate:10,features:['Up to 50 students','Video recordings','Basic analytics','Email support']},
+  {type:'standard',display_name:'Standard',monthly_fee:1999,yearly_fee:19999,lifetime_fee:59999,commission_rate:8,features:['Up to 200 students','HD recordings','Live classes','Notes & quizzes','Priority support']},
+  {type:'pro',display_name:'Pro',monthly_fee:3999,yearly_fee:39999,lifetime_fee:99999,commission_rate:5,features:['Unlimited students','4K recordings','Live & store access','Advanced analytics','Custom branding','Dedicated support']}
+];}
+
+async function loadSubjs(gradeId){
+  const e=document.getElementById('s-subj'),b=document.getElementById('s-batch');
+  e.innerHTML='<option value="">Select subject</option>';
+  b.innerHTML='<option value="">Select batch</option>';
+  if(!gradeId)return;
+  const{data}=await sb.from('subjects').select('id,name').eq('grade_id',gradeId).eq('is_active',true).order('name');
+  e.innerHTML='<option value="">Select subject</option>'+(data||[]).map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+}
+
+async function loadBatches(subjId){
+  const e=document.getElementById('s-batch');
+  e.innerHTML='<option value="">Select batch</option>';
+  if(!subjId)return;
+  const{data}=await sb.from('batches').select('id,name').eq('subject_id',subjId).eq('is_active',true).order('name');
+  e.innerHTML='<option value="">Select batch</option>'+(data||[]).map(b=>`<option value="${b.id}">${b.name}</option>`).join('');
+}
+
+// ─── ROUTING ───
+function gp(name){
+  document.querySelectorAll('.pg,.pgf').forEach(p=>p.classList.remove('on'));
+  document.getElementById(name)?.classList.add('on');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function rdx(session){
+  sb.from('profiles').select('role').eq('id',session.user.id).single().then(({data})=>{
+    const r=data?.role||'student';
+    if(r==='student')window.location.href='student-portal.html';
+    else if(r==='teacher')window.location.href='teacher-portal.html';
+    else window.location.href='admin-portal.html';
+  }).catch(()=>hideLdr());
+}
+
+// ─── THEME ───
+let theme=localStorage.getItem('nxe-theme')||'dark';
+applyTheme(theme);
+document.getElementById('thm').addEventListener('click',()=>{
+  theme=theme==='dark'?'light':'dark';
+  applyTheme(theme);
+  localStorage.setItem('nxe-theme',theme);
+});
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  document.getElementById('thm').textContent=t==='dark'?'☀️':'🌙';
+}
+
+// ─── LOADER ───
+function hideLdr(){
+  const e=document.getElementById('ldr');
+  setTimeout(()=>{e.classList.add('out');setTimeout(()=>e.style.display='none',400)},500);
+}
+
+// ─── SIGN IN ───
+function setSiRole(r,btn){
+  siRole=r;
+  document.querySelectorAll('#si-tabs .tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+async function doSignIn(){
+  clrA('si');
+  const email=g('si-e'),pwd=g('si-p');
+  if(!email||!pwd){shErr('si','Please enter your email and password.');return}
+  setBtn('si-btn',true);
+  try{
+    const{data,error}=await sb.auth.signInWithPassword({email,password:pwd});
+    if(error)throw error;
+    const{data:prof,error:pe}=await sb.from('profiles').select('role,is_blocked,is_active').eq('id',data.user.id).single();
+    if(pe||!prof)throw new Error('Account not found. Please check your email address.');
+    if(prof.is_blocked)throw new Error('Your account has been blocked. Please contact support.');
+    if(!prof.is_active)throw new Error('Your account is inactive. Please contact support.');
+    const rm={student:['student'],teacher:['teacher'],staff:['staff','admin','super_admin']};
+    if(!rm[siRole]?.includes(prof.role)){await sb.auth.signOut();throw new Error(`This account is not a "${siRole}" account. Please select the correct role tab.`);}
+    try{await sb.from('session_logs').insert({user_id:data.user.id,user_agent:navigator.userAgent,device_type:/Mobile|Android|iPhone|iPad/i.test(navigator.userAgent)?'mobile':'desktop',logged_in_at:new Date().toISOString()});}catch(_){}
+    shOk('si','Signed in successfully! Redirecting…');
+    setTimeout(()=>rdx(data.session),900);
+  }catch(e){
+    shErr('si',e.message||'Sign in failed. Please try again.');
+    setBtn('si-btn',false);
+  }
+}
+
+// ─── REGISTER ROLE ───
+function swRole(role,btn){
+  regRole=role;
+  document.querySelectorAll('#reg-tabs .tab').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  else document.querySelectorAll('#reg-tabs .tab')[role==='student'?0:1]?.classList.add('on');
+  document.getElementById('frm-s').style.display=role==='student'?'block':'none';
+  document.getElementById('frm-t').style.display=role==='teacher'?'block':'none';
+  document.getElementById('stepbar').style.display=role==='teacher'?'flex':'none';
+  clrA('r');setStep(1);
+}
+
+// ─── STUDENT REGISTER ───
+async function doStudentReg(){
+  clrA('r');
+  const F={fn:g('s-fn'),ln:g('s-ln'),nic:g('s-nic'),dob:g('s-dob'),gen:g('s-gender'),dist:g('s-dist'),addr:g('s-addr'),city:g('s-city'),wa:g('s-wa'),email:g('s-email'),pwd:g('s-pwd'),pwd2:g('s-pwd2'),grade:g('s-grade')};
+  const req=['fn','ln','nic','dob','gen','dist','addr','city','wa','email','pwd','grade'];
+  for(const k of req)if(!F[k]){shErr('r','Please fill in all required fields.');return}
+  if(F.pwd!==F.pwd2){shErr('r','Passwords do not match.');return}
+  if(F.pwd.length<8){shErr('r','Password must be at least 8 characters.');return}
+  setBtn('s-btn',true);
+  try{
+    const{data,error}=await sb.auth.signUp({email:F.email,password:F.pwd,options:{data:{role:'student',first_name:F.fn,last_name:F.ln}}});
+    if(error)throw error;
+    const uid=data.user.id;
+    await sb.from('profiles').update({role:'student',first_name:F.fn,last_name:F.ln,nic_number:F.nic,birthday:F.dob,gender:F.gen,district:F.dist,address:F.addr,city:F.city,work_phone:g('s-ph'),contact_number:F.wa}).eq('id',uid);
+    await sb.from('student_profiles').upsert({id:uid,grade_id:F.grade});
+    const batch=g('s-batch'),subj=g('s-subj');
+    if(batch)await sb.from('enrollments').upsert({student_id:uid,batch_id:batch,subject_id:subj||null});
+    shOk('r','🎉 Account created! Please verify your email then sign in.');
+    setTimeout(()=>gp('signin'),2500);
+  }catch(e){
+    shErr('r',e.message||'Registration failed. Please try again.');
+    setBtn('s-btn',false);
+  }
+}
+
+// ─── TEACHER STEPS ───
+let tSt=1;
+function setStep(n){
+  tSt=n;
+  for(let i=1;i<=3;i++){
+    const nd=document.getElementById('sn'+i);
+    if(!nd)continue;
+    if(i<n){nd.className='snode done';nd.textContent='✓'}
+    else if(i===n){nd.className='snode act';nd.textContent=i}
+    else{nd.className='snode';nd.textContent=i}
+  }
+  for(let i=1;i<=2;i++){const c=document.getElementById('sc'+i);if(c)c.className='sconn'+(i<n?' done':'')}
+}
+function ts2(){
+  clrA('r');
+  const req=['t-name','t-nic','t-dob','t-gen','t-dist','t-addr','t-ph','t-wa','t-subj','t-grade','t-batch','t-bank','t-acc','t-brnch','t-holder','t-email','t-pwd','t-pwd2'];
+  for(const id of req)if(!g(id)){shErr('r','Please fill in all required fields.');return}
+  if(g('t-pwd')!==g('t-pwd2')){shErr('r','Passwords do not match.');return}
+  if(g('t-pwd').length<8){shErr('r','Password must be at least 8 characters.');return}
+  document.getElementById('t1').style.display='none';
+  document.getElementById('t2').style.display='block';
+  setStep(2);
+}
+function tb(){
+  document.getElementById('t2').style.display='none';
+  document.getElementById('t1').style.display='block';
+  setStep(1);
+}
+async function doTeacherReg(){
+  if(!selPkg){toast('warn','Select Package','Please choose a package to continue.');return}
+  clrA('r');
+  setBtn('t-btn',true);
+  try{
+    const{data,error}=await sb.auth.signUp({email:g('t-email'),password:g('t-pwd'),options:{data:{role:'teacher',name:g('t-name')}}});
+    if(error)throw error;
+    const uid=data.user.id;
+    await sb.from('profiles').update({role:'teacher',name:g('t-name'),nic_number:g('t-nic'),birthday:g('t-dob'),gender:g('t-gen'),district:g('t-dist'),address:g('t-addr'),work_phone:g('t-ph'),contact_number:g('t-wa'),notes:g('t-notes')}).eq('id',uid);
+    await sb.from('teacher_profiles').upsert({id:uid,bank_name:g('t-bank'),bank_account_number:g('t-acc'),bank_branch:g('t-brnch'),bank_account_name:g('t-holder'),package_type:selPkg});
+    await sb.from('package_upgrade_requests').insert({teacher_id:uid,requested_package:selPkg,requested_billing:selBill,status:'pending'});
+    document.getElementById('t2').style.display='none';
+    document.getElementById('t3').style.display='block';
+    setStep(3);
+  }catch(e){
+    shErr('r',e.message||'Registration failed. Please try again.');
+    setBtn('t-btn',false);
+    setStep(2);
+  }
+}
+
+// ─── PACKAGES ───
+function setBill(type,btn){
+  selBill=type;
+  document.querySelectorAll('.bbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderPkgs();
+}
+function selPkgFn(type,el){
+  selPkg=type;
+  document.querySelectorAll('.pcard').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function renderPkgs(){
+  const ct=document.getElementById('pkg-ct');
+  if(!ct)return;
+  const pk={'monthly':'monthly_fee','yearly':'yearly_fee','lifetime':'lifetime_fee'}[selBill];
+  const lb={'monthly':'/month','yearly':'/year','lifetime':' one-time'}[selBill];
+  ct.innerHTML=pkgs.map(p=>{
+    const price=p[pk]||0;
+    const feats=Array.isArray(p.features)?p.features:JSON.parse(p.features||'[]');
+    return`<div class="pcard pk-${p.type} ${selPkg===p.type?'sel':''}" onclick="selPkgFn('${p.type}',this)">
+      <div class="pbadge">${p.display_name}</div>
+      <div class="pname">${p.display_name} Plan</div>
+      <div class="pprice">LKR ${price.toLocaleString()}<sub>${lb}</sub></div>
+      <div class="pcomm">Commission: ${p.commission_rate}%</div>
+      <ul class="pfts">${feats.map(f=>`<li>${f}</li>`).join('')}</ul>
+    </div>`;
+  }).join('');
+}
+
+// ─── HELPERS ───
+const g=id=>(document.getElementById(id)?.value?.trim()||'');
+function tpwd(id,btn){const el=document.getElementById(id);if(!el)return;el.type=el.type==='password'?'text':'password';btn.textContent=el.type==='password'?'👁':'🔒'}
+function chkPw(inp,bId,lId){
+  const pw=inp.value;const bars=document.querySelectorAll(`#${bId} .pbar`);const lbl=document.getElementById(lId);
+  let sc=0;if(pw.length>=8)sc++;if(/[A-Z]/.test(pw))sc++;if(/[0-9]/.test(pw))sc++;if(/[^A-Za-z0-9]/.test(pw))sc++;
+  const cls=['','w','f','g','s'];const lb={0:'',1:'Weak 😟',2:'Fair 😐',3:'Good 👍',4:'Strong 🔒'};const cl={1:'var(--err)',2:'var(--warn)',3:'var(--a1)',4:'var(--ok)'};
+  bars.forEach((b,i)=>{b.className='pbar';if(i<sc)b.classList.add(cls[sc])});
+  if(lbl){lbl.textContent=lb[sc];lbl.style.color=cl[sc]||''}
+}
+function setBtn(id,loading){
+  const btn=document.getElementById(id);if(!btn)return;btn.disabled=loading;
+  if(loading){btn._orig=btn.innerHTML;btn.innerHTML='<span class="spn"></span>Please wait…'}
+  else if(btn._orig)btn.innerHTML=btn._orig;
+}
+function clrA(p){document.getElementById(p+'e')?.classList.remove('show');document.getElementById(p+'o')?.classList.remove('show')}
+function shErr(p,m){const e=document.getElementById(p+'e'),me=document.getElementById(p+'e-m');if(e)e.classList.add('show');if(me)me.textContent=m}
+function shOk(p,m){const e=document.getElementById(p+'o'),me=document.getElementById(p+'o-m');if(e)e.classList.add('show');if(me)me.textContent=m}
+function toast(type,title,msg,ms=4500){
+  const ic={ok:'✅',err:'❌',info:'ℹ️',warn:'⚠️'};
+  const tz=document.getElementById('tz');
+  const el=document.createElement('div');
+  el.className=`tk tk-${type==='ok'?'ok':type==='err'?'err':'info'}`;
+  el.innerHTML=`<div class="tk-ico">${ic[type]||'ℹ️'}</div><div><div class="tk-t">${title}</div>${msg?`<div class="tk-m">${msg}</div>`:''}</div>`;
+  tz.appendChild(el);
+  setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),350)},ms);
+}
+document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const a=document.querySelector('.pgf.on');if(a?.id==='signin')doSignIn()});
+setStep(1);renderPkgs();
+</script>
 </body>
 </html>
