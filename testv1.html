@@ -1,0 +1,2741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NovaX Edu - Learning Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a24;
+            --bg-elevated: #22222e;
+            --fg-primary: #f0f0f5;
+            --fg-secondary: #a0a0b0;
+            --fg-muted: #606070;
+            --accent: #00d4aa;
+            --accent-dim: #00a080;
+            --accent-glow: rgba(0, 212, 170, 0.3);
+            --danger: #ff4757;
+            --warning: #ffa502;
+            --success: #2ed573;
+            --border: #2a2a38;
+            --glass: rgba(26, 26, 36, 0.8);
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #f5f7fa;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --bg-elevated: #f0f2f5;
+            --fg-primary: #1a1a2e;
+            --fg-secondary: #4a4a5a;
+            --fg-muted: #8a8a9a;
+            --accent: #00b894;
+            --accent-dim: #00997a;
+            --accent-glow: rgba(0, 184, 148, 0.2);
+            --border: #e0e0e8;
+            --glass: rgba(255, 255, 255, 0.9);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--fg-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        /* Animated Background */
+        .bg-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.3; }
+            90% { opacity: 0.3; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+
+        .gradient-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .orb-1 {
+            width: 600px;
+            height: 600px;
+            background: var(--accent);
+            top: -200px;
+            right: -200px;
+            animation: pulse-slow 8s infinite ease-in-out;
+        }
+
+        .orb-2 {
+            width: 400px;
+            height: 400px;
+            background: #6366f1;
+            bottom: -100px;
+            left: -100px;
+            animation: pulse-slow 10s infinite ease-in-out reverse;
+        }
+
+        @keyframes pulse-slow {
+            0%, 100% { transform: scale(1); opacity: 0.15; }
+            50% { transform: scale(1.2); opacity: 0.1; }
+        }
+
+        /* Glass Card */
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--fg-muted);
+        }
+
+        /* Input Styles */
+        .input-field {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: var(--fg-primary);
+            font-size: 14px;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .input-field::placeholder {
+            color: var(--fg-muted);
+        }
+
+        /* Button Styles */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+            color: #000;
+            font-weight: 600;
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--accent-glow);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--bg-elevated);
+            color: var(--fg-primary);
+            border: 1px solid var(--border);
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 100;
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-260px);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: var(--fg-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-elevated);
+            color: var(--fg-primary);
+        }
+
+        .nav-item.active {
+            background: var(--accent-glow);
+            color: var(--accent);
+            border-left-color: var(--accent);
+        }
+
+        .nav-item svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        .main-content.expanded {
+            margin-left: 0;
+        }
+
+        /* Dashboard Cards */
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* Tabs */
+        .tab-btn {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            color: var(--fg-secondary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        .tab-btn:hover {
+            color: var(--fg-primary);
+        }
+
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 12px 16px;
+            background: var(--bg-elevated);
+            color: var(--fg-secondary);
+            font-weight: 500;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .data-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+
+        .data-table tr:hover td {
+            background: var(--bg-elevated);
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: rgba(46, 213, 115, 0.15);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(255, 165, 2, 0.15);
+            color: var(--warning);
+        }
+
+        .badge-danger {
+            background: rgba(255, 71, 87, 0.15);
+            color: var(--danger);
+        }
+
+        .badge-info {
+            background: var(--accent-glow);
+            color: var(--accent);
+        }
+
+        /* Step Indicator */
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 30px;
+        }
+
+        .step-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .step-dot.active {
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .step-dot.completed {
+            background: var(--success);
+        }
+
+        /* Notification Dot */
+        .notification-dot {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            background: var(--danger);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-260px);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .stat-value {
+                font-size: 24px;
+            }
+            .stat-card {
+                padding: 16px;
+            }
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Switch Toggle */
+        .switch {
+            width: 50px;
+            height: 26px;
+            background: var(--bg-elevated);
+            border-radius: 13px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .switch.active {
+            background: var(--accent);
+        }
+
+        .switch::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.3s ease;
+        }
+
+        .switch.active::after {
+            transform: translateX(24px);
+        }
+
+        /* Stagger Animation */
+        .stagger-in > * {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: staggerItem 0.5s ease forwards;
+        }
+
+        .stagger-in > *:nth-child(1) { animation-delay: 0.1s; }
+        .stagger-in > *:nth-child(2) { animation-delay: 0.2s; }
+        .stagger-in > *:nth-child(3) { animation-delay: 0.3s; }
+        .stagger-in > *:nth-child(4) { animation-delay: 0.4s; }
+        .stagger-in > *:nth-child(5) { animation-delay: 0.5s; }
+        .stagger-in > *:nth-child(6) { animation-delay: 0.6s; }
+
+        @keyframes staggerItem {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Checkbox Custom */
+        .checkbox-custom {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-custom.checked {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .checkbox-custom svg {
+            width: 14px;
+            height: 14px;
+            stroke: #000;
+            stroke-width: 3;
+            opacity: 0;
+        }
+
+        .checkbox-custom.checked svg {
+            opacity: 1;
+        }
+
+        /* Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <!-- Background Effects -->
+    <div class="bg-particles" id="particles"></div>
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+
+    <!-- Auth Pages -->
+    <div id="auth-container">
+        <!-- Login Page -->
+        <div id="login-page" class="min-h-screen flex items-center justify-center p-4">
+            <div class="glass-card p-8 w-full max-w-md">
+                <div class="text-center mb-8">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4" style="background: var(--accent-glow);">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                            <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                        </svg>
+                    </div>
+                    <h1 class="text-2xl font-bold" style="color: var(--fg-primary);">NovaX Edu</h1>
+                    <p class="mt-2" style="color: var(--fg-secondary);">Learning Management System</p>
+                </div>
+
+                <form id="login-form" class="space-y-5">
+                    <div>
+                        <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Email Address</label>
+                        <input type="email" id="login-email" class="input-field" placeholder="Enter your email" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Password</label>
+                        <div class="relative">
+                            <input type="password" id="login-password" class="input-field pr-12" placeholder="Enter your password" required>
+                            <button type="button" onclick="togglePassword('login-password')" class="absolute right-3 top-1/2 -translate-y-1/2" style="color: var(--fg-muted);">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" class="hidden" id="remember-me">
+                            <div class="checkbox-custom" onclick="this.classList.toggle('checked')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                            </div>
+                            <span style="color: var(--fg-secondary);">Remember me</span>
+                        </label>
+                        <a href="#" class="hover:underline" style="color: var(--accent);">Forgot Password?</a>
+                    </div>
+                    <button type="submit" class="btn-primary w-full">Sign In</button>
+                </form>
+
+                <div class="mt-6 text-center">
+                    <p style="color: var(--fg-secondary);">Don't have an account? 
+                        <a href="#" onclick="showRegister()" class="font-medium hover:underline" style="color: var(--accent);">Register</a>
+                    </p>
+                </div>
+
+                <div class="mt-6 flex items-center gap-4">
+                    <div class="flex-1 h-px" style="background: var(--border);"></div>
+                    <span class="text-sm" style="color: var(--fg-muted);">or continue with</span>
+                    <div class="flex-1 h-px" style="background: var(--border);"></div>
+                </div>
+
+                <div class="mt-6 flex gap-3">
+                    <button class="btn-secondary flex-1 flex items-center justify-center gap-2">
+                        <svg width="20" height="20" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                        Google
+                    </button>
+                    <button class="btn-secondary flex-1 flex items-center justify-center gap-2">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color: var(--fg-primary);">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                        GitHub
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Register Page -->
+        <div id="register-page" class="min-h-screen flex items-center justify-center p-4 hidden">
+            <div class="glass-card p-8 w-full max-w-2xl">
+                <div class="text-center mb-6">
+                    <h1 class="text-2xl font-bold" style="color: var(--fg-primary);">Create Account</h1>
+                    <p class="mt-2" style="color: var(--fg-secondary);">Join NovaX Edu today</p>
+                </div>
+
+                <!-- Step Indicator -->
+                <div class="step-indicator">
+                    <div class="step-dot active" data-step="1"></div>
+                    <div class="step-dot" data-step="2"></div>
+                    <div class="step-dot" data-step="3"></div>
+                    <div class="step-dot" data-step="4"></div>
+                </div>
+
+                <form id="register-form">
+                    <!-- Step 1: Personal Info -->
+                    <div class="reg-step" data-step="1">
+                        <h3 class="text-lg font-semibold mb-4" style="color: var(--accent);">Personal Information</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Full Name *</label>
+                                <input type="text" id="reg-fullname" class="input-field" placeholder="Enter full name" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm mb-2" style="color: var(--fg-secondary);">NIC ID Number *</label>
+                                <input type="text" id="reg-nic" class="input-field" placeholder="e.g., 200012345678" required oninput="parseNIC(this.value)">
+                            </div>
+                            <div>
+                                <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Birthday</label>
+                                <input type="date" id="reg-birthday" class="input-field" readonly>
+                            </div>
+                            <div>
+                                <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Gender</label>
+                                <select id="reg-gender" class="input-field" readonly>
+                                    <option value="">Auto-detected from NIC</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Age</label>
+                                <input type="number" id="reg-age" class="input-field" placeholder="Auto-calculated" readonly>
+                            </div>
+                            <div>
+                                <label class="block text-sm mb-2" style="color: var(--fg-secondary);">WhatsApp/Telegram *</label>
+                                <input type="tel" id="reg-phone" class="input-field" placeholder="e.g., 0771234567" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Account Info -->
+                    <div class="reg-step hidden" data-step="2">
+                        <h3 class="text-lg font-semibold mb-4" style="color: var(--accent);">Account Information</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Email Address *</label>
+                                <input type="email" id="reg-email" class="input-field" placeholder="Enter your email" required>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Password *</label>
+                                    <input type="password" id="reg-password" class="input-field" placeholder="Min 8 characters" required minlength="8">
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Confirm Password *</label>
+                                    <input type="password" id="reg-confirm-password" class="input-field" placeholder="Re-enter password" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Location Info -->
+                    <div class="reg-step hidden" data-step="3">
+                        <h3 class="text-lg font-semibold mb-4" style="color: var(--accent);">Location Details</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm mb-2" style="color: var(--fg-secondary);">District *</label>
+                                <select id="reg-district" class="input-field" required>
+                                    <option value="">Select District</option>
+                                    <option value="Colombo">Colombo</option>
+                                    <option value="Gampaha">Gampaha</option>
+                                    <option value="Kalutara">Kalutara</option>
+                                    <option value="Kandy">Kandy</option>
+                                    <option value="Matale">Matale</option>
+                                    <option value="Nuwara Eliya">Nuwara Eliya</option>
+                                    <option value="Galle">Galle</option>
+                                    <option value="Matara">Matara</option>
+                                    <option value="Hambantota">Hambantota</option>
+                                    <option value="Jaffna">Jaffna</option>
+                                    <option value="Kilinochchi">Kilinochchi</option>
+                                    <option value="Mannar">Mannar</option>
+                                    <option value="Vavuniya">Vavuniya</option>
+                                    <option value="Mullaitivu">Mullaitivu</option>
+                                    <option value="Batticaloa">Batticaloa</option>
+                                    <option value="Ampara">Ampara</option>
+                                    <option value="Trincomalee">Trincomalee</option>
+                                    <option value="Kurunegala">Kurunegala</option>
+                                    <option value="Puttalam">Puttalam</option>
+                                    <option value="Anuradhapura">Anuradhapura</option>
+                                    <option value="Polonnaruwa">Polonnaruwa</option>
+                                    <option value="Badulla">Badulla</option>
+                                    <option value="Monaragala">Monaragala</option>
+                                    <option value="Ratnapura">Ratnapura</option>
+                                    <option value="Kegalle">Kegalle</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Address *</label>
+                                <textarea id="reg-address" class="input-field" rows="3" placeholder="Enter your full address" required></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Academic Info -->
+                    <div class="reg-step hidden" data-step="4">
+                        <h3 class="text-lg font-semibold mb-4" style="color: var(--accent);">Academic Information</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Grade *</label>
+                                <select id="reg-grade" class="input-field" required>
+                                    <option value="">Select Grade</option>
+                                    <option value="6">Grade 6</option>
+                                    <option value="7">Grade 7</option>
+                                    <option value="8">Grade 8</option>
+                                    <option value="9">Grade 9</option>
+                                    <option value="10">Grade 10</option>
+                                    <option value="11">Grade 11 (O/L)</option>
+                                    <option value="12">Grade 12 (A/L)</option>
+                                    <option value="13">Grade 13 (A/L)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Batch *</label>
+                                <input type="text" id="reg-batch" class="input-field" placeholder="e.g., 2024 A/L Batch" required>
+                            </div>
+                        </div>
+                        <div class="mt-6 p-4 rounded-xl" style="background: var(--accent-glow);">
+                            <p class="text-sm" style="color: var(--accent);">
+                                By registering, you agree to our Terms of Service and Privacy Policy. Your account will be reviewed and activated within 24 hours.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <div class="flex justify-between mt-8">
+                        <button type="button" id="reg-prev" class="btn-secondary hidden" onclick="prevStep()">Previous</button>
+                        <button type="button" id="reg-next" class="btn-primary ml-auto" onclick="nextStep()">Next Step</button>
+                        <button type="submit" id="reg-submit" class="btn-primary ml-auto hidden">Create Account</button>
+                    </div>
+                </form>
+
+                <p class="mt-6 text-center" style="color: var(--fg-secondary);">
+                    Already have an account? 
+                    <a href="#" onclick="showLogin()" class="font-medium hover:underline" style="color: var(--accent);">Sign In</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard-container" class="hidden">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="p-5 border-b" style="border-color: var(--border);">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: var(--accent-glow);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                            <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="font-bold" style="color: var(--fg-primary);">NovaX Edu</h2>
+                        <p class="text-xs" style="color: var(--fg-muted);">Learning Platform</p>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="py-4">
+                <div class="px-4 mb-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider" style="color: var(--fg-muted);">Main</span>
+                </div>
+                <div class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"/>
+                        <rect x="14" y="3" width="7" height="7"/>
+                        <rect x="14" y="14" width="7" height="7"/>
+                        <rect x="3" y="14" width="7" height="7"/>
+                    </svg>
+                    <span>Dashboard</span>
+                </div>
+                <div class="nav-item" data-page="live-classes" onclick="navigateTo('live-classes')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polygon points="10 8 16 12 10 16 10 8"/>
+                    </svg>
+                    <span>Live Classes</span>
+                </div>
+                <div class="nav-item" data-page="recordings" onclick="navigateTo('recordings')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="23 7 16 12 23 17 23 7"/>
+                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                    </svg>
+                    <span>Recordings</span>
+                </div>
+                <div class="nav-item" data-page="notes" onclick="navigateTo('notes')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                    <span>Notes</span>
+                </div>
+                <div class="nav-item" data-page="quizzes" onclick="navigateTo('quizzes')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    <span>Quizzes</span>
+                </div>
+
+                <div class="px-4 mb-2 mt-6">
+                    <span class="text-xs font-semibold uppercase tracking-wider" style="color: var(--fg-muted);">Shop & Orders</span>
+                </div>
+                <div class="nav-item" data-page="store" onclick="navigateTo('store')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="9" cy="21" r="1"/>
+                        <circle cx="20" cy="21" r="1"/>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                    </svg>
+                    <span>Store</span>
+                </div>
+                <div class="nav-item" data-page="orders" onclick="navigateTo('orders')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="8" y1="6" x2="21" y2="6"/>
+                        <line x1="8" y1="12" x2="21" y2="12"/>
+                        <line x1="8" y1="18" x2="21" y2="18"/>
+                        <line x1="3" y1="6" x2="3.01" y2="6"/>
+                        <line x1="3" y1="12" x2="3.01" y2="12"/>
+                        <line x1="3" y1="18" x2="3.01" y2="18"/>
+                    </svg>
+                    <span>Track Orders</span>
+                </div>
+
+                <div class="px-4 mb-2 mt-6">
+                    <span class="text-xs font-semibold uppercase tracking-wider" style="color: var(--fg-muted);">Support</span>
+                </div>
+                <div class="nav-item" data-page="timetable" onclick="navigateTo('timetable')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    <span>Time Table</span>
+                </div>
+                <div class="nav-item" data-page="support" onclick="navigateTo('support')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                    </svg>
+                    <span>Support</span>
+                </div>
+
+                <div class="px-4 mb-2 mt-6">
+                    <span class="text-xs font-semibold uppercase tracking-wider" style="color: var(--fg-muted);">Account</span>
+                </div>
+                <div class="nav-item" data-page="profile" onclick="navigateTo('profile')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    <span>Profile</span>
+                </div>
+                <div class="nav-item" data-page="history" onclick="navigateTo('history')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    <span>History</span>
+                </div>
+                <div class="nav-item" data-page="notifications" onclick="navigateTo('notifications')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                    <span>Notifications</span>
+                    <span class="notification-dot"></span>
+                </div>
+                <div class="nav-item" data-page="settings" onclick="navigateTo('settings')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    <span>Settings</span>
+                </div>
+
+                <!-- Admin Nav Items -->
+                <div id="admin-nav" class="hidden">
+                    <div class="px-4 mb-2 mt-6">
+                        <span class="text-xs font-semibold uppercase tracking-wider" style="color: var(--fg-muted);">Admin Panel</span>
+                    </div>
+                    <div class="nav-item" data-page="admin-staff" onclick="navigateTo('admin-staff')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                        <span>Staff Management</span>
+                    </div>
+                    <div class="nav-item" data-page="admin-students" onclick="navigateTo('admin-students')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                            <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                        </svg>
+                        <span>Student Approvals</span>
+                    </div>
+                    <div class="nav-item" data-page="admin-finance" onclick="navigateTo('admin-finance')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="1" x2="12" y2="23"/>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                        </svg>
+                        <span>Finance</span>
+                    </div>
+                    <div class="nav-item" data-page="admin-content" onclick="navigateTo('admin-content')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                        <span>Content Manager</span>
+                    </div>
+                </div>
+
+                <div class="nav-item mt-6" onclick="logout()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    <span>Logout</span>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="sticky top-0 z-50 p-4 border-b flex items-center justify-between" style="background: var(--bg-secondary); border-color: var(--border);">
+                <div class="flex items-center gap-4">
+                    <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-lg hover:bg-opacity-50" style="background: var(--bg-elevated);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="3" y1="12" x2="21" y2="12"/>
+                            <line x1="3" y1="6" x2="21" y2="6"/>
+                            <line x1="3" y1="18" x2="21" y2="18"/>
+                        </svg>
+                    </button>
+                    <div>
+                        <h1 class="text-xl font-bold" id="page-title">Dashboard</h1>
+                        <p class="text-sm" style="color: var(--fg-muted);" id="page-subtitle">Welcome back!</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleTheme()" class="p-2 rounded-lg transition-colors" style="background: var(--bg-elevated);">
+                        <svg id="theme-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                        </svg>
+                    </button>
+                    <div class="flex items-center gap-3 pl-3 border-l" style="border-color: var(--border);">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style="background: var(--accent); color: #000;" id="user-avatar">JD</div>
+                        <div class="hidden sm:block">
+                            <p class="font-medium text-sm" id="user-name">John Doe</p>
+                            <p class="text-xs" style="color: var(--fg-muted);" id="user-role">Student</p>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content Container -->
+            <div class="p-6" id="page-content">
+                <!-- Dashboard Page -->
+                <div id="page-dashboard" class="page-section">
+                    <!-- Stats Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 stagger-in">
+                        <div class="stat-card">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-sm" style="color: var(--fg-secondary);">Live Classes Joined</span>
+                                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: var(--accent-glow);">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <polygon points="10 8 16 12 10 16 10 8"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="stat-value">24</div>
+                            <p class="text-sm mt-1" style="color: var(--success);">+3 this week</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-sm" style="color: var(--fg-secondary);">Recordings Watched</span>
+                                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(99, 102, 241, 0.15);">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2">
+                                        <polygon points="23 7 16 12 23 17 23 7"/>
+                                        <rect x="1" y="5" width="15" height="14" rx="2"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="stat-value">156</div>
+                            <p class="text-sm mt-1" style="color: var(--fg-muted);">42 hours total</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-sm" style="color: var(--fg-secondary);">Quizzes Completed</span>
+                                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(245, 158, 11, 0.15);">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                        <polyline points="22 4 12 14.01 9 11.01"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="stat-value">18</div>
+                            <p class="text-sm mt-1" style="color: var(--success);">85% avg score</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-sm" style="color: var(--fg-secondary);">Total Payments</span>
+                                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(236, 72, 153, 0.15);">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2">
+                                        <line x1="12" y1="1" x2="12" y2="23"/>
+                                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="stat-value">Rs.15,500</div>
+                            <p class="text-sm mt-1" style="color: var(--warning);">Next: Jan 15</p>
+                        </div>
+                    </div>
+
+                    <!-- Additional Stats -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                        <div class="lg:col-span-2">
+                            <div class="glass-card p-6">
+                                <h3 class="font-semibold mb-4" style="color: var(--fg-primary);">Upcoming Classes</h3>
+                                <div class="space-y-3" id="upcoming-classes">
+                                    <!-- Dynamic content -->
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="glass-card p-6">
+                                <h3 class="font-semibold mb-4" style="color: var(--fg-primary);">Payment Status</h3>
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center">
+                                        <span style="color: var(--fg-secondary);">January Fee</span>
+                                        <span class="badge badge-success">Paid</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span style="color: var(--fg-secondary);">February Fee</span>
+                                        <span class="badge badge-warning">Due: Feb 15</span>
+                                    </div>
+                                    <div class="pt-3 border-t" style="border-color: var(--border);">
+                                        <p class="text-sm" style="color: var(--fg-muted);">Amount Due</p>
+                                        <p class="text-2xl font-bold" style="color: var(--accent);">Rs.2,500</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats Row -->
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="glass-card p-4 text-center">
+                            <p class="text-3xl font-bold" style="color: var(--accent);">12</p>
+                            <p class="text-sm" style="color: var(--fg-secondary);">Notes Downloaded</p>
+                        </div>
+                        <div class="glass-card p-4 text-center">
+                            <p class="text-3xl font-bold" style="color: var(--accent);">5</p>
+                            <p class="text-sm" style="color: var(--fg-secondary);">Tutes Purchased</p>
+                        </div>
+                        <div class="glass-card p-4 text-center">
+                            <p class="text-3xl font-bold" style="color: var(--accent);">98%</p>
+                            <p class="text-sm" style="color: var(--fg-secondary);">Attendance</p>
+                        </div>
+                        <div class="glass-card p-4 text-center">
+                            <p class="text-3xl font-bold" style="color: var(--accent);">A+</p>
+                            <p class="text-sm" style="color: var(--fg-secondary);">Current Grade</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Classes Page -->
+                <div id="page-live-classes" class="page-section hidden">
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <button class="tab-btn active" onclick="filterLive('all')">All</button>
+                        <button class="tab-btn" onclick="filterLive('live')">Live Now</button>
+                        <button class="tab-btn" onclick="filterLive('upcoming')">Upcoming</button>
+                        <button class="tab-btn" onclick="filterLive('past')">Past</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" id="live-classes-grid">
+                        <!-- Dynamic content -->
+                    </div>
+                </div>
+
+                <!-- Recordings Page -->
+                <div id="page-recordings" class="page-section hidden">
+                    <div class="glass-card p-6 mb-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Year</label>
+                                <select class="input-field" id="rec-year" onchange="filterRecordings()">
+                                    <option value="2025">2025</option>
+                                    <option value="2024">2024</option>
+                                    <option value="2023">2023</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Month</label>
+                                <select class="input-field" id="rec-month" onchange="filterRecordings()">
+                                    <option value="">All Months</option>
+                                    <option value="1">January</option>
+                                    <option value="2">February</option>
+                                    <option value="3">March</option>
+                                    <option value="4">April</option>
+                                    <option value="5">May</option>
+                                    <option value="6">June</option>
+                                    <option value="7">July</option>
+                                    <option value="8">August</option>
+                                    <option value="9">September</option>
+                                    <option value="10">October</option>
+                                    <option value="11">November</option>
+                                    <option value="12">December</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Category</label>
+                                <select class="input-field" id="rec-category" onchange="filterRecordings()">
+                                    <option value="">All Categories</option>
+                                    <option value="theory">Theory</option>
+                                    <option value="revision">Revision</option>
+                                    <option value="paper">Paper Discussion</option>
+                                    <option value="extra">Extra Classes</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Access</label>
+                                <select class="input-field" id="rec-access" onchange="filterRecordings()">
+                                    <option value="">All</option>
+                                    <option value="free">Free</option>
+                                    <option value="paid">Paid</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4 p-4 rounded-xl" style="background: var(--accent-glow);">
+                        <div class="flex flex-wrap items-center justify-between gap-4">
+                            <div>
+                                <p class="font-semibold" style="color: var(--accent);">January 2025 Access</p>
+                                <p class="text-sm" style="color: var(--fg-secondary);">Monthly Fee: Rs.2,500</p>
+                            </div>
+                            <button class="btn-primary" onclick="requestAccess('rec', '2025-01')">Request Access</button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" id="recordings-grid">
+                        <!-- Dynamic content -->
+                    </div>
+                </div>
+
+                <!-- Notes Page -->
+                <div id="page-notes" class="page-section hidden">
+                    <div class="glass-card p-4 mb-6">
+                        <div class="flex flex-wrap gap-4 items-center">
+                            <input type="text" class="input-field flex-1" placeholder="Search notes..." id="notes-search">
+                            <select class="input-field w-auto" id="notes-filter">
+                                <option value="">All</option>
+                                <option value="free">Free</option>
+                                <option value="paid">Paid</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="notes-grid">
+                        <!-- Dynamic content -->
+                    </div>
+                </div>
+
+                <!-- Quizzes Page -->
+                <div id="page-quizzes" class="page-section hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="quizzes-grid">
+                        <!-- Dynamic content -->
+                    </div>
+                </div>
+
+                <!-- Store Page -->
+                <div id="page-store" class="page-section hidden">
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <button class="tab-btn active" onclick="filterStore('all')">All</button>
+                        <button class="tab-btn" onclick="filterStore('paper')">Papers</button>
+                        <button class="tab-btn" onclick="filterStore('books')">Books</button>
+                        <button class="tab-btn" onclick="filterStore('tute')">Tutes</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="store-grid">
+                        <!-- Dynamic content -->
+                    </div>
+                </div>
+
+                <!-- Orders Page -->
+                <div id="page-orders" class="page-section hidden">
+                    <div class="glass-card overflow-hidden">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Product</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orders-table-body">
+                                <!-- Dynamic content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Support Page -->
+                <div id="page-support" class="page-section hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="glass-card p-6">
+                            <h3 class="font-semibold mb-4" style="color: var(--fg-primary);">Teacher Information</h3>
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="w-16 h-16 rounded-full" style="background: var(--accent-glow);"></div>
+                                <div>
+                                    <p class="font-semibold">Mr. Kamal Perera</p>
+                                    <p style="color: var(--fg-secondary);">BSc (Hons) in Mathematics</p>
+                                </div>
+                            </div>
+                            <div class="space-y-3">
+                                <p style="color: var(--fg-secondary);"><strong>University:</strong> University of Colombo</p>
+                                <p style="color: var(--fg-secondary);"><strong>Experience:</strong> 10+ years</p>
+                                <p style="color: var(--fg-secondary);"><strong>Institute:</strong> NovaX Academy</p>
+                            </div>
+                        </div>
+
+                        <div class="glass-card p-6">
+                            <h3 class="font-semibold mb-4" style="color: var(--fg-primary);">Contact Us</h3>
+                            <div class="space-y-4">
+                                <a href="tel:0775048455" class="flex items-center gap-3 p-3 rounded-xl" style="background: var(--bg-elevated);">
+                                    <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: var(--accent-glow);">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm" style="color: var(--fg-muted);">Hotline</p>
+                                        <p class="font-medium">0775048455</p>
+                                    </div>
+                                </a>
+                                <a href="mailto:nova.x.team001@gmail.com" class="flex items-center gap-3 p-3 rounded-xl" style="background: var(--bg-elevated);">
+                                    <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: var(--accent-glow);">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                            <polyline points="22,6 12,13 2,6"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm" style="color: var(--fg-muted);">Email</p>
+                                        <p class="font-medium">nova.x.team001@gmail.com</p>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-2 glass-card p-6">
+                            <h3 class="font-semibold mb-4" style="color: var(--fg-primary);">Submit a Support Ticket</h3>
+                            <form id="support-form" class="space-y-4">
+                                <div>
+                                    <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Subject</label>
+                                    <input type="text" class="input-field" placeholder="Brief description of your issue" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Message</label>
+                                    <textarea class="input-field" rows="4" placeholder="Describe your issue in detail" required></textarea>
+                                </div>
+                                <button type="submit" class="btn-primary">Submit Ticket</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timetable Page -->
+                <div id="page-timetable" class="page-section hidden">
+                    <div class="glass-card p-6 mb-6">
+                        <h3 class="font-semibold mb-2" style="color: var(--accent);">Next Class</h3>
+                        <div class="flex flex-wrap items-center gap-4">
+                            <div class="flex-1">
+                                <p class="text-xl font-bold">Combined Mathematics - Paper Discussion</p>
+                                <p style="color: var(--fg-secondary);">Today at 4:00 PM - 6:00 PM</p>
+                            </div>
+                            <button class="btn-primary">Join Now</button>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-6">
+                        <h3 class="font-semibold mb-4" style="color: var(--fg-primary);">Weekly Schedule</h3>
+                        <div class="overflow-x-auto">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Day</th>
+                                        <th>Time</th>
+                                        <th>Subject</th>
+                                        <th>Type</th>
+                                        <th>Teacher</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="timetable-body">
+                                    <!-- Dynamic content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Page -->
+                <div id="page-profile" class="page-section hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="glass-card p-6 text-center">
+                            <div class="w-24 h-24 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl font-bold" style="background: var(--accent); color: #000;">JD</div>
+                            <h3 class="text-xl font-bold" id="profile-name">John Doe</h3>
+                            <p style="color: var(--fg-secondary);" id="profile-email">john@example.com</p>
+                            <p class="mt-2"><span class="badge badge-success">Active</span></p>
+                        </div>
+
+                        <div class="lg:col-span-2 glass-card p-6">
+                            <h3 class="font-semibold mb-4" style="color: var(--fg-primary);">Personal Information</h3>
+                            <form id="profile-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Full Name</label>
+                                    <input type="text" class="input-field" id="edit-fullname">
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-2" style="color: var(--fg-secondary);">NIC</label>
+                                    <input type="text" class="input-field" id="edit-nic" disabled>
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Phone</label>
+                                    <input type="tel" class="input-field" id="edit-phone">
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-2" style="color: var(--fg-secondary);">District</label>
+                                    <select class="input-field" id="edit-district">
+                                        <!-- Options same as registration -->
+                                    </select>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Address</label>
+                                    <textarea class="input-field" rows="2" id="edit-address"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Grade</label>
+                                    <input type="text" class="input-field" id="edit-grade" disabled>
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Batch</label>
+                                    <input type="text" class="input-field" id="edit-batch" disabled>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <button type="submit" class="btn-primary">Save Changes</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Page -->
+                <div id="page-history" class="page-section hidden">
+                    <div class="flex gap-2 mb-6">
+                        <button class="tab-btn active" onclick="filterHistory('all')">All</button>
+                        <button class="tab-btn" onclick="filterHistory('payments')">Payments</button>
+                        <button class="tab-btn" onclick="filterHistory('store')">Store Purchases</button>
+                    </div>
+
+                    <div class="glass-card overflow-hidden">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table-body">
+                                <!-- Dynamic content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Notifications Page -->
+                <div id="page-notifications" class="page-section hidden">
+                    <div class="space-y-3" id="notifications-list">
+                        <!-- Dynamic content -->
+                    </div>
+                </div>
+
+                <!-- Settings Page -->
+                <div id="page-settings" class="page-section hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="glass-card p-6">
+                            <h3 class="font-semibold mb-4" style="color: var(--fg-primary);">Appearance</h3>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-medium">Dark Mode</p>
+                                    <p class="text-sm" style="color: var(--fg-secondary);">Use dark theme by default</p>
+                                </div>
+                                <div class="switch active" id="theme-switch" onclick="toggleThemeFromSettings()"></div>
+                            </div>
+                        </div>
+
+                        <div class="glass-card p-6">
+                            <h3 class="font-semibold mb-4" style="color: var(--fg-primary);">Change Password</h3>
+                            <form id="password-form" class="space-y-4">
+                                <div>
+                                    <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Current Password</label>
+                                    <input type="password" class="input-field" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-2" style="color: var(--fg-secondary);">New Password</label>
+                                    <input type="password" class="input-field" required minlength="8">
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Confirm New Password</label>
+                                    <input type="password" class="input-field" required>
+                                </div>
+                                <button type="submit" class="btn-primary">Update Password</button>
+                            </form>
+                        </div>
+
+                        <div class="glass-card p-6">
+                            <h3 class="font-semibold mb-4" style="color: var(--fg-primary);">Login Activity</h3>
+                            <div class="space-y-3" id="login-activity">
+                                <!-- Dynamic content -->
+                            </div>
+                        </div>
+
+                        <div class="glass-card p-6">
+                            <h3 class="font-semibold mb-4" style="color: var(--danger);">Danger Zone</h3>
+                            <p class="text-sm mb-4" style="color: var(--fg-secondary);">Once you delete your account, there is no going back. Please be certain.</p>
+                            <button class="btn-danger" onclick="confirmDeleteAccount()">Delete Account</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin: Staff Management -->
+                <div id="page-admin-staff" class="page-section hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold">Staff Management</h2>
+                        <button class="btn-primary" onclick="openModal('add-staff-modal')">Add Staff</button>
+                    </div>
+
+                    <div class="glass-card overflow-hidden">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Access</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="staff-table-body">
+                                <!-- Dynamic content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Admin: Student Approvals -->
+                <div id="page-admin-students" class="page-section hidden">
+                    <div class="flex gap-2 mb-6">
+                        <button class="tab-btn active">Pending</button>
+                        <button class="tab-btn">Approved</button>
+                        <button class="tab-btn">Blocked</button>
+                    </div>
+
+                    <div class="glass-card overflow-hidden">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Grade</th>
+                                    <th>Batch</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="students-table-body">
+                                <!-- Dynamic content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Admin: Finance -->
+                <div id="page-admin-finance" class="page-section hidden">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div class="stat-card">
+                            <p class="text-sm" style="color: var(--fg-secondary);">Total Revenue</p>
+                            <p class="stat-value">Rs.525,000</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="text-sm" style="color: var(--fg-secondary);">This Month</p>
+                            <p class="stat-value">Rs.78,500</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="text-sm" style="color: var(--fg-secondary);">Pending Payments</p>
+                            <p class="stat-value">Rs.12,000</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="text-sm" style="color: var(--fg-secondary);">Active Students</p>
+                            <p class="stat-value">156</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-6">
+                        <h3 class="font-semibold mb-4">Recent Transactions</h3>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Student</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="finance-table-body">
+                                <!-- Dynamic content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Admin: Content Manager -->
+                <div id="page-admin-content" class="page-section hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex gap-2">
+                            <button class="tab-btn active">Live Classes</button>
+                            <button class="tab-btn">Recordings</button>
+                            <button class="tab-btn">Notes</button>
+                            <button class="tab-btn">Quizzes</button>
+                        </div>
+                        <button class="btn-primary" onclick="openModal('add-content-modal')">Add Content</button>
+                    </div>
+
+                    <div class="glass-card overflow-hidden">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Type</th>
+                                    <th>Access</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="content-table-body">
+                                <!-- Dynamic content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="add-staff-modal">
+        <div class="modal-content p-6">
+            <h3 class="text-xl font-bold mb-4">Add New Staff</h3>
+            <form class="space-y-4">
+                <div>
+                    <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Full Name</label>
+                    <input type="text" class="input-field" placeholder="Enter name">
+                </div>
+                <div>
+                    <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Email</label>
+                    <input type="email" class="input-field" placeholder="Enter email">
+                </div>
+                <div>
+                    <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Job Role</label>
+                    <select class="input-field">
+                        <option value="owner">Owner</option>
+                        <option value="manager">Manager</option>
+                        <option value="store_admin">Store Admin</option>
+                        <option value="approval_admin">Approval Admin</option>
+                        <option value="teacher">Teacher</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Access Permissions</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-2">
+                            <div class="checkbox-custom" onclick="this.classList.toggle('checked')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+                            <span style="color: var(--fg-secondary);">Dashboard</span>
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <div class="checkbox-custom" onclick="this.classList.toggle('checked')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+                            <span style="color: var(--fg-secondary);">Content Management</span>
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <div class="checkbox-custom" onclick="this.classList.toggle('checked')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+                            <span style="color: var(--fg-secondary);">Student Approvals</span>
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <div class="checkbox-custom" onclick="this.classList.toggle('checked')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+                            <span style="color: var(--fg-secondary);">Finance</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="button" class="btn-secondary flex-1" onclick="closeModal('add-staff-modal')">Cancel</button>
+                    <button type="submit" class="btn-primary flex-1">Add Staff</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="add-content-modal">
+        <div class="modal-content p-6">
+            <h3 class="text-xl font-bold mb-4">Add New Content</h3>
+            <form class="space-y-4">
+                <div>
+                    <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Content Type</label>
+                    <select class="input-field">
+                        <option value="live">Live Class</option>
+                        <option value="recording">Recording</option>
+                        <option value="note">Note</option>
+                        <option value="quiz">Quiz</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Title</label>
+                    <input type="text" class="input-field" placeholder="Enter title">
+                </div>
+                <div>
+                    <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Description</label>
+                    <textarea class="input-field" rows="3" placeholder="Enter description"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Video/Preview Link</label>
+                    <input type="url" class="input-field" placeholder="YouTube or Drive link">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Access</label>
+                        <select class="input-field">
+                            <option value="free">Free</option>
+                            <option value="paid">Paid</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-2" style="color: var(--fg-secondary);">Month</label>
+                        <input type="month" class="input-field">
+                    </div>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="button" class="btn-secondary flex-1" onclick="closeModal('add-content-modal')">Cancel</button>
+                    <button type="submit" class="btn-primary flex-1">Add Content</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="confirm-modal">
+        <div class="modal-content p-6 text-center">
+            <div class="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style="background: rgba(255, 71, 87, 0.15);">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+            </div>
+            <h3 class="text-xl font-bold mb-2" id="confirm-title">Delete Account?</h3>
+            <p class="mb-6" style="color: var(--fg-secondary);" id="confirm-message">This action cannot be undone. All your data will be permanently deleted.</p>
+            <div class="flex gap-3">
+                <button class="btn-secondary flex-1" onclick="closeModal('confirm-modal')">Cancel</button>
+                <button class="btn-danger flex-1" id="confirm-action">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 p-4 rounded-xl z-50 transform translate-y-full opacity-0 transition-all duration-300" style="background: var(--bg-card); border: 1px solid var(--border);">
+        <div class="flex items-center gap-3">
+            <div id="toast-icon"></div>
+            <p id="toast-message">Notification message</p>
+        </div>
+    </div>
+
+    <script>
+        // =============================================
+        // CONFIGURATION & INITIALIZATION
+        // =============================================
+        
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://hjjermqfrrbblhaccjvc.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqamVybXFmcnJiYmxoYWNjenZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0NjI3NjIsImV4cCI6MjA4NjAzODc2Mn0.acw8vpErUuhEmfYFqoR7nf69U7YrpTRDiwkJjg87S4Y';
+        
+        // Initialize Supabase Client
+        let supabase = null;
+        try {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } catch (e) {
+            console.error('Supabase initialization error:', e);
+        }
+
+        // App State
+        let currentUser = null;
+        let currentStep = 1;
+        const totalSteps = 4;
+
+        // =============================================
+        // PARTICLE BACKGROUND
+        // =============================================
+        function createParticles() {
+            const container = document.getElementById('particles');
+            if (!container) return;
+            
+            const particleCount = 30;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // =============================================
+        // THEME MANAGEMENT
+        // =============================================
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+            updateThemeSwitch(newTheme);
+        }
+
+        function toggleThemeFromSettings() {
+            const switchEl = document.getElementById('theme-switch');
+            if (switchEl) {
+                switchEl.classList.toggle('active');
+                toggleTheme();
+            }
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('theme-icon');
+            if (icon) {
+                if (theme === 'dark') {
+                    icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+                } else {
+                    icon.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+                }
+            }
+        }
+
+        function updateThemeSwitch(theme) {
+            const switchEl = document.getElementById('theme-switch');
+            if (switchEl) {
+                if (theme === 'dark') {
+                    switchEl.classList.add('active');
+                } else {
+                    switchEl.classList.remove('active');
+                }
+            }
+        }
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.body.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+            updateThemeSwitch(savedTheme);
+        }
+
+        // =============================================
+        // NAVIGATION
+        // =============================================
+        function navigateTo(page) {
+            // Hide all pages
+            document.querySelectorAll('.page-section').forEach(p => p.classList.add('hidden'));
+            
+            // Show target page
+            const targetPage = document.getElementById('page-' + page);
+            if (targetPage) {
+                targetPage.classList.remove('hidden');
+            }
+
+            // Update nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('data-page') === page) {
+                    item.classList.add('active');
+                }
+            });
+
+            // Update title
+            const titles = {
+                'dashboard': { title: 'Dashboard', subtitle: 'Welcome back!' },
+                'live-classes': { title: 'Live Classes', subtitle: 'Join your classes' },
+                'recordings': { title: 'Recordings', subtitle: 'Watch past classes' },
+                'notes': { title: 'Notes', subtitle: 'Download study materials' },
+                'quizzes': { title: 'Quizzes', subtitle: 'Test your knowledge' },
+                'store': { title: 'Store', subtitle: 'Purchase study materials' },
+                'orders': { title: 'Track Orders', subtitle: 'Track your purchases' },
+                'support': { title: 'Support', subtitle: 'Get help from our team' },
+                'timetable': { title: 'Time Table', subtitle: 'Your class schedule' },
+                'profile': { title: 'Profile', subtitle: 'Manage your account' },
+                'history': { title: 'History', subtitle: 'Your activity log' },
+                'notifications': { title: 'Notifications', subtitle: 'Stay updated' },
+                'settings': { title: 'Settings', subtitle: 'Customize your experience' },
+                'admin-staff': { title: 'Staff Management', subtitle: 'Manage team members' },
+                'admin-students': { title: 'Student Approvals', subtitle: 'Review registrations' },
+                'admin-finance': { title: 'Finance', subtitle: 'Financial overview' },
+                'admin-content': { title: 'Content Manager', subtitle: 'Manage all content' }
+            };
+
+            const pageInfo = titles[page] || { title: 'Dashboard', subtitle: '' };
+            document.getElementById('page-title').textContent = pageInfo.title;
+            document.getElementById('page-subtitle').textContent = pageInfo.subtitle;
+
+            // Close sidebar on mobile
+            if (window.innerWidth < 1024) {
+                document.getElementById('sidebar').classList.remove('open');
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        // =============================================
+        // AUTH FUNCTIONS
+        // =============================================
+        function showLogin() {
+            document.getElementById('login-page').classList.remove('hidden');
+            document.getElementById('register-page').classList.add('hidden');
+        }
+
+        function showRegister() {
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('register-page').classList.remove('hidden');
+        }
+
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.type = input.type === 'password' ? 'text' : 'password';
+            }
+        }
+
+        // NIC Parser (Sri Lankan NIC)
+        function parseNIC(nic) {
+            if (nic.length >= 10) {
+                const isOldFormat = nic.length === 10;
+                const isNewFormat = nic.length === 12;
+
+                let year, dayOfYear;
+
+                if (isOldFormat) {
+                    year = parseInt('19' + nic.substring(0, 2));
+                    dayOfYear = parseInt(nic.substring(2, 5));
+                } else if (isNewFormat) {
+                    year = parseInt(nic.substring(0, 4));
+                    dayOfYear = parseInt(nic.substring(4, 7));
+                }
+
+                if (dayOfYear > 500) {
+                    document.getElementById('reg-gender').innerHTML = '<option value="female" selected>Female</option>';
+                    dayOfYear -= 500;
+                } else {
+                    document.getElementById('reg-gender').innerHTML = '<option value="male" selected>Male</option>';
+                }
+
+                // Calculate birthday
+                const birthday = getBirthdayFromDay(year, dayOfYear);
+                if (birthday) {
+                    document.getElementById('reg-birthday').value = birthday;
+                    document.getElementById('reg-age').value = calculateAge(birthday);
+                }
+            }
+        }
+
+        function getBirthdayFromDay(year, dayOfYear) {
+            const daysInMonths = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+            
+            // Check leap year
+            if ((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0) {
+                daysInMonths[1] = 29;
+            }
+
+            let month = 0;
+            let day = dayOfYear;
+
+            while (day > daysInMonths[month]) {
+                day -= daysInMonths[month];
+                month++;
+            }
+
+            if (month < 12 && day > 0) {
+                const monthStr = String(month + 1).padStart(2, '0');
+                const dayStr = String(day).padStart(2, '0');
+                return `${year}-${monthStr}-${dayStr}`;
+            }
+            return null;
+        }
+
+        function calculateAge(birthday) {
+            const birth = new Date(birthday);
+            const today = new Date();
+            let age = today.getFullYear() - birth.getFullYear();
+            const monthDiff = today.getMonth() - birth.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+                age--;
+            }
+            return age;
+        }
+
+        // Registration Steps
+        function nextStep() {
+            if (currentStep < totalSteps) {
+                // Validate current step
+                if (!validateStep(currentStep)) return;
+
+                document.querySelector(`.reg-step[data-step="${currentStep}"]`).classList.add('hidden');
+                currentStep++;
+                document.querySelector(`.reg-step[data-step="${currentStep}"]`).classList.remove('hidden');
+                updateStepIndicator();
+
+                document.getElementById('reg-prev').classList.remove('hidden');
+                if (currentStep === totalSteps) {
+                    document.getElementById('reg-next').classList.add('hidden');
+                    document.getElementById('reg-submit').classList.remove('hidden');
+                }
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                document.querySelector(`.reg-step[data-step="${currentStep}"]`).classList.add('hidden');
+                currentStep--;
+                document.querySelector(`.reg-step[data-step="${currentStep}"]`).classList.remove('hidden');
+                updateStepIndicator();
+
+                document.getElementById('reg-next').classList.remove('hidden');
+                document.getElementById('reg-submit').classList.add('hidden');
+                if (currentStep === 1) {
+                    document.getElementById('reg-prev').classList.add('hidden');
+                }
+            }
+        }
+
+        function updateStepIndicator() {
+            document.querySelectorAll('.step-dot').forEach((dot, index) => {
+                dot.classList.remove('active', 'completed');
+                if (index + 1 < currentStep) {
+                    dot.classList.add('completed');
+                } else if (index + 1 === currentStep) {
+                    dot.classList.add('active');
+                }
+            });
+        }
+
+        function validateStep(step) {
+            const stepEl = document.querySelector(`.reg-step[data-step="${step}"]`);
+            const inputs = stepEl.querySelectorAll('input[required], select[required], textarea[required]');
+            let valid = true;
+
+            inputs.forEach(input => {
+                if (!input.value.trim()) {
+                    input.style.borderColor = 'var(--danger)';
+                    valid = false;
+                } else {
+                    input.style.borderColor = 'var(--border)';
+                }
+            });
+
+            if (step === 2) {
+                const password = document.getElementById('reg-password').value;
+                const confirmPassword = document.getElementById('reg-confirm-password').value;
+                if (password !== confirmPassword) {
+                    showToast('Passwords do not match', 'error');
+                    return false;
+                }
+                if (password.length < 8) {
+                    showToast('Password must be at least 8 characters', 'error');
+                    return false;
+                }
+            }
+
+            return valid;
+        }
+
+        // =============================================
+        // MODAL FUNCTIONS
+        // =============================================
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('active');
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        }
+
+        function confirmDeleteAccount() {
+            document.getElementById('confirm-title').textContent = 'Delete Account?';
+            document.getElementById('confirm-message').textContent = 'This action cannot be undone. All your data will be permanently deleted.';
+            document.getElementById('confirm-action').textContent = 'Delete';
+            document.getElementById('confirm-action').onclick = () => {
+                // Handle account deletion
+                showToast('Account deletion requested', 'info');
+                closeModal('confirm-modal');
+            };
+            openModal('confirm-modal');
+        }
+
+        // =============================================
+        // TOAST NOTIFICATIONS
+        // =============================================
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            const icons = {
+                success: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+                error: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+                info: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+                warning: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
+            };
+
+            toastMessage.textContent = message;
+            toastIcon.innerHTML = icons[type] || icons.info;
+
+            toast.style.transform = 'translateY(0)';
+            toast.style.opacity = '1';
+
+            setTimeout(() => {
+                toast.style.transform = 'translateY(100%)';
+                toast.style.opacity = '0';
+            }, 3000);
+        }
+
+        // =============================================
+        // LOGIN HANDLER
+        // =============================================
+        async function handleLogin(email, password) {
+            if (!supabase) {
+                // Demo mode
+                simulateLogin();
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (error) throw error;
+
+                currentUser = data.user;
+                await loadUserData();
+                showDashboard();
+                showToast('Welcome back!', 'success');
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+
+        async function handleRegister(formData) {
+            if (!supabase) {
+                // Demo mode
+                showToast('Registration successful! Please login.', 'success');
+                showLogin();
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase.auth.signUp({
+                    email: formData.email,
+                    password: formData.password,
+                    options: {
+                        data: {
+                            full_name: formData.fullname,
+                            nic: formData.nic,
+                            phone: formData.phone,
+                            district: formData.district,
+                            address: formData.address,
+                            grade: formData.grade,
+                            batch: formData.batch,
+                            birthday: formData.birthday,
+                            gender: formData.gender,
+                            age: formData.age
+                        }
+                    }
+                });
+
+                if (error) throw error;
+
+                // Insert into students table
+                const { error: insertError } = await supabase
+                    .from('students')
+                    .insert([{
+                        id: data.user.id,
+                        full_name: formData.fullname,
+                        email: formData.email,
+                        nic: formData.nic,
+                        phone: formData.phone,
+                        district: formData.district,
+                        address: formData.address,
+                        grade: formData.grade,
+                        batch: formData.batch,
+                        birthday: formData.birthday,
+                        gender: formData.gender,
+                        age: formData.age,
+                        status: 'pending'
+                    }]);
+
+                if (insertError) throw insertError;
+
+                showToast('Registration successful! Please wait for approval.', 'success');
+                showLogin();
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+
+        function simulateLogin() {
+            // Demo login for testing
+            currentUser = {
+                email: 'demo@novax.edu',
+                role: 'student'
+            };
+            showDashboard();
+            showToast('Welcome to NovaX Edu!', 'success');
+        }
+
+        function showDashboard() {
+            document.getElementById('auth-container').classList.add('hidden');
+            document.getElementById('dashboard-container').classList.remove('hidden');
+            loadDashboardData();
+        }
+
+        async function loadUserData() {
+            if (!supabase || !currentUser) return;
+
+            try {
+                const { data, error } = await supabase
+                    .from('students')
+                    .select('*')
+                    .eq('id', currentUser.id)
+                    .single();
+
+                if (data) {
+                    document.getElementById('user-name').textContent = data.full_name;
+                    document.getElementById('user-avatar').textContent = data.full_name.split(' ').map(n => n[0]).join('').toUpperCase();
+                    
+                    // Check if admin
+                    if (data.role === 'admin' || data.role === 'teacher') {
+                        document.getElementById('admin-nav').classList.remove('hidden');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        function loadDashboardData() {
+            // Load upcoming classes
+            const upcomingClasses = [
+                { title: 'Combined Mathematics', time: 'Today, 4:00 PM', teacher: 'Mr. Kamal' },
+                { title: 'Physics - Mechanics', time: 'Tomorrow, 2:00 PM', teacher: 'Mr. Nimal' },
+                { title: 'Chemistry - Organic', time: 'Wed, 10:00 AM', teacher: 'Ms. Kumari' }
+            ];
+
+            const upcomingContainer = document.getElementById('upcoming-classes');
+            if (upcomingContainer) {
+                upcomingContainer.innerHTML = upcomingClasses.map(c => `
+                    <div class="flex items-center gap-4 p-4 rounded-xl" style="background: var(--bg-elevated);">
+                        <div class="w-12 h-12 rounded-lg flex items-center justify-center" style="background: var(--accent-glow);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polygon points="10 8 16 12 10 16 10 8"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-medium">${c.title}</p>
+                            <p class="text-sm" style="color: var(--fg-muted);">${c.time}</p>
+                        </div>
+                        <span class="text-sm" style="color: var(--fg-secondary);">${c.teacher}</span>
+                    </div>
+                `).join('');
+            }
+
+            // Load live classes
+            const liveClasses = [
+                { title: 'Combined Mathematics - Paper Discussion', status: 'live', time: '4:00 PM - 6:00 PM', type: 'Theory', access: 'free' },
+                { title: 'Physics - Mechanics Revision', status: 'upcoming', time: 'Tomorrow, 2:00 PM', type: 'Revision', access: 'paid' },
+                { title: 'Chemistry Past Paper 2023', status: 'past', time: 'Yesterday', type: 'Paper', access: 'paid' }
+            ];
+
+            const liveGrid = document.getElementById('live-classes-grid');
+            if (liveGrid) {
+                liveGrid.innerHTML = liveClasses.map(c => `
+                    <div class="glass-card p-5">
+                        <div class="flex items-center gap-2 mb-3">
+                            ${c.status === 'live' ? '<span class="badge badge-danger">LIVE</span>' : 
+                              c.status === 'upcoming' ? '<span class="badge badge-warning">Upcoming</span>' : 
+                              '<span class="badge badge-info">Past</span>'}
+                            <span class="badge badge-info">${c.type}</span>
+                        </div>
+                        <h4 class="font-semibold mb-2">${c.title}</h4>
+                        <p class="text-sm mb-3" style="color: var(--fg-secondary);">${c.time}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm" style="color: ${c.access === 'free' ? 'var(--success)' : 'var(--warning)'};">${c.access === 'free' ? 'Free' : 'Premium'}</span>
+                            <button class="btn-primary text-sm py-2 px-4">${c.status === 'live' ? 'Join Now' : c.status === 'upcoming' ? 'Set Reminder' : 'Watch Recording'}</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Load recordings
+            const recordings = [
+                { title: 'Integration Techniques', category: 'Theory', duration: '2h 15m', date: '2025-01-10', access: 'paid', thumbnail: '' },
+                { title: 'Newton\'s Laws Revision', category: 'Revision', duration: '1h 45m', date: '2025-01-08', access: 'free', thumbnail: '' },
+                { title: '2024 A/L Paper Discussion', category: 'Paper', duration: '3h', date: '2025-01-05', access: 'paid', thumbnail: '' }
+            ];
+
+            const recGrid = document.getElementById('recordings-grid');
+            if (recGrid) {
+                recGrid.innerHTML = recordings.map(r => `
+                    <div class="glass-card overflow-hidden">
+                        <div class="h-32 flex items-center justify-center" style="background: var(--bg-elevated);">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--fg-muted)" stroke-width="1">
+                                <polygon points="23 7 16 12 23 17 23 7"/>
+                                <rect x="1" y="5" width="15" height="14" rx="2"/>
+                            </svg>
+                        </div>
+                        <div class="p-4">
+                            <span class="badge badge-info mb-2">${r.category}</span>
+                            <h4 class="font-semibold mb-1">${r.title}</h4>
+                            <p class="text-sm mb-3" style="color: var(--fg-secondary);">${r.duration} | ${r.date}</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm" style="color: ${r.access === 'free' ? 'var(--success)' : 'var(--warning)'};">${r.access === 'free' ? 'Free' : 'Premium'}</span>
+                                <button class="btn-secondary text-sm py-2 px-4">Watch</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Load notes
+            const notes = [
+                { title: 'Integration Formulas', subject: 'Mathematics', size: '2.4 MB', access: 'free', month: 'January' },
+                { title: 'Physics Cheat Sheet', subject: 'Physics', size: '1.8 MB', access: 'paid', month: 'January' },
+                { title: 'Organic Chemistry Notes', subject: 'Chemistry', size: '5.2 MB', access: 'paid', month: 'December' }
+            ];
+
+            const notesGrid = document.getElementById('notes-grid');
+            if (notesGrid) {
+                notesGrid.innerHTML = notes.map(n => `
+                    <div class="glass-card p-5">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-12 h-12 rounded-lg flex items-center justify-center" style="background: var(--accent-glow);">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">${n.title}</h4>
+                                <p class="text-sm" style="color: var(--fg-muted);">${n.subject}</p>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center text-sm mb-3">
+                            <span style="color: var(--fg-secondary);">${n.size}</span>
+                            <span style="color: var(--fg-secondary);">${n.month}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm" style="color: ${n.access === 'free' ? 'var(--success)' : 'var(--warning)'};">${n.access === 'free' ? 'Free' : 'Premium'}</span>
+                            <button class="btn-primary text-sm py-2 px-4">Download</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Load quizzes
+            const quizzes = [
+                { title: 'Integration Quiz', questions: 20, duration: '30 min', status: 'completed', score: 85 },
+                { title: 'Mechanics Quiz', questions: 15, duration: '25 min', status: 'pending', score: null },
+                { title: 'Chemical Bonding', questions: 25, duration: '35 min', status: 'completed', score: 92 }
+            ];
+
+            const quizzesGrid = document.getElementById('quizzes-grid');
+            if (quizzesGrid) {
+                quizzesGrid.innerHTML = quizzes.map(q => `
+                    <div class="glass-card p-5">
+                        <h4 class="font-semibold mb-2">${q.title}</h4>
+                        <p class="text-sm mb-4" style="color: var(--fg-secondary);">${q.questions} questions | ${q.duration}</p>
+                        ${q.status === 'completed' ? 
+                            `<div class="mb-4"><div class="text-sm mb-1" style="color: var(--fg-secondary);">Score</div><div class="text-2xl font-bold" style="color: var(--success);">${q.score}%</div></div>` :
+                            `<div class="mb-4"><span class="badge badge-warning">Not attempted</span></div>`
+                        }
+                        <button class="btn-primary w-full">${q.status === 'completed' ? 'Review Answers' : 'Start Quiz'}</button>
+                    </div>
+                `).join('');
+            }
+
+            // Load store items
+            const storeItems = [
+                { name: 'A/L Past Papers 2020-2024', type: 'paper', price: 1500, image: '' },
+                { name: 'Mathematics Theory Book', type: 'books', price: 800, image: '' },
+                { name: 'Physics Tute Bundle', type: 'tute', price: 500, image: '' },
+                { name: 'Chemistry Practical Guide', type: 'books', price: 650, image: '' }
+            ];
+
+            const storeGrid = document.getElementById('store-grid');
+            if (storeGrid) {
+                storeGrid.innerHTML = storeItems.map(s => `
+                    <div class="glass-card overflow-hidden">
+                        <div class="h-40 flex items-center justify-center" style="background: var(--bg-elevated);">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--fg-muted)" stroke-width="1">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                            </svg>
+                        </div>
+                        <div class="p-4">
+                            <span class="badge badge-info mb-2">${s.type}</span>
+                            <h4 class="font-semibold mb-2">${s.name}</h4>
+                            <div class="flex justify-between items-center">
+                                <span class="text-lg font-bold" style="color: var(--accent);">Rs.${s.price}</span>
+                                <button class="btn-primary text-sm py-2 px-4">Request</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Load orders
+            const orders = [
+                { id: 'ORD-001', product: 'A/L Past Papers', date: '2025-01-10', status: 'delivered' },
+                { id: 'ORD-002', product: 'Math Theory Book', date: '2025-01-12', status: 'processing' },
+                { id: 'ORD-003', product: 'Physics Tute', date: '2025-01-14', status: 'shipped' }
+            ];
+
+            const ordersBody = document.getElementById('orders-table-body');
+            if (ordersBody) {
+                ordersBody.innerHTML = orders.map(o => `
+                    <tr>
+                        <td>${o.id}</td>
+                        <td>${o.product}</td>
+                        <td>${o.date}</td>
+                        <td><span class="badge badge-${o.status === 'delivered' ? 'success' : o.status === 'shipped' ? 'info' : 'warning'}">${o.status}</span></td>
+                        <td><button class="btn-secondary text-sm py-1 px-3">Track</button></td>
+                    </tr>
+                `).join('');
+            }
+
+            // Load timetable
+            const timetable = [
+                { day: 'Monday', time: '4:00 PM - 6:00 PM', subject: 'Combined Mathematics', type: 'Theory', teacher: 'Mr. Kamal' },
+                { day: 'Tuesday', time: '2:00 PM - 4:00 PM', subject: 'Physics', type: 'Theory', teacher: 'Mr. Nimal' },
+                { day: 'Wednesday', time: '10:00 AM - 12:00 PM', subject: 'Chemistry', type: 'Revision', teacher: 'Ms. Kumari' },
+                { day: 'Thursday', time: '4:00 PM - 6:00 PM', subject: 'Combined Mathematics', type: 'Paper', teacher: 'Mr. Kamal' },
+                { day: 'Friday', time: '2:00 PM - 4:00 PM', subject: 'Physics', type: 'Revision', teacher: 'Mr. Nimal' }
+            ];
+
+            const timetableBody = document.getElementById('timetable-body');
+            if (timetableBody) {
+                timetableBody.innerHTML = timetable.map(t => `
+                    <tr>
+                        <td>${t.day}</td>
+                        <td>${t.time}</td>
+                        <td>${t.subject}</td>
+                        <td><span class="badge badge-info">${t.type}</span></td>
+                        <td>${t.teacher}</td>
+                    </tr>
+                `).join('');
+            }
+
+            // Load history
+            const history = [
+                { date: '2025-01-15', description: 'January Monthly Fee', amount: 'Rs.2,500', status: 'completed', type: 'payments' },
+                { date: '2025-01-12', description: 'Math Theory Book', amount: 'Rs.800', status: 'completed', type: 'store' },
+                { date: '2025-01-10', description: 'A/L Past Papers Bundle', amount: 'Rs.1,500', status: 'completed', type: 'store' },
+                { date: '2024-12-15', description: 'December Monthly Fee', amount: 'Rs.2,500', status: 'completed', type: 'payments' }
+            ];
+
+            const historyBody = document.getElementById('history-table-body');
+            if (historyBody) {
+                historyBody.innerHTML = history.map(h => `
+                    <tr>
+                        <td>${h.date}</td>
+                        <td>${h.description}</td>
+                        <td>${h.amount}</td>
+                        <td><span class="badge badge-success">${h.status}</span></td>
+                    </tr>
+                `).join('');
+            }
+
+            // Load notifications
+            const notifications = [
+                { title: 'New Recording Available', message: 'Integration Techniques recording is now available', time: '2 hours ago', read: false },
+                { title: 'Payment Received', message: 'Your January fee payment has been confirmed', time: '1 day ago', read: true },
+                { title: 'Upcoming Class Reminder', message: 'Physics class starts in 1 hour', time: '2 days ago', read: true },
+                { title: 'Access Granted', message: 'You now have access to January recordings', time: '3 days ago', read: true }
+            ];
+
+            const notifList = document.getElementById('notifications-list');
+            if (notifList) {
+                notifList.innerHTML = notifications.map(n => `
+                    <div class="glass-card p-4 flex items-start gap-4 ${!n.read ? 'border-l-4' : ''}" style="${!n.read ? 'border-left-color: var(--accent);' : ''}">
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style="background: var(--accent-glow);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-semibold">${n.title}</h4>
+                            <p class="text-sm" style="color: var(--fg-secondary);">${n.message}</p>
+                            <p class="text-xs mt-1" style="color: var(--fg-muted);">${n.time}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Load login activity
+            const loginActivity = [
+                { device: 'Chrome on Windows', ip: '192.168.1.xxx', location: 'Colombo, Sri Lanka', time: 'Jan 15, 2025 at 10:30 AM', current: true },
+                { device: 'Safari on iPhone', ip: '192.168.1.xxx', location: 'Colombo, Sri Lanka', time: 'Jan 14, 2025 at 4:15 PM', current: false },
+                { device: 'Firefox on Linux', ip: '192.168.1.xxx', location: 'Colombo, Sri Lanka', time: 'Jan 12, 2025 at 9:00 AM', current: false }
+            ];
+
+            const activityContainer = document.getElementById('login-activity');
+            if (activityContainer) {
+                activityContainer.innerHTML = loginActivity.map(a => `
+                    <div class="flex items-center justify-between p-3 rounded-xl" style="background: var(--bg-elevated);">
+                        <div>
+                            <p class="font-medium">${a.device} ${a.current ? '<span class="badge badge-success ml-2">Current</span>' : ''}</p>
+                            <p class="text-sm" style="color: var(--fg-muted);">${a.ip} | ${a.location}</p>
+                        </div>
+                        <span class="text-sm" style="color: var(--fg-secondary);">${a.time}</span>
+                    </div>
+                `).join('');
+            }
+
+            // Load admin tables
+            loadAdminData();
+        }
+
+        function loadAdminData() {
+            // Staff table
+            const staff = [
+                { name: 'Kamal Perera', role: 'Owner', status: 'active', email: 'kamal@novax.edu' },
+                { name: 'Nimal Silva', role: 'Manager', status: 'active', email: 'nimal@novax.edu' },
+                { name: 'Kumari Fernando', role: 'Teacher', status: 'active', email: 'kumari@novax.edu' },
+                { name: 'Sunil Jayasena', role: 'Store Admin', status: 'pending', email: 'sunil@novax.edu' }
+            ];
+
+            const staffBody = document.getElementById('staff-table-body');
+            if (staffBody) {
+                staffBody.innerHTML = staff.map(s => `
+                    <tr>
+                        <td>
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style="background: var(--accent); color: #000;">${s.name.split(' ').map(n => n[0]).join('')}</div>
+                                <div>
+                                    <p class="font-medium">${s.name}</p>
+                                    <p class="text-sm" style="color: var(--fg-muted);">${s.email}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="badge badge-info">${s.role}</span></td>
+                        <td><span class="badge badge-${s.status === 'active' ? 'success' : 'warning'}">${s.status}</span></td>
+                        <td>
+                            <button class="btn-secondary text-sm py-1 px-3">Manage</button>
+                        </td>
+                        <td>
+                            <div class="flex gap-2">
+                                <button class="btn-secondary text-sm py-1 px-2">Edit</button>
+                                <button class="btn-danger text-sm py-1 px-2">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            // Students table
+            const students = [
+                { name: 'Amal Dias', email: 'amal@example.com', grade: '12', batch: '2025 A/L', status: 'pending' },
+                { name: 'Samantha Kumar', email: 'sam@example.com', grade: '11', batch: '2025 O/L', status: 'pending' },
+                { name: 'Nuwan Jayawardena', email: 'nuwan@example.com', grade: '13', batch: '2025 A/L', status: 'approved' }
+            ];
+
+            const studentsBody = document.getElementById('students-table-body');
+            if (studentsBody) {
+                studentsBody.innerHTML = students.map(s => `
+                    <tr>
+                        <td>${s.name}</td>
+                        <td>${s.email}</td>
+                        <td>${s.grade}</td>
+                        <td>${s.batch}</td>
+                        <td>
+                            <div class="flex gap-2">
+                                <button class="btn-primary text-sm py-1 px-3">Approve</button>
+                                <button class="btn-danger text-sm py-1 px-3">Reject</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            // Finance table
+            const transactions = [
+                { date: '2025-01-15', student: 'John Doe', type: 'Monthly Fee', amount: 'Rs.2,500', status: 'completed' },
+                { date: '2025-01-14', student: 'Jane Smith', type: 'Store Purchase', amount: 'Rs.1,500', status: 'completed' },
+                { date: '2025-01-13', student: 'Mike Johnson', type: 'Monthly Fee', amount: 'Rs.2,500', status: 'pending' }
+            ];
+
+            const financeBody = document.getElementById('finance-table-body');
+            if (financeBody) {
+                financeBody.innerHTML = transactions.map(t => `
+                    <tr>
+                        <td>${t.date}</td>
+                        <td>${t.student}</td>
+                        <td>${t.type}</td>
+                        <td>${t.amount}</td>
+                        <td><span class="badge badge-${t.status === 'completed' ? 'success' : 'warning'}">${t.status}</span></td>
+                    </tr>
+                `).join('');
+            }
+
+            // Content table
+            const content = [
+                { title: 'Integration Part 1', type: 'Live Class', access: 'Paid', date: '2025-01-15' },
+                { title: 'Mechanics Recording', type: 'Recording', access: 'Free', date: '2025-01-14' },
+                { title: 'Physics Notes', type: 'Note', access: 'Paid', date: '2025-01-13' }
+            ];
+
+            const contentBody = document.getElementById('content-table-body');
+            if (contentBody) {
+                contentBody.innerHTML = content.map(c => `
+                    <tr>
+                        <td>${c.title}</td>
+                        <td><span class="badge badge-info">${c.type}</span></td>
+                        <td><span class="badge badge-${c.access === 'Free' ? 'success' : 'warning'}">${c.access}</span></td>
+                        <td>${c.date}</td>
+                        <td>
+                            <div class="flex gap-2">
+                                <button class="btn-secondary text-sm py-1 px-2">Edit</button>
+                                <button class="btn-danger text-sm py-1 px-2">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('dashboard-container').classList.add('hidden');
+            document.getElementById('auth-container').classList.remove('hidden');
+            document.getElementById('login-page').classList.remove('hidden');
+            document.getElementById('register-page').classList.add('hidden');
+            showToast('Logged out successfully', 'info');
+        }
+
+        function requestAccess(type, month) {
+            showToast('Access request sent! Please wait for approval.', 'info');
+        }
+
+        // =============================================
+        // EVENT LISTENERS
+        // =============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize
+            initTheme();
+            createParticles();
+
+            // Login form
+            document.getElementById('login-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+                await handleLogin(email, password);
+            });
+
+            // Register form
+            document.getElementById('register-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                if (!validateStep(currentStep)) return;
+
+                const formData = {
+                    fullname: document.getElementById('reg-fullname').value,
+                    nic: document.getElementById('reg-nic').value,
+                    birthday: document.getElementById('reg-birthday').value,
+                    gender: document.getElementById('reg-gender').value,
+                    age: document.getElementById('reg-age').value,
+                    phone: document.getElementById('reg-phone').value,
+                    email: document.getElementById('reg-email').value,
+                    password: document.getElementById('reg-password').value,
+                    district: document.getElementById('reg-district').value,
+                    address: document.getElementById('reg-address').value,
+                    grade: document.getElementById('reg-grade').value,
+                    batch: document.getElementById('reg-batch').value
+                };
+
+                await handleRegister(formData);
+            });
+
+            // Close modals on overlay click
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        modal.classList.remove('active');
+                    }
+                });
+            });
+
+            // Keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
